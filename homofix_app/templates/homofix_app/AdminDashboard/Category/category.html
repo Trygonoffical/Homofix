@@ -1,0 +1,186 @@
+{% extends 'homofix_app/Base/base.html' %}
+{% block title %}Category{% endblock title %}
+{% block main-content %}
+
+<div class="page-content">
+    <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Tables</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Data Table</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="ms-auto">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light">Settings</button>
+                <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">	<span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end">	<a class="dropdown-item" href="javascript:;">Action</a>
+                    <a class="dropdown-item" href="javascript:;">Another action</a>
+                    <a class="dropdown-item" href="javascript:;">Something else here</a>
+                    <div class="dropdown-divider"></div>	<a class="dropdown-item" href="javascript:;">Separated link</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end breadcrumb-->
+  
+    <h6 class="mb-0 text-uppercase">DataTable Import</h6>
+    <hr>
+    <div class="card">
+        <div class="ms-auto mt-2 px-3" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal"><a href="javascript:;" class="btn btn-light radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>Add New Category</a></div>
+        <div class="card-body">
+            
+            <div class="table-responsive">
+                <table id="example2" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                           
+                            <th>Date Created</th>
+                            <th>Updated Date</th>
+                            <th>Action</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in category %}
+                        <tr>
+                            <td>{{i.category_name}}</td>
+                            <td>{{i.created_at}}</td>
+                            <td>{{i.updated_at}}</td>
+                            <td>
+                                <div class="d-flex order-actions">
+                                    <a href="javascript:;" class=""><i class='bx bxs-edit'></i></a>
+                                    <a href="javascript:;" class="ms-3"><i class='bx bxs-trash'></i></a>
+                                </div>
+                            </td>
+                           
+                            
+                        </tr>
+                        {% endfor %}
+                       
+                    </tbody>
+                    
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="col">
+    <!-- Button trigger modal -->
+    {% comment %} <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal">Vertically Centered</button> {% endcomment %}
+    <!-- Modal -->
+    <div class="modal fade" id="exampleVerticallycenteredModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <P class="text-center mt-2" id="msg"></P>
+                
+                <form action="{% url 'add_category' %}" method = "POST" id="categoryform">
+                    {% csrf_token %}
+                <div class="row">
+					<div class="col-xl-9 mx-auto">
+						{% comment %} <h6 class="mb-0 text-uppercase">Category Form</h6> {% endcomment %}
+						
+						<div class="card border-top border-0 border-4 border-white">
+							<div class="card-body">
+								<div class="border p-4 rounded">
+									<div class="card-title d-flex align-items-center">
+										<div><i class="bx bxs-user me-1 font-22 text-white"></i>
+										</div>
+										<h5 class="mb-0 text-white">Add Category</h5>
+									</div>
+									<hr>
+									<div class="row mb-3">
+										<label for="inputEnterYourName" class="col-sm-12 col-form-label">Enter Your Category Name</label>
+										<div class="col-sm-12">
+											<input type="text" class="form-control"  placeholder="Enter Your Category Name" id ="category_name" name="category_name" required>
+										</div>
+									</div>
+									
+									
+									
+									
+									
+									
+									{% comment %} <div class="row">
+										<label class="col-sm-3 col-form-label"></label>
+										<div class="col-sm-9">
+											<button type="submit" class="btn btn-light px-5">Register</button>
+										</div>
+									</div> {% endcomment %}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save </button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+
+<script>
+ $(document).on('submit', '#categoryform',function(e){
+     e.preventDefault();
+     let category_name = $('#category_name').val()
+     console.log(category_name)
+     
+     
+
+     $.ajax({
+         type: 'POST',
+         url:"{% url 'add_category' %}",
+         
+         data:{
+             category_name:category_name,
+             csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val()
+         },
+         success:function(data){
+             if(data.status == "Save"){
+                 // alert("Form Submitted Successfully")
+                 $('#categoryform').trigger("reset");
+                 $('#msg').text(category_name + " Category Add Successfully")
+              }
+             if(data.status == "error"){
+                 // alert("Form Submitted Successfully")
+                 
+                 $('#msg').text("Category is already Taken")
+              }
+              
+             
+
+             
+             
+             
+             //if(error.text()=="USER Created"){
+               //  window.location= {% url 'login' %}
+             //}
+
+         }
+     })
+ })
+
+</script>
+
+
+{% endblock main-content %}
