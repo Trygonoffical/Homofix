@@ -21,19 +21,26 @@
   
     <h6 class="mb-0 text-uppercase">List of Technician</h6>
     <hr>
+	{% include 'homofix_app/Base/messages.html' %}
+	<div class="ms-auto mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal"><a href="javascript:;" class="btn btn-light  mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>New Technician</a></div>
     <div class="card">
-        <div class="ms-auto mt-2 px-3" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal"><a href="javascript:;" class="btn btn-light radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>Add New Technician</a></div>
+        
         <div class="card-body">
             
             <div class="table-responsive">
+                
                 <table id="example2" class="table table-striped">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Category</th>
-                           
-                            <th>Date Created</th>
-                            <th>Updated Date</th>
+                            <th>Mobile</th>
+                            <th>Email</th>
+                            <th>Present Address</th>
+                            <th>Permanent Address</th>
+                            <th>ID Proof Type</th>
+                            <th>ID Proof</th>
+                            <th>Status</th>
                             <th>Action</th>
                             
                         </tr>
@@ -43,22 +50,47 @@
                         <tr>
                             <td>{{i.admin.username}}</td>
                             <td>{{i.category.category_name}}</td>
-                            <td>{{i.created_at}}</td>
-                            <td>{{i.updated_at}}</td>
+                            <td>{{i.mobile}}</td>
+                            <td>{{i.admin.email}}</td>
+                            <td>{{i.present_address}}</td>
+                            <td>{{i.permanent_address}}</td>
+                            <td>{{i.Id_Proof}}</td>
+                            {% if i.id_proof_document %}
+                                <td> 
+                                    <a href="{{i.id_proof_document.url}}" download="{{i.id_proof_document.name}}">
+                                        <img class="rounded w-50" src="{{i.id_proof_document.url}}" alt="">
+                                    </a>
+                                </td>
+                            {% else %}
+                                <td>No ID proof document uploaded</td>
+                            {% endif %}
+                            <td><span class="badge bg-success">{{i.status}}</span></td>
+                            
+                            
                             <td>
                                 <div class="d-flex order-actions">
-                                    <a href="javascript:;" class=""><i class='bx bxs-edit'></i></a>
-                                    <a href="javascript:;" class="ms-3"><i class='bx bxs-trash'></i></a>
+                                    {% comment %} <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a> {% endcomment %}
+                                    {% comment %} <a href="javascript:;" class="ms-3"><i class='bx bxs-trash'></i></a> {% endcomment %}
+                                    <a href="{% url 'technician_edit_profile' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
+                                    <a data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" href=""
+                                        class="ms-3"><i class='bx bxs-trash'></i></a>
                                 </div>
                             </td>
                            
                             
                         </tr>
+                        <div class="col">
+                            {% include 'homofix_app/AdminDashboard/Technician/edit_technician_modal.html' %}
+                            {% include 'homofix_app/AdminDashboard/Technician/delete_technician_modal.html' %}
+                        </div>
                         {% endfor %}
                        
                     </tbody>
+
+                    
                     
                 </table>
+                
             </div>
         </div>
     </div>
@@ -70,91 +102,11 @@
     <!-- Button trigger modal -->
     {% comment %} <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal">Vertically Centered</button> {% endcomment %}
     <!-- Modal -->
-    <div class="modal fade" id="exampleVerticallycenteredModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Technician</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <P class="text-center mt-2" id="msg"></P>
-                
-                <form action="{% url 'technician' %}" method = "POST" id="technicianform">
-                    {% csrf_token %}
-                <div class="row">
-					<div class="col-xl-9 mx-auto">
-						{% comment %} <h6 class="mb-0 text-uppercase">Category Form</h6> {% endcomment %}
-						
-						<div class="card border-top border-0 border-4 border-white">
-							<div class="card-body">
-								<div class="border p-4 rounded">
-									<div class="card-title d-flex align-items-center">
-										<div><i class="bx bxs-user me-1 font-22 text-white"></i>
-										</div>
-										<h5 class="mb-0 text-white">Add Technician</h5>
-									</div>
-									<hr>
-									<div class="row mb-3">
-                                        
-										<label for="Category" class="col-sm-12 col-form-label">Category</label>
-										<div class="col-sm-12">
-                                            <select name="category_id" id="category_id" class="form-control">
-                                                <option value="">---Select---</option>
-                                                {% for i in category %}
-                                                <option value="{{i.id}}">{{i.category_name}}</option>
-                                                
-                                                {% endfor %}
-                                            </select>
-											{% comment %} <input type="text" class="form-control"  placeholder="Enter Your Username" id ="username" name="username" required> {% endcomment %}
-										</div>
-									</div>
-									<div class="row mb-3">
-										<label for="inputEnterYourName" class="col-sm-12 col-form-label">Username</label>
-										<div class="col-sm-12">
-											<input type="text" class="form-control"  placeholder="Enter Your Username" id ="username" name="username" required>
-										</div>
-									</div>
-									<div class="row mb-3">
-										<label for="inputEnterYourName" class="col-sm-12 col-form-label">Email</label>
-										<div class="col-sm-12">
-											<input type="text" class="form-control"  placeholder="Email" id ="email" name="email" required>
-										</div>
-									</div>
-									<div class="row mb-3">
-										<label for="inputEnterYourName" class="col-sm-12 col-form-label">Password</label>
-										<div class="col-sm-12">
-											<input type="password" class="form-control"  placeholder="Password" id ="password" name="password" required>
-										</div>
-									</div>
-									
-									
-									
-									
-									
-									
-									 <div class="row">
-										<label class="col-sm-3 col-form-label"></label>
-										<div class="col-sm-9">
-											<button type="submit" class="btn btn-light px-5">Register</button>
-										</div>
-									</div> 
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    {% comment %} <button type="submit" class="btn btn-primary">Save </button> {% endcomment %}
-                </div>
-                </form>
-            </div>
-        </div>
-    </div>
+   {% include 'homofix_app/AdminDashboard/Technician/add_technician_modal.html' %}
 </div>
 
 
-<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+{% comment %} <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
 
 
 <script>
@@ -197,14 +149,12 @@
 				
 				
 				
-				//if(error.text()=="USER Created"){
-				  //  window.location= {% url 'login' %}
-				//}
+				
 
 			}
 		})
 	})
 
-</script>
+</script> {% endcomment %}
   
 {% endblock main-content %}

@@ -1,8 +1,7 @@
 {% load static %}
 <!doctype html>
 <html lang="en">
-
-	<head>
+ <head>
 		<!-- Required meta tags -->
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,9 +16,16 @@
 	
 		<link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
 		<link href="{% static 'assets/css/icons.css' %}" rel="stylesheet">
-		<title>Login</title>
-	</head>
 
+				
+		<!-- CSS -->
+		<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+		<!-- Default theme -->
+		<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"/>
+
+		<title>Login</title>
+	</head> 
+	
 <body class="bg-theme bg-theme1">
 	<!--wrapper-->
 	<div class="wrapper">
@@ -29,16 +35,25 @@
 					<div class="col mx-auto">
 						<div class="mb-4 text-center">
 							<img src="{% static 'assets/images/Company logo nw.png' %}" width="180" alt="">
+							
 						</div>
+						<center>
+							{% include 'homofix_app/Base/messages.html' %}
+							
+						</center>
+						
 						<div class="card">
 							<div class="card-body">
 								<div class="border p-4 rounded">
 									<div class="text-center">
+										
 										<h3 class="">Sign in</h3>
+										
 										
 									</div>
 									
 									<div class="login-separater text-center mb-4"> <span>OR SIGN IN WITH Username</span>
+										
 										<hr>
 									</div>
 									<div class="form-body">
@@ -120,6 +135,9 @@
 
 	<!--plugins-->
 	<script src="{% static 'assets/js/jquery.min.js' %}"></script>
+	<script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+
+	<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 	<!--Password show & hide js -->
 	<script>
 		$(document).ready(function () {
@@ -223,6 +241,19 @@
 	  $('body').attr('class', 'bg-theme bg-theme15');
 	}
 	</script>
+
+	<script>
+		{% for message in messages %}
+		{% if message.tags == 'error' %}
+	
+		alertify.set('notifier','position', 'top-right');
+		alertify.error('Your Account is not Active');
+		{% endif %}
+		{% endfor %}
+	</script>
+
+	
+	
 </body>
 
 </html>
