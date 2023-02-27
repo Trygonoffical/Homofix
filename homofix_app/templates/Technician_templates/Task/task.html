@@ -88,7 +88,11 @@
                                             </option>
                                             {% endfor %}
                                         </select>
+                                        {% if task.booking.status == cancelled or task.booking.status == "completed" %}
+                                        <button type="submit" class="btn btn-success" disabled>Update</button>
+                                        {% else %}
                                         <button type="submit" class="btn btn-success">Update</button>
+                                        {% endif %}
                                     </div>
                                 </form>
                             </td>

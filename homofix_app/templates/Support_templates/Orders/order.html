@@ -68,7 +68,7 @@
                             <td>
                                 <div class="d-flex">
                                     {% comment %} <span class="badge bg-warning text-dark">Warning</span> {% endcomment %}
-                                    {% if booking.status == "cancelled" %}
+                                    {% if booking.status == "cancelled" or booking.status == "completed" %}
                                     <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{booking.id}}" disabled>Reschedule</button>
                                     <button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{booking.id}}" disabled>Cancel</button>
                                     {% else %}

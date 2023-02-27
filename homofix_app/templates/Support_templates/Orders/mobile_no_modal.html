@@ -3,8 +3,10 @@
         <div class="modal-content bg-dark">
             <div class="modal-header">
                 <h5 class="modal-title text-white">Verify Mobile No</h5>
+                
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <p id="test"></p>
 
             <div class="modal-body text-white">
                 <form id="mobile-no-form" method="POST">
@@ -62,15 +64,17 @@
                         $('#tech_category_add_modal').modal('show');
 
                     }
-                    if(response.status == "error"){
-                        console.log("errorr")
+                    console.log(response)
+                    if(response.status == "Error"){
+                        console.log("error")
+                        
+                        $('#test').text("Username is already Taken Please create username unique")
+                        $('#mobile-no-form').trigger("reset");
 
                     }
                     
                 },
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText);
-                }
+                
             });
         });
     });

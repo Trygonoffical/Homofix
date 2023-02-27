@@ -178,7 +178,7 @@ def technician_edit_profile(request,id):
         technician.state=state
         technician.city=city
 
-
+        print("ooooooooooooooooo",category_id)
         cat = Category.objects.get(id=category_id)
 
         technician.category=cat
@@ -269,6 +269,8 @@ def update_product(request):
         price = request.POST.get('price')
         warranty = request.POST.get('warranty')
         description = request.POST.get('description')
+
+        print("description",description)
 
         
         cat = Category.objects.get(id=category_id)

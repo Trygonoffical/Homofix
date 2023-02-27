@@ -11,6 +11,7 @@
                 <label for="" class="mb-2">Select Your Expert</label>
                 <input type="text" value="{{booking.id}}" name="booking_id" hidden>
                 <select class = "form-select" name="technician_id" id="">
+                    <option selected disabled ,"true"> --- Select --- </option>
                     {% for i in technicians %}
                     <option value="{{i.id}}">{{i.admin.username}}</option>
                     {% endfor %}

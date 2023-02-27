@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from .utils import generate_ref_code
 from ckeditor.fields import RichTextField
 import os
+from django.utils import timezone
 
 # Create your models here.
 
@@ -135,7 +136,7 @@ class Booking(models.Model):
     )
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='bookings')
-    booking_date = models.DateTimeField(null=True, blank=True)
+    booking_date = models.DateTimeField()
     is_verified = models.BooleanField(default=False)
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')

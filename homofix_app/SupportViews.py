@@ -6,6 +6,7 @@ from django.urls import reverse
 from .models import Support,Customer,Product,Booking,CustomUser
 from datetime import datetime,timedelta
 from django.utils import timezone
+import pytz
 
 from django.conf import settings
 
@@ -64,9 +65,10 @@ def support_orders(request):
             user= CustomUser.objects.get(username=username)
             request.session['cust_id'] = user.customer.id
             return JsonResponse({'status':'Save'})
+        
         else:
             if CustomUser.objects.filter(username=username):
-                return JsonResponse({'status':'error'})
+                return JsonResponse({'status':'Error'})
             user = CustomUser.objects.create(username=username, user_type='4')    
             user.set_password(mob)
             user.customer.mobile = mob
@@ -123,30 +125,61 @@ def support_verify_otp(request):
     # return render(request, 'Support_templates/Orders/otp_modal.html')
 
 
+# def support_booking(request):
+#     prod = Product.objects.all()
+#     supported_by = request.user.support
+   
+#     if request.method == 'POST':
+        
+#         customer_id = request.session.get('customer_id')       
+        
+#         product_id = request.POST.get('product_id')
+#         booking_date_str = request.POST.get('booking_date')
+#         customer = Customer.objects.get(id=customer_id)
+        
+#         product = Product.objects.get(id=product_id)
+     
+#         # create the booking object
+#         booking = Booking(customer=customer, product=product,booking_date=datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M"),supported_by=supported_by)
+#         booking.save()
+#         messages.success(request, 'Booking created successfully.')
+#         return redirect('support_orders')
+    
+   
+#     context = {
+#         'prod':prod
+#         }
+#     return render(request, 'Support_templates/Booking/create_booking.html', context)
+
+
 def support_booking(request):
     prod = Product.objects.all()
     supported_by = request.user.support
-   
+
     if request.method == 'POST':
-        
-        customer_id = request.session.get('customer_id')       
+
+        customer_id = request.session.get('customer_id')
         product_id = request.POST.get('product_id')
         booking_date_str = request.POST.get('booking_date')
         customer = Customer.objects.get(id=customer_id)
         product = Product.objects.get(id=product_id)
-     
+
+        # convert booking date string to datetime object
+        local_tz = pytz.timezone('Asia/Kolkata')  # replace with your local time zone
+        booking_date = datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M")
+        booking_date = local_tz.localize(booking_date)
+        booking_date_utc = booking_date.astimezone(pytz.utc)
+
         # create the booking object
-        booking = Booking(customer=customer, product=product,booking_date=datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M"),supported_by=supported_by)
+        booking = Booking(customer=customer, product=product, booking_date=booking_date_utc, supported_by=supported_by)
         booking.save()
         messages.success(request, 'Booking created successfully.')
         return redirect('support_orders')
-    
-   
-    context = {
-        'prod':prod
-        }
-    return render(request, 'Support_templates/Booking/create_booking.html', context)
 
+    context = {
+        'prod': prod
+    }
+    return render(request, 'Support_templates/Booking/create_booking.html', context)
 
 def reschedule_booking(request):
     if request.method == "POST":
