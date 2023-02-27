@@ -1,0 +1,61 @@
+<div class="modal fade" id="exampleVerticallycenteredModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Addons</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <P class="text-center mt-2" id="msg"></P>
+            
+            <form action="{% url 'addons' %}" method = "POST" enctype="multipart/form-data" id="productform">
+                {% csrf_token %}
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+
+                    
+                   
+
+                   
+                    <div class="row mb-3">
+                        <label for="inputEnterYourName" class="col-sm-12 col-form-label">Product Name</label>
+                        <div class="col-sm-12">
+                           
+                            <select class="form-select" name="product_id" id="">
+                                {% for i in product %}
+                                 <option  value="{{i.id}}">{{i.name}}</option>
+                                {% endfor %}
+                            </select>
+                            
+                           
+                           
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="row mb-3">
+                        <label for="inputEnterYourName" class="col-sm-12 col-form-label">Description</label>
+                        <div class="col-sm-12">
+                            <textarea name="desc"></textarea>
+                            
+                        </div>
+                    </div>
+                    {% comment %} <h6 class="mb-0 text-uppercase">Category Form</h6> {% endcomment %}
+                    
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+                
+                {% comment %} <button type="submit" class="btn btn-primary">Save </button> {% endcomment %}
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    CKEDITOR.replace( 'desc' );
+ </script>

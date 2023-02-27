@@ -21,7 +21,36 @@ urlpatterns = [
     path('Accounts/Admin/Technician/Edit',HodViews.edit_technician,name="edit_technician"),
     path('Accounts/Technician/Delete/<int:id>',HodViews.delete_technician,name="delete_technician"),
     path('Accounts/Admin/Product',HodViews.product,name="product"),
-   
+    path('Accounts/Admin/Product/Update',HodViews.update_product,name="update_product"),
+    path('Accounts/Admin/Product/Delete/<int:id>',HodViews.delete_product,name="delete_product"),
+
+
+    ########################## Addons ##################################
+    path('Accounts/Admin/Addons',HodViews.addons,name="addons"),
+    path('Accounts/Admin/Addons/Edit',HodViews.update_addons,name="update_addons"),
+    path('Accounts/Admin/Addons/Delete/<int:id>',HodViews.delete_addons,name="delete_addons"),
+
+
+
+    ########################## Support ##################################
+
+    path('Accounts/Admin/Support',HodViews.support,name="admin_support"),
+    path('Accounts/Admin/Add/Support',HodViews.add_support,name="add_support"),
+    path('Accounts/Admin/Support/Profile/<int:id>',HodViews.support_profile,name="support_profile"),
+    path('Accounts/Admin/Support/Profile/Update/',HodViews.support_update_profile,name="support_update_profile"),
+    path('Accounts/Admin/Support/Delete/<int:id>/',HodViews.delete_support,name="delete_support"),
+    
+
+    ########################## FAQS ##################################
+    path('Accounts/Admin/FAQ', HodViews.add_faq, name='add_faq'),
+
+    ########################## Booking List ##################################
+     path('Accounts/Admin/BookingList', HodViews.booking_list, name='booking_list'),
+     path('Accounts/Admin/Reschudule', HodViews.admin_reschedule, name='admin_reschedule'),
+     path('Accounts/Admin/cancel_booking/<int:booking_id>', HodViews.cancel_booking_byadmin, name='cancel_booking_byadmin'),
+     path('Accounts/Admin/taskAssign/', HodViews.task_assign, name='task_assign'),
+     path('Accounts/Admin/ListofTask/', HodViews.list_of_task, name='list_of_task'),
+    
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

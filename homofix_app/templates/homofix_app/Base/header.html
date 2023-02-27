@@ -324,7 +324,12 @@
             </div>
             <div class="user-box dropdown">
                 <a class="d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="{% static 'assets/images/avatars/avatar-2.png' %}" class="user-img" alt="user avatar">
+                    {% comment %} <img src="{% static 'assets/images/avatars/avatar-2.png' %}" class="user-img" alt="user avatar"> {% endcomment %}
+                    {% if user.support.profile_pic.url != ""  %}
+                        <img src="{{user.support.profile_pic.url}}" alt="Admin" class="user-img" width="110">
+                    {% else %}
+                        <img src="{% static 'assets/images/nww.jpg' %}" alt="Admin" class="user-img" width="110">
+                    {% endif %}
                     <div class="user-info ps-3">
                         <p class="user-name mb-0">{{user.username}}</p>
                         {% comment %} <p class="designattion mb-0">Web Designer</p> {% endcomment %}

@@ -1,8 +1,10 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product
-from django.http import JsonResponse
+from .models import CustomUser,Category,Technician,Product,Addons,Support,FAQ,Booking,Task
+from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 
 # @login_required
@@ -96,7 +98,7 @@ def technician(request):
             messages.error(request,'Username is already Taken')
             return redirect('technician')
             
-        user = CustomUser.objects.create_user(username=username,password=password,email=email,user_type=2)
+        user = CustomUser.objects.create_user(username=username,password=password,email=email,user_type='2')
         user.technician.category = ctg
         user.save()
         messages.success(request,'Technician Register Successfully')
@@ -220,25 +222,306 @@ def delete_technician(request,id):
     return redirect('technician')
 
 
-def product(request):
-    product = Product.objects.all()
 
-    if request.method == "POST":
-        
+
+
+def product(request):
+
+    product = Product.objects.all()
+    category = Category.objects.all()
+
+    if request.method == "POST":       
         
         product_pic = request.FILES.get('product_pic')
         product_name = request.POST.get('product_name')
+        product_title = request.POST.get('product_title')
         price = request.POST.get('price')
-        description = request.POST.get('description')
-        print(product_name,price,description,product_pic)
+        warranty = request.POST.get('warranty')
+        description = request.POST.get('desc')
+        category_id = request.POST.get('category_id')
+       
         
         
         if Product.objects.filter(name = product_name).exists():
-            return JsonResponse({'status': 'error', 'message': 'Product is already Taken'})
+            # return JsonResponse({'status': 'error', 'message': 'Product is already Taken'})
+            messages.warning(request,'Product is already Taken')
+            return redirect('product')
             
+        cat = Category.objects.get(id=category_id)
+        product = Product.objects.create(product_pic=product_pic,name=product_name,product_title=product_title,category=cat,price=price,warranty=warranty,description=description)
+        messages.success(request,'Product Add Successfully')
+        product.save()
+        return redirect('product')
+        
+        # return JsonResponse({'status':'Save'})
+    return render(request,'homofix_app/AdminDashboard/Product/product.html',{'product':product,'category':category})
 
-        product = Product.objects.create(product_pic=product_pic,name=product_name,price=price,description=description)
+
+def update_product(request):
+    if request.method == "POST":
+        
+        product_id = request.POST.get('product_id')
+        category_id = request.POST.get('category_id')
+        product_pic = request.FILES.get('product_pic')
+
+        product_title = request.POST.get('product_title')
+        product_name = request.POST.get('product_name')
+        price = request.POST.get('price')
+        warranty = request.POST.get('warranty')
+        description = request.POST.get('description')
+
+        
+        cat = Category.objects.get(id=category_id)
+        product = Product.objects.get(id=product_id)
+        if product_pic != None:
+            product.product_pic = product_pic
+        product.category = cat
+        product.product_title = product_title
+        product.name = product_name
+        product.price = price
+        product.warranty = warranty
+        product.description = description
+
         product.save()
         
-        return JsonResponse({'status':'Save'})
-    return render(request,'homofix_app/AdminDashboard/Product/product.html',{'product':product})
+        
+        messages.success(request,"Records are Updated Successfully")
+        return redirect('product')
+
+
+
+def delete_product(request,id):
+    product = Product.objects.get(id=id)
+    product.delete()
+    messages.success(request, "Product deleted successfully.")
+    return redirect('product')
+
+
+
+
+
+######################## Addons #####################
+
+def addons(request):
+    addons = Addons.objects.all()
+    product = Product.objects.all()
+    if request.method == "POST":
+        product_id = request.POST.get('product_id')
+        desc = request.POST.get('desc')
+
+        prod = Product.objects.get(id=product_id)
+
+        ad = Addons.objects.create(product=prod,description=desc)
+        prod.save()
+        messages.success(request,'Addon Add Successfully')
+        return redirect('addons')
+        
+
+    return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product})
+
+
+
+def update_addons(request):
+
+    if request.method == "POST":
+        product_id  = request.POST.get('product_id')
+        addon_id  = request.POST.get('addon_id')
+        description  = request.POST.get('description')
+
+        print("sssssssssssssssssssssss",product_id)
+        product = Product.objects.get(id=product_id)
+        addons = Addons.objects.get(id=addon_id)
+        
+        addons.product = product
+        addons.description =description
+        print("sssssssssssssssssssssss",product_id)
+        addons.save()
+        messages.success(request,'Addons Updated Successfully')
+        return redirect('addons')
+
+    
+
+def delete_addons(request,id):
+
+    addon = Addons.objects.get(id=id)
+    addon.delete()
+    messages.success(request, "Addon deleted successfully.")
+    return redirect('addons')
+
+
+
+
+# --------------------- SUPPORT CREATION --------------------- 
+
+def support(request):
+    suppt = Support.objects.all()
+    return render(request,'homofix_app/AdminDashboard/Support/support.html',{'suppt':suppt})
+
+def add_support(request):
+    if request.method == "POST":
+        
+        
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+      
+        if CustomUser.objects.filter(username = username).exists():
+            messages.error(request,'Username is already Taken')
+            return redirect('admin_support')
+            
+        user = CustomUser.objects.create_user(username=username,password=password,email=email,user_type='3')
+        
+        user.save()
+        messages.success(request,'Support Register Successfully')
+        return redirect('admin_support')
+        
+        
+
+    return redirect('admin_support')
+
+
+def support_profile(request,id):
+    support = Support.objects.get(id=id)
+    return render(request,'homofix_app/AdminDashboard/Support/edit_profile.html',{'support':support})
+
+
+
+def support_update_profile(request):
+    if request.method == "POST":
+        support_id = request.POST.get('support_id')
+       
+        profile_pic = request.FILES.get('profile_pic') 
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        mob_no = request.POST.get('mob_no')
+        address = request.POST.get('address')
+        status = request.POST.get('status')
+
+        support = Support.objects.get(id=support_id)
+
+       
+        support.admin.username =username 
+        support.admin.email =email
+        if profile_pic != None:
+            support.profile_pic =profile_pic
+         
+        support.address =address 
+        support.mobile =mob_no 
+
+        if status == 'Deactivate':
+            support.status = "Deactivate"
+            
+        elif status == 'Hold':
+            support.status = 'Hold'
+        else:
+            support.status = 'Active'
+
+        support.save()
+        messages.success(request,'Support Updated Succesffully')
+        return HttpResponseRedirect(reverse("support_profile",args=[support_id]))
+
+
+
+def delete_support(request,id):
+    support = Support.objects.get(id=id)
+    user = support.admin
+    support.delete()
+    user.delete()
+    messages.success(request, "Support deleted successfully.")
+    return redirect('admin_support')
+    
+        
+
+
+# ------------------------------- FAQS ------------------------------        
+
+
+
+def add_faq(request):
+    product = Product.objects.all()
+    faqs = FAQ.objects.all()
+    if request.method == "POST":
+        product_id = request.POST.get('product_id')
+        question = request.POST.get('question')
+        answer = request.POST.get('answer')
+
+        prod_id = Product.objects.get(id=product_id)
+        faq = FAQ.objects.create(product=prod_id,question=question,answer=answer)
+        faq.save()
+        
+    context = {
+        'product':product,
+        'faqs':faqs
+    }
+
+    return render(request,'homofix_app/AdminDashboard/Faqs/faqs.html',context)
+
+
+def booking_list(request):
+    booking = Booking.objects.all() 
+    technicians = Technician.objects.all()
+    tasks = Task.objects.all()
+    context = {
+    'booking':booking,
+    'technicians':technicians,
+    'tasks':tasks
+    
+    
+   }
+    
+    
+    
+    return render(request,'homofix_app/AdminDashboard/Booking_list/booking.html',context)    
+
+
+
+
+def admin_reschedule(request):
+    if request.method == "POST":
+
+        booking_id=request.POST.get('booking_id')
+        booking_date=request.POST.get('booking_date')
+        booking = Booking.objects.get(id=booking_id)
+        booking.booking_date = booking_date
+        booking.save()
+        messages.success(request,"Your order reschedule success")
+
+        return redirect('booking_list')
+
+
+
+
+def cancel_booking_byadmin(request,booking_id):
+    booking = Booking.objects.get(id=booking_id)
+    booking.status = 'cancelled'
+    booking.save()
+    messages.success(request, 'Booking has been cancelled.')
+    return redirect('booking_list')    
+
+
+def task_assign(request):
+    if request.method == "POST":
+        booking_id = request.POST.get('booking_id')
+        technician_id = request.POST.get('technician_id')
+
+        booking = Booking.objects.get(id=booking_id)
+        technician = Technician.objects.get(id=technician_id)
+        
+        print("BOOKING ID",booking_id)
+        print("technician_id",technician_id)
+        task = Task.objects.create(booking=booking,technician=technician)
+        task.save()
+        messages.success(request,'Assign Task Successfully')
+        return redirect('booking_list')
+    # 
+    # print("technician id",tect_id)
+    return redirect('booking_list')
+
+
+def list_of_task(request):
+    task = Task.objects.all()
+    context = {
+        'task':task
+    }
+    return render(request,'homofix_app/AdminDashboard/Booking_list/task.html',context)    

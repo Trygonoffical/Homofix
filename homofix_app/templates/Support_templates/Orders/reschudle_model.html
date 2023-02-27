@@ -1,0 +1,49 @@
+
+<div class="modal  fade" id="exampleVerticallycenteredModal{{booking.id}}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reschedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <P class="text-center mt-2" id="msg"></P>
+            
+            <form action="{% url 'reschedule_booking' %}" method = "POST" enctype="multipart/form-data" id="productform">
+                {% csrf_token %}
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+
+                    <div class="row mb-3">
+                                    
+                        <label for="inputDateTime" class="form-label">Select Date & Time</label>
+                        <div class="col-sm-12">
+                            
+                            <input class="form-control" type="datetime-local" value="{{booking.booking_date}}"  id="inputDateTime" name="booking_date">  
+                            <input class="form-control" type="text" value="{{booking.id}}"  name="booking_id" hidden>  
+                                 
+                        </div>
+                    </div>
+
+                    
+
+                    
+                   
+                    
+                   
+                    
+                    {% comment %} <h6 class="mb-0 text-uppercase">Category Form</h6> {% endcomment %}
+                    
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+                
+                {% comment %} <button type="submit" class="btn btn-primary">Save </button> {% endcomment %}
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+

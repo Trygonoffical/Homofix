@@ -31,6 +31,53 @@
                 <div class="menu-title">Category</div>
             </a>
         </li>
+       
+{% comment %} 
+        <li>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Products</div>
+            </a>
+            <ul>
+                
+                 <li> <a href="{% url 'product' %}"><i class="bx bx-right-arrow-alt"></i>Product List</a>
+                <li> <a href="{% url 'add_faq' %}"><i class="bx bx-right-arrow-alt"></i>FAQs</a>
+                </li>
+            </ul>
+        </li> {% endcomment %}
+
+
+        <li>
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Products</div>
+            </a>
+            <ul>
+                <li> <a href="{% url 'product' %}"><i class="bx bx-right-arrow-alt"></i>Product List</a>
+                </li>
+                <li> <a href="{% url 'add_faq' %}"><i class="bx bx-right-arrow-alt"></i>FAQs</a>
+                </li>
+               
+             
+              
+               
+            </ul>
+        </li>
+
+       
+       
+        
+        <li>
+            <a href="{% url 'addons' %}">
+                <div class="parent-icon"><i class='bx bx-user-circle'></i>
+                </div>
+                <div class="menu-title">Addon</div>
+            </a>
+        </li>
+
+
         <li>
             <a href="{% url 'technician' %}">
                 <div class="parent-icon"><i class='bx bx-user-circle'></i>
@@ -40,11 +87,31 @@
         </li>
 
         <li>
-            <a href="{% url 'product' %}">
+            <a href="{% url 'admin_support' %}">
                 <div class="parent-icon"><i class='bx bx-user-circle'></i>
                 </div>
-                <div class="menu-title">Product</div>
+                <div class="menu-title">Support</div>
             </a>
+        </li>
+
+        
+        <li>
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Booking</div>
+            </a>
+            <ul>
+                <li> <a href="{% url 'booking_list' %}"><i class="bx bx-right-arrow-alt"></i>New Booking List</a>
+                </li>
+                <li> <a href="{% url 'list_of_task' %}"><i class="bx bx-right-arrow-alt"></i>Assign Booking</a>
+                </li>
+                
+               
+             
+              
+               
+            </ul>
         </li>
        
    

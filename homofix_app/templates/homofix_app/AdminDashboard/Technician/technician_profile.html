@@ -107,13 +107,13 @@
                                     <h6 class="mb-0">Category</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select class="form-control bg-secondary" name="category_id">
-                                        <option value="{{technician.category.id}}">{{technician.category.category_name}}</option>
+                                    <select class="single-select" name="category_id">
+                                        <option value="{{technician.category.id}}" disabled selected>{{technician.category.category_name}}</option>
                                         {% for i in category %}
-                                        <option value="{{i.id}}">{{i.category_name}}</option>
+                                        <option  value="{{i.id}}">{{i.category_name}}</option>
                                         {% endfor %}
                                     </select>
-                                    {% comment %} <input type="text" class="form-control" value="{{technician.category.category_name}}"> {% endcomment %}
+                                    
                                 </div>
                             </div>
                             
@@ -148,12 +148,12 @@
                                 </div>
                                 <div class="col-sm-9">
                                     {% comment %} <input type="text" class="form-control" value="{{technician.Id_Proof}}"> {% endcomment %}
-                                    <select class="form-control bg-secondary" name="id_proof">
-                                        <option value="{{technician.Id_Proof}}">{{technician.Id_Proof}}</option>
-                                        <option value="passport">Passport</option>
-                                        <option value="driving_license">Driving License</option>
-                                        <option value="voter_id">Voter ID</option>
-                                        <option value="aadhaar_card">Aadhaar Card</option>
+                                    <select class="single-select" name="id_proof">
+                                        <option class="bg-dark" value="{{technician.Id_Proof}}">{{technician.Id_Proof}}</option>
+                                        <option class="bg-dark" value="passport">Passport</option>
+                                        <option class="bg-dark" value="driving_license">Driving License</option>
+                                        <option class="bg-dark" value="voter_id">Voter ID</option>
+                                        <option class="bg-dark" value="aadhaar_card">Aadhaar Card</option>
                                         <!-- Add more options if needed -->
                                       </select>
                                 </div>
@@ -236,6 +236,7 @@
                                 <div class="col-sm-9">
                                     <select class="form-control btn-light dropdown-toggle" name="status">
                                         <option class="bg-dark" value="{{technician.status}}" hidden>{{technician.status}}</option>
+                                        <option class="bg-dark" value="Active">Active</option>
                                         <option class="bg-dark" value="Deactivate">Deactivate</option>
                                         <option class="bg-dark" value="Hold">Hold</option>
                                         

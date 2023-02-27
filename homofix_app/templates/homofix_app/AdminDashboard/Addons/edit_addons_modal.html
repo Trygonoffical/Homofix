@@ -1,0 +1,69 @@
+
+<div class="modal modal-lg fade" id="exampleVerticallycenteredModal{{i.id}}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Addons</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <P class="text-center mt-2" id="msg"></P>
+            
+            <form action="{% url 'update_addons' %}" method = "POST" enctype="multipart/form-data" id="productform">
+                {% csrf_token %}
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+
+
+
+                    
+                    <div class="row mb-3">
+                        <label for="inputEnterYourName" class="col-sm-12 col-form-label">Product Name</label>
+                        <div class="col-sm-12">
+                            {% comment %} <input type="text" class="form-control"  placeholder="Enter Your Product" id ="product_name" value="{{i.name}}" name="product_name" required> {% endcomment %}
+                            <select class="form-control btn-light" name="product_id" id="">
+                                <option value="{{i.product.id}}" hidden>{{i.product.name}}</option>
+                                {% for i in product %}
+                                <option class="text-black" value="{{i.id}}">{{i.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <input type="text" value="{{i.id}}" name="addon_id" hidden>
+                    </div>
+                   
+                    
+                    <div class="row mb-3">
+                        <label for="inputEnterYourName" class="col-sm-12 col-form-label">Description</label>
+                        <div class="col-sm-12">
+                            <textarea name="description">{{i.description|safe}}</textarea>
+                            
+                        </div>
+                    </div>
+                    
+                    
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+                
+                {% comment %} <button type="submit" class="btn btn-primary">Save </button> {% endcomment %}
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // select all textarea elements on the page
+    var textareas = document.getElementsByTagName('textarea');
+    
+    // loop through all textarea elements and replace them with CKEditor instances
+    for (var i = 0; i < textareas.length; i++) {
+        CKEDITOR.replace(textareas[i]);
+    }
+</script>
+
+{% comment %} <script>
+    CKEDITOR.replace('description');
+</script> {% endcomment %}
