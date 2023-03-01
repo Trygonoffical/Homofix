@@ -3,11 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
-from .models import Support,Customer,Product,Booking,CustomUser
+from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician
 from datetime import datetime,timedelta
 from django.utils import timezone
-import pytz
-
 from django.conf import settings
 
 @login_required(login_url='/')
@@ -54,6 +52,10 @@ def support_profile_update(request):
         return HttpResponseRedirect(reverse("support_profile"))
 
 def support_orders(request):
+    # booking = Booking.objects.all() 
+    technicians = Technician.objects.all()
+    tasks = Task.objects.all()
+    
     # bookings = Booking.objects.filter(customer=request.user.support).select_related('product', 'supported_by')
     support = request.user.support
     bookings = Booking.objects.filter(supported_by=support)
@@ -76,8 +78,14 @@ def support_orders(request):
             request.session['customer_id'] = user.customer.id
             return JsonResponse({'status':'Save'})
 
-        
-    return render(request, 'Support_templates/Orders/order.html',{'bookings': bookings})
+    context = {
+    'bookings':bookings,
+    'technicians':technicians,
+    'tasks':tasks
+    
+    
+   }    
+    return render(request, 'Support_templates/Orders/order.html',context)
 
 
 
@@ -165,13 +173,13 @@ def support_booking(request):
         product = Product.objects.get(id=product_id)
 
         # convert booking date string to datetime object
-        local_tz = pytz.timezone('Asia/Kolkata')  # replace with your local time zone
+        # local_tz = pytz.timezone('Asia/Kolkata')  # replace with your local time zone
         booking_date = datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M")
-        booking_date = local_tz.localize(booking_date)
-        booking_date_utc = booking_date.astimezone(pytz.utc)
+        # booking_date = local_tz.localize(booking_date)
+        # booking_date_utc = booking_date.astimezone(pytz.utc)
 
         # create the booking object
-        booking = Booking(customer=customer, product=product, booking_date=booking_date_utc, supported_by=supported_by)
+        booking = Booking(customer=customer, product=product, booking_date=booking_date, supported_by=supported_by)
         booking.save()
         messages.success(request, 'Booking created successfully.')
         return redirect('support_orders')
@@ -201,6 +209,30 @@ def cancel_booking(request,booking_id):
     booking.save()
     messages.success(request, 'Booking has been cancelled.')
     return redirect('support_orders')    
+
+
+def support_Task_assign(request):
+    if request.method == "POST":
+        booking_id = request.POST.get('booking_id')
+        technician_id = request.POST.get('technician_id')
+
+        booking = Booking.objects.get(id=booking_id)
+        technician = Technician.objects.get(id=technician_id)
+        task = Task.objects.create(booking=booking,technician=technician)
+        task.save()
+        messages.success(request,'Assign Task Successfully')
+        return redirect('support_orders')
+    # 
+    # print("technician id",tect_id)
+    return redirect('support_orders')
+
+
+def support_list_of_task(request):
+    task = Task.objects.all()
+    context = {
+        'task':task
+    }
+    return render(request,'Support_templates/Orders/list_of_task.html',context)    
 # ------------------------ Testing for session --------------------------- 
 
 def myView(request):

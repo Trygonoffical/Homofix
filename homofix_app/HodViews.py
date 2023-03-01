@@ -149,6 +149,8 @@ def technician_edit_profile(request,id):
         state = request.POST.get('state')
         city = request.POST.get('city')
         status = request.POST.get('status')   
+        date_of_joining = request.POST.get('date_of_joining')   
+        application_form = request.FILES.get('application_form')   
 
         technician.admin.username = username
         technician.admin.email = email
@@ -177,8 +179,11 @@ def technician_edit_profile(request,id):
         technician.highest_qualification=highest_qualification
         technician.state=state
         technician.city=city
+        technician.joining_date=date_of_joining
+        if application_form != None:
+            technician.application_form=application_form
+        
 
-        print("ooooooooooooooooo",category_id)
         cat = Category.objects.get(id=category_id)
 
         technician.category=cat
@@ -186,7 +191,8 @@ def technician_edit_profile(request,id):
         technician.admin.save()
         technician.save()
         messages.success(request,'updated sucessfully')
-        return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
+        return redirect('technician_edit_profile',id=technician.id)
+        # return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
         # return redirect('technician_edit_profile',{'technician_id': technician_id})
     return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
 
@@ -238,6 +244,7 @@ def product(request):
         price = request.POST.get('price')
         warranty = request.POST.get('warranty')
         description = request.POST.get('desc')
+        warranty_desc = request.POST.get('warranty_desc')
         category_id = request.POST.get('category_id')
        
         
@@ -248,7 +255,7 @@ def product(request):
             return redirect('product')
             
         cat = Category.objects.get(id=category_id)
-        product = Product.objects.create(product_pic=product_pic,name=product_name,product_title=product_title,category=cat,price=price,warranty=warranty,description=description)
+        product = Product.objects.create(product_pic=product_pic,name=product_name,product_title=product_title,category=cat,price=price,warranty=warranty,warranty_desc=warranty_desc,description=description)
         messages.success(request,'Product Add Successfully')
         product.save()
         return redirect('product')
@@ -398,8 +405,9 @@ def support_update_profile(request):
         email = request.POST.get('email')
         mob_no = request.POST.get('mob_no')
         address = request.POST.get('address')
+        date_of_joining = request.POST.get('date_of_joining')
         status = request.POST.get('status')
-
+        application_form = request.FILES.get('application_form')
         support = Support.objects.get(id=support_id)
 
        
@@ -407,9 +415,16 @@ def support_update_profile(request):
         support.admin.email =email
         if profile_pic != None:
             support.profile_pic =profile_pic
-         
+        
+        if application_form != None:
+            support.application_form =application_form
+
+
         support.address =address 
         support.mobile =mob_no 
+        if date_of_joining != "":
+
+            support.joining_date =date_of_joining 
 
         if status == 'Deactivate':
             support.status = "Deactivate"

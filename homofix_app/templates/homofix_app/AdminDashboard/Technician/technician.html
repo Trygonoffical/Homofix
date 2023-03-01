@@ -32,6 +32,8 @@
                 <table id="example2" class="table table-striped">
                     <thead>
                         <tr>
+                            <th>#SR No.</th>
+                            <th>Expert ID</th>
                             <th>Name</th>
                             <th>Category</th>
                             <th>Mobile</th>
@@ -48,6 +50,8 @@
                     <tbody>
                         {% for i in technician %}
                         <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{i.expert_id}}</td>
                             <td>{{i.admin.username}}</td>
                             <td>{{i.category.category_name}}</td>
                             <td>{{i.mobile}}</td>

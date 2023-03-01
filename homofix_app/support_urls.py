@@ -12,6 +12,8 @@ urlpatterns = [
     path('support_booking/', SupportViews.support_booking, name='support_booking'),
     path('reschedule_booking/', SupportViews.reschedule_booking, name='reschedule_booking'),
     path('cancel_booking/<int:booking_id>', SupportViews.cancel_booking, name='cancel_booking'),
+    path('Support/Task/Assign', SupportViews.support_Task_assign, name='support_Task_assign'),
+    path('Support/List/Task', SupportViews.support_list_of_task, name='support_list_of_task'),
     
 #    ------------------------------ testing for request session --------------------- 
 

@@ -124,6 +124,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL="homofix_app.CustomUser"
 
+DATE_INPUT_FORMATS = [
+    '%d-%m-%Y',
+    '%Y-%m-%d',
+    '%m/%d/%Y',
+    # Add more formats here if needed
+]
+
 
 # STATICFILES_DIRS = [
 #     BASE_DIR / "homofixapp/static",

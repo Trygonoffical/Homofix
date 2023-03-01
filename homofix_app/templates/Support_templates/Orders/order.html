@@ -37,12 +37,13 @@
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
+                            <th>Task</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for booking in bookings %}
-                        <tr>
+                        <tr {% if booking.task_set.all %}class="d-none"{% endif %}>
                             <td>
                                 #OS-000354
                             </td>
@@ -64,6 +65,14 @@
                             <td>Rs{{booking.product.price}}</td>
                             <td>{{booking.booking_date}}</td>
                             
+                            </td>
+                            <td>
+                                {% comment %} <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}">Assign Task</button>  {% endcomment %}
+                                {% if booking.status == "cancelled" %}
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}" disabled>Assign Task</button> 
+                                {% else %}
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}">Assign Task</button>
+                                {% endif %}
                             </td>
                             <td>
                                 <div class="d-flex">
@@ -90,6 +99,7 @@
                            
                             {% include 'Support_templates/Orders/reschudle_model.html' %}
                             {% include 'Support_templates/Orders/delete_order_modal.html' %}
+                            {% include 'Support_templates/Orders/assign_task_modal.html' %}
                         </div>
                         {% endfor %}
 

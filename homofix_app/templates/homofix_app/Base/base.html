@@ -12,6 +12,7 @@
 	<link href="{% static 'assets/plugins/simplebar/css/simplebar.css' %}" rel="stylesheet">
 	<link href="{% static 'assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css' %}" rel="stylesheet">
 	<link href="{% static 'assets/plugins/metismenu/css/metisMenu.min.css' %}" rel="stylesheet">
+	<link href="{% static 'assets/plugins/fancy-file-uploader/fancy_fileupload.css' %}" rel="stylesheet">
 	<link href="{% static 'assets/plugins/Drag-And-Drop/dist/imageuploadify.min.css' %}" rel="stylesheet">
 	<link href="{% static 'assets/plugins/datatable/css/dataTables.bootstrap5.min.css' %}" rel="stylesheet">
 	<!-- loader-->
@@ -30,7 +31,11 @@
 
 	<script src="https://cdn.ckeditor.com/4.19.0/full/ckeditor.js"></script>
 
-	
+	<!-- DATE TIME PICKER -->
+	<link href="{% static 'assets/plugins/datetimepicker/css/classic.css' %}" rel="stylesheet">
+	<link href="{% static 'assets/plugins/datetimepicker/css/classic.time.css' %}" rel="stylesheet">
+	<link href="{% static 'assets/plugins/datetimepicker/css/classic.date.css' %}" rel="stylesheet">
+	<link rel="stylesheet" href="{% static 'assets/plugins/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.min.css' %}">
 	
 	<title>{% block title %}{% endblock title %}</title>
 </head>
@@ -91,7 +96,38 @@
 <script src="{% static 'assets/plugins/jquery-knob/jquery.knob.js' %}"></script>
 <script src="{% static 'assets/plugins/datatable/js/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'assets/plugins/datatable/js/dataTables.bootstrap5.min.js' %}"></script>
-	
+
+<!--Date Time Picker-->
+<script src="{% static 'assets/plugins/datetimepicker/js/legacy.js' %}"></script>
+<script src="{% static 'assets/plugins/datetimepicker/js/picker.js' %}"></script>
+<script src="{% static 'assets/plugins/datetimepicker/js/picker.time.js' %}"></script>
+<script src="{% static 'assets/plugins/datetimepicker/js/picker.date.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap-material-datetimepicker/js/moment.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.min.js' %}"></script>
+
+<script>
+	$('.datepicker').pickadate({
+		selectMonths: true,
+		selectYears: true,
+		format: 'yyyy-mm-dd'
+	}),
+	$('.timepicker').pickatime()
+</script>
+<script>
+	$(function () {
+		$('#date-time').bootstrapMaterialDatePicker({
+			format: 'YYYY-MM-DD HH:mm'
+		});
+		$('#date').bootstrapMaterialDatePicker({
+			time: false
+		});
+		$('#time').bootstrapMaterialDatePicker({
+			date: false,
+			format: 'HH:mm'
+		});
+	});
+</script>
+
   <script>
 	  $(function() {
 		  $(".knob").knob();
@@ -134,8 +170,20 @@
 		allowClear: Boolean($(this).data('allow-clear')),
 	});
 </script>
+	<script src="{% static 'assets/plugins/fancy-file-uploader/jquery.ui.widget.js' %}"></script>
+	<script src="{% static 'assets/plugins/fancy-file-uploader/jquery.fileupload.js' %}"></script>
+	<script src="{% static 'assets/plugins/fancy-file-uploader/jquery.iframe-transport.js' %}"></script>
+	<script src="{% static 'assets/plugins/fancy-file-uploader/jquery.fancy-fileupload.js' %}"></script>
+	<script src="{% static 'assets/plugins/Drag-And-Drop/dist/imageuploadify.min.js' %}"></script>
 
-<script src="{% static 'assets/plugins/Drag-And-Drop/dist/imageuploadify.min.js' %}"></script>
+	<script>
+		$('#fancy-file-upload').FancyFileUpload({
+			params: {
+				action: 'fileuploader'
+			},
+			maxfilesize: 100000000
+		});
+	</script>
 <script>
 	$(document).ready(function () {
 		$('#image-uploadify').imageuploadify();

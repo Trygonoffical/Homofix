@@ -31,8 +31,9 @@
                                 {% else %}
                                 <img src="{% static 'assets/images/nww.jpg' %}" alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
                                 {% endif %}
+                                <h6 class="mt-2">ID:{{support.support_id}}</h6>
                                 {% comment %} <img src="{% static 'assets/images/nww.jpg' %}" alt="Admin" class="rounded-circle p-1 bg-primary" width="110"> {% endcomment %}
-                                <div class="mt-3">
+                                <div class="">
                                     <h4>{{support.admin.username}}</h4>
                                     {% comment %} <p class="mb-1">{{technician.category.category_name}}</p>
                                     <p class="font-size-sm">{{technician.present_address}}</p> {% endcomment %}
@@ -126,7 +127,7 @@
                                     <h6 class="mb-0">Status</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select class="form-control btn-light dropdown-toggle" name="status">
+                                    <select class=" single-select form-control btn-light dropdown-toggle" name="status">
                                         <option class="bg-dark" value="{{support.status}}" hidden>{{support.status}}</option>
                                         <option class="bg-dark" value="Active">Active</option>
                                         <option class="bg-dark" value="Deactivate">Deactivate</option>
@@ -136,6 +137,31 @@
                                       </select>
                                     {% comment %} <input type="text" class="form-control" value="{{technician.status}}" name="status"> {% endcomment %}
                                     
+                                </div>
+                            </div>
+
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Application Form</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    
+                                    <input class="form-control"  type="file" value="{{support.application_form}}"  accept=".pdf,.png,.jpg" name="application_form">
+                                    {% if support.application_form.url != ""  %}
+                                    <a href="{{support.application_form.url}}">{{support.application_form}}</a>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Joining Date</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control datepicker" value="{{ support.joining_date|date:'Y-m-d'}}" name="date_of_joining">
+                                    {% comment %} <input type="text" class="form-control datepicker" data-date-format="d-m-Y" placeholder="dd-mm-yyyy" value="{{ technician.joining_date|date:'Y-m-d' }}" name="date_of_joining"> {% endcomment %}
+
                                 </div>
                             </div>
 

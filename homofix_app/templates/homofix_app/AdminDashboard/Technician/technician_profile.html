@@ -33,6 +33,7 @@
                                 {% endif %}
                                 {% comment %} <img src="{% static 'assets/images/nww.jpg' %}" alt="Admin" class="rounded-circle p-1 bg-primary" width="110"> {% endcomment %}
                                 <div class="mt-3">
+                                    <h6>Expert ID : {{technician.expert_id}}</h6>
                                     <h4>{{technician.admin.username}}</h4>
                                     <p class="mb-1">{{technician.category.category_name}}</p>
                                     <p class="font-size-sm">{{technician.present_address}}</p>
@@ -186,6 +187,19 @@
                                     {% comment %} <a href="{{technician.profile_pic.url}}">/media/{{technician.profile_pic}}</a> {% endcomment %}
                                 </div>
                             </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Upload App Form</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="file" class="form-control"  name="application_form" accept="image/*">
+                                    {% if technician.application_form.url != ""  %}
+                                    <a href="{{technician.application_form.url}}">{{technician.application_form}}</a>
+                                    {% endif %}
+                                    {% comment %} <a href="{{technician.profile_pic.url}}">/media/{{technician.profile_pic}}</a> {% endcomment %}
+                                </div>
+                            </div>
                             <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Expert In</h6>
@@ -248,7 +262,16 @@
                             </div>
 
                           
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Joining Date</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control datepicker" value="{{ technician.joining_date|date:'Y-m-d'}}" name="date_of_joining">
+                                    {% comment %} <input type="text" class="form-control datepicker" data-date-format="d-m-Y" placeholder="dd-mm-yyyy" value="{{ technician.joining_date|date:'Y-m-d' }}" name="date_of_joining"> {% endcomment %}
 
+                                </div>
+                            </div>
 
 
                             <div class="row">
