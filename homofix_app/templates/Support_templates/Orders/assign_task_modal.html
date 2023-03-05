@@ -13,7 +13,9 @@
                 <select class = "form-select" name="technician_id" id="">
                     <option selected disabled ,"true"> --- Select --- </option>
                     {% for i in technicians %}
+                    {% if booking.state == i.state %}
                     <option value="{{i.id}}">{{i.admin.username}}</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>

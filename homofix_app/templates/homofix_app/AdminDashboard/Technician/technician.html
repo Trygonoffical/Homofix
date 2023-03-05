@@ -38,10 +38,10 @@
                             <th>Category</th>
                             <th>Mobile</th>
                             <th>Email</th>
-                            <th>Present Address</th>
-                            <th>Permanent Address</th>
-                            <th>ID Proof Type</th>
-                            <th>ID Proof</th>
+                            <th>City</th>
+                            <th>State</th>
+                            
+                            
                             <th>Status</th>
                             <th>Action</th>
                             
@@ -56,18 +56,11 @@
                             <td>{{i.category.category_name}}</td>
                             <td>{{i.mobile}}</td>
                             <td>{{i.admin.email}}</td>
-                            <td>{{i.present_address}}</td>
-                            <td>{{i.permanent_address}}</td>
-                            <td>{{i.Id_Proof}}</td>
-                            {% if i.id_proof_document %}
-                                <td> 
-                                    <a href="{{i.id_proof_document.url}}" download="{{i.id_proof_document.name}}">
-                                        <img class="rounded w-50" src="{{i.id_proof_document.url}}" alt="">
-                                    </a>
-                                </td>
-                            {% else %}
-                                <td>No ID proof document uploaded</td>
-                            {% endif %}
+                            <td>{{i.city}}</td>
+                            <td>{{i.state}}</td>
+                            
+                            
+                            
                             <td><span class="badge bg-success">{{i.status}}</span></td>
                             
                             

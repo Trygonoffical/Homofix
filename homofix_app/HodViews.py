@@ -1,10 +1,11 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,Addons,Support,FAQ,Booking,Task
+from .models import CustomUser,Category,Technician,Product,Addons,Support,FAQ,Booking,Task,STATE_CHOICES
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count
 
 
 # @login_required
@@ -130,7 +131,14 @@ def technician_add_category(request):
 
 def technician_edit_profile(request,id):
     technician = Technician.objects.get(id=id)
+    state_choices = STATE_CHOICES
+    # print("ahsssssss",cit)
     category = Category.objects.all()
+    # city_choices = [
+    #     ('city1', 'City 1'),
+    #     ('city2', 'City 2'),
+    #     ('city3', 'City 3'),
+    # ]
     if request.method == "POST":
         profile_pic = request.FILES.get('profile_pic')
         username = request.POST.get('username')
@@ -143,7 +151,7 @@ def technician_edit_profile(request,id):
         permanent_address = request.POST.get('permanent_address')
         id_proof = request.POST.get('id_proof')
         id_nob = request.FILES.get('id_nob')
-        expert_in = request.POST.get('expert_in')
+        rating = request.POST.get('rating')
         serving_area = request.POST.get('serving_area')
         highest_qualification = request.POST.get('highest_qualification')
         state = request.POST.get('state')
@@ -151,6 +159,7 @@ def technician_edit_profile(request,id):
         status = request.POST.get('status')   
         date_of_joining = request.POST.get('date_of_joining')   
         application_form = request.FILES.get('application_form')   
+        
 
         technician.admin.username = username
         technician.admin.email = email
@@ -174,7 +183,7 @@ def technician_edit_profile(request,id):
         else:
             technician.status = 'Active'
 
-        technician.expert_in=expert_in
+        technician.rating=rating
         technician.serving_area=serving_area
         technician.highest_qualification=highest_qualification
         technician.state=state
@@ -194,7 +203,7 @@ def technician_edit_profile(request,id):
         return redirect('technician_edit_profile',id=technician.id)
         # return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
         # return redirect('technician_edit_profile',{'technician_id': technician_id})
-    return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
+    return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category,'state_choices':state_choices})
 
 
 def edit_technician(request):
@@ -476,13 +485,16 @@ def add_faq(request):
 
 
 def booking_list(request):
-    booking = Booking.objects.all() 
+    
+    booking = Booking.objects.all()
+    
     technicians = Technician.objects.all()
     tasks = Task.objects.all()
     context = {
     'booking':booking,
     'technicians':technicians,
-    'tasks':tasks
+    'tasks':tasks,
+    
     
     
    }
@@ -542,3 +554,11 @@ def list_of_task(request):
         'task':task
     }
     return render(request,'homofix_app/AdminDashboard/Booking_list/task.html',context)    
+
+
+def Listofcancel(request):
+    booking = Booking.objects.filter(status="cancelled")
+    context = {
+        'booking':booking
+    }
+    return render(request,'homofix_app/AdminDashboard/Booking_list/cancel_booking.html',context)    

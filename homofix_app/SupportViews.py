@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
-from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician
+from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,STATE_CHOICES
 from datetime import datetime,timedelta
 from django.utils import timezone
 from django.conf import settings
@@ -162,6 +162,7 @@ def support_verify_otp(request):
 
 def support_booking(request):
     prod = Product.objects.all()
+    state_choices = STATE_CHOICES
     supported_by = request.user.support
 
     if request.method == 'POST':
@@ -169,6 +170,12 @@ def support_booking(request):
         customer_id = request.session.get('customer_id')
         product_id = request.POST.get('product_id')
         booking_date_str = request.POST.get('booking_date')
+        state = request.POST.get('state')
+        zip_code = request.POST.get('zip_code')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        area = request.POST.get('area')
+        description = request.POST.get('description')
         customer = Customer.objects.get(id=customer_id)
         product = Product.objects.get(id=product_id)
 
@@ -179,13 +186,14 @@ def support_booking(request):
         # booking_date_utc = booking_date.astimezone(pytz.utc)
 
         # create the booking object
-        booking = Booking(customer=customer, product=product, booking_date=booking_date, supported_by=supported_by)
+        booking = Booking(customer=customer, product=product, booking_date=booking_date,state=state,zip_code=zip_code,address=address,description=description,city=city,area=area, supported_by=supported_by)
         booking.save()
         messages.success(request, 'Booking created successfully.')
         return redirect('support_orders')
 
     context = {
-        'prod': prod
+        'prod': prod,
+        'state_choices':state_choices
     }
     return render(request, 'Support_templates/Booking/create_booking.html', context)
 
@@ -212,6 +220,7 @@ def cancel_booking(request,booking_id):
 
 
 def support_Task_assign(request):
+    
     if request.method == "POST":
         booking_id = request.POST.get('booking_id')
         technician_id = request.POST.get('technician_id')
@@ -226,6 +235,17 @@ def support_Task_assign(request):
     # print("technician id",tect_id)
     return redirect('support_orders')
 
+def support_List_of_expert(request,id):
+    booking = Booking.objects.get(id=id)
+    
+   
+    expert = Technician.objects.filter(city=booking.city, serving_area__icontains=booking.area)
+    context = {
+        'expert':expert,
+        'booking':booking
+    }
+    return render(request,'Support_templates/Orders/list_of_expert.html',context)    
+
 
 def support_list_of_task(request):
     task = Task.objects.all()
@@ -233,6 +253,13 @@ def support_list_of_task(request):
         'task':task
     }
     return render(request,'Support_templates/Orders/list_of_task.html',context)    
+
+def order_cancel(request):
+    booking = Booking.objects.filter(status="cancelled")
+    context = {
+        'booking':booking
+    }
+    return render(request,'Support_templates/Orders/cancel_order.html',context)    
 # ------------------------ Testing for session --------------------------- 
 
 def myView(request):

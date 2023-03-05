@@ -50,6 +50,7 @@ urlpatterns = [
      path('Accounts/Admin/cancel_booking/<int:booking_id>', HodViews.cancel_booking_byadmin, name='cancel_booking_byadmin'),
      path('Accounts/Admin/taskAssign/', HodViews.task_assign, name='task_assign'),
      path('Accounts/Admin/ListofTask/', HodViews.list_of_task, name='list_of_task'),
+     path('Accounts/Admin/Booking/Listofcancel', HodViews.Listofcancel, name='Listofcancel'),
     
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,21 +1,16 @@
 {% extends 'homofix_app/Base/base.html' %}
 {% load static %}
 {% block main-content %}
-<style>
-    .nowrap {
-        white-space: nowrap;
-      }
-</style>
 <div class="page-content">
     <!--breadcrumb-->
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div class="breadcrumb-title pe-3">Taks</div>
+        <div class="breadcrumb-title pe-3">Order</div>
         <div class="ps-3">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 p-0">
                     <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">Task List</li>
+                    <li class="breadcrumb-item active" aria-current="page">Order List</li>
                 </ol>
             </nav>
         </div>
@@ -23,7 +18,7 @@
     </div>
     <!--end breadcrumb-->
 
-    <h6 class="mb-0 text-uppercase">List of Task</h6>
+    <h6 class="mb-0 text-uppercase">List of Order</h6>
     <hr>
 
     {% include 'homofix_app/Base/messages.html' %}
@@ -40,7 +35,6 @@
                     <thead class="table-light">
                         <tr>
                             <th>Order#</th>
-                            <th>Expert</th>
                             <th>Category</th>
                             <th>Product</th>
                             <th>Customer</th>
@@ -51,58 +45,54 @@
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
-                            
-                            
+                            {% comment %} <th>Assigned Technician</th> {% endcomment %}
+
+                            <th>Action</th>
 
                         </tr>
                     </thead>
                     <tbody>
-                        {% for i in task %}
+                        {% for booking in booking %}
                         <tr>
                             <td>
-                                #{{i.booking.order_id}}
+                                #{{booking.order_id}}
                             </td>
-                            <td>
-                                {{i.technician.admin.username}}
-                            </td>
-                            <td>
-                                {{i.booking.product.category}}
-                            </td>
+                            <td>{{booking.product.category.category_name}}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="ms-2">
-                                        <h6 class="mb-1 font-14">{{i.booking.product.name}}</h6>
+                                        <h6 class="mb-1 font-14">{{booking.product.name}}</h6>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{i.booking.customer.admin.username}}</td>
-                            <td>{{i.booking.customer.mobile}}</td>
-                            <td>{{i.booking.city}}</td>
-                            <td>{{i.booking.state}}</td>
-                            <td>{{i.booking.area}}</td>
+                            <td>{{booking.customer.admin.username}}</td>
+                            <td>{{booking.customer.mobile}}</td>
+                            <td>{{booking.city}}</td>
+                            <td>{{booking.state}}</td>
+                            <td>{{booking.area}}</td>
                             <td>
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
-                                        class='bx bxs-circle me-1'></i>{{i.booking.status}}</div>
+                                        class='bx bxs-circle me-1'></i>{{booking.status}}</div>
                             </td>
-                            <td>Rs{{i.booking.product.price}}</td>
-                            <td class="nowrap">{{i.booking.booking_date}}</td>
+                            <td>Rs{{booking.product.price}}</td>
+                            <td>{{booking.booking_date}}</td>
                             {% comment %} <td>
                                 {% for techni in booking.task_set.all %}
                                 {{techni.technician.admin.username}} <!-- Display assigned technician's username -->
                                 {% endfor %}
                             </td> {% endcomment %}
-                            
-                            
+
+                            <td>
+                                <div class="d-flex">
+                                    {% if booking.status == "cancelled" %}
+                                    <button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal"
+                                        data-bs-target="#exampleDangerModal{{booking.id}}" disabled>Cancel</button>
+                                    {% endif %}
+                                </div>
+                            </td>
                         </tr>
-                        {% comment %} <div class="col">
-                            {% include 'homofix_app/AdminDashboard/Booking_list/reschudle_model.html' %}
-                            {% include 'homofix_app/AdminDashboard/Booking_list/delete_order_modal.html' %}
-                            {% include 'homofix_app/AdminDashboard/Booking_list/assign_task_modal.html' %}
-                        </div> {% endcomment %}
+
                         {% endfor %}
-
-
-
 
 
                     </tbody>
@@ -110,11 +100,7 @@
                 </table>
 
 
-
-
             </div>
-
-
 
 
         </div>

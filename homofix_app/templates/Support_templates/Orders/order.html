@@ -1,6 +1,11 @@
 {% extends 'Support_templates/Base/base.html' %}
 {% load static %}
 {% block main-content %}
+<style>
+    .nowrap {
+        white-space: nowrap;
+      }
+</style>
 <div class="page-content">
     <!--breadcrumb-->
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
@@ -30,10 +35,16 @@
             <div class="table-responsive">
                 <table id="example2" class=" table  mb-0">
                     <thead class="table-light">
+                        
                         <tr >
                             <th>Order#</th>
+                            <th>category</th>
                             <th>Product</th>
                             <th>Customer</th>
+                            <th>Mobile</th>
+                            <th>City</th>
+                            <th>State</th> 
+                            <th>Area</th> 
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
@@ -43,10 +54,11 @@
                     </thead>
                     <tbody>
                         {% for booking in bookings %}
-                        <tr {% if booking.task_set.all %}class="d-none"{% endif %}>
+                        <tr {% if booking.task_set.all or booking.status == "cancelled" %}class="d-none"{% endif %}>
                             <td>
-                                #OS-000354
+                                #{{booking.order_id}}
                             </td>
+                            <td>{{booking.product.category.category_name}}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     {% comment %} <div class="recent-product-img">
@@ -58,12 +70,17 @@
                                 </div>
                             </td>
                             <td>{{booking.customer.admin.username}}</td>
+                            <td>{{booking.customer.mobile}}</td>
+                            <td>{{booking.city}}</td>
+                            <td>{{booking.state}}</td>
+                            <td>{{booking.area}}</td>
                             <td>
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{booking.status}}</div>
                             </td>
+                            
                             <td>Rs{{booking.product.price}}</td>
-                            <td>{{booking.booking_date}}</td>
+                            <td class="nowrap">{{booking.booking_date}}</td>
                             
                             </td>
                             <td>
@@ -71,7 +88,8 @@
                                 {% if booking.status == "cancelled" %}
                                     <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}" disabled>Assign Task</button> 
                                 {% else %}
-                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}">Assign Task</button>
+                                    {% comment %} <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}">Assign Task</button> {% endcomment %}
+                                    <a href="{% url 'support_List_of_expert' booking.id %}"><button class="btn btn-sm btn-warning" >Assign Task</button></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -106,6 +124,7 @@
 
 
                     </tbody>
+                    
                 </table>
             </div>
 

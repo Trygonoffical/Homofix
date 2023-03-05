@@ -41,15 +41,57 @@
               </div>
               <div class="mb-3">
                 <label for="inputDateTime" class="form-label">Select Date & Time</label>
-                <input class="form-control" type="datetime-local"  id="inputDateTime" name="booking_date">
+                <input class="form-control" type="datetime-local"  id="inputDateTime" name="booking_date" required>
                 
                
 
               </div>
               <div class="mb-3">
-                <label for="inputProductDescription" class="form-label">Description</label>
-                <textarea class="form-control" id="inputProductDescription" rows="3"></textarea>
+                <label for="inputCity" class="form-label">City</label>
+                <input class="form-control" type="text" id="inputCity" name="city" oninput="this.value = this.value.toLowerCase()" required>
+                {% comment %} <input class="form-control" type="text"  id="inputCity" name="city"> {% endcomment %}
               </div>
+
+              <div class="mb-3">
+                <label for="inputDateTime" class="form-label">State</label>
+                {% comment %} <input class="form-control" type="datetime-local"  id="inputDateTime" name="booking_date"> {% endcomment %}
+
+                
+                <select class="single-select" name="state" id="" required>
+                  <option value="" disabled selected>---SELECT---</option>
+                  {% for state in state_choices %}
+                  {% comment %} <option value="{{state.0}}">{{i.name}}</option> {% endcomment %}
+                  <option value="{{ state.0 }}" {% if state.0 == technician.state %}selected{% endif %}>{{ state.1 }}</option>
+
+                  {% endfor %}
+                </select>
+                {% comment %} <select class="single-select" name="state" class="form-control" required>
+                  <option selected disabled ,"true"> --- Select State ---</option>
+                  {% for state in state_choices %}
+                      <option value="{{ state.0 }}" {% if state.0 == technician.state %}selected{% endif %}>{{ state.1 }}</option>
+                  {% endfor %}
+              </select> {% endcomment %}
+              </div>
+
+              <div class="mb-3">
+                <label for="inputDateTime" class="form-label">Area</label>
+                <input class="form-control" type="text" name="area" required>
+
+              </div>
+              <div class="mb-3">
+                <label for="inputDateTime" class="form-label">Zip Code</label>
+                <input class="form-control" type="number" name="zip_code" required>
+
+              </div>
+              <div class="mb-3">
+                <label for="inputProductaddress" class="form-label">Address</label>
+                <textarea class="form-control" id="inputProductaddress" rows="3" name="address" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="inputProductDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="inputProductDescription" rows="3" name="description"></textarea>
+              </div>
+             
               <input class="btn btn-primary" type="submit" value="submit">
             </div>
           </div>

@@ -45,6 +45,39 @@ status = (
     ('Hold','Hold'),
 )
 
+STATE_CHOICES = (
+        ('Andhra Pradesh', 'Andhra Pradesh'),
+        ('Arunachal Pradesh', 'Arunachal Pradesh'),
+        ('Assam', 'Assam'),
+        ('Bihar', 'Bihar'),
+        ('Chhattisgarh', 'Chhattisgarh'),
+        ('Goa', 'Goa'),
+        ('Gujarat', 'Gujarat'),
+        ('Haryana', 'Haryana'),
+        ('Himachal', 'Pradesh'),
+        ('Jharkhand', 'Jharkhand'),
+        ('Karnatka', 'Karnatka'),
+        ('Kerala', 'Kerala'),
+        ('Madhya Pradesh', 'Madhya Pradesh'),
+        ('Maharashtra', 'Maharashtra'),
+        ('Manipur', 'Manipur'),
+        ('Meghalaya', 'Meghalaya'),
+        ('Mizoram', 'Mizoram'),
+        ('Nagaland', 'Nagaland'),
+        ('Odisha', 'Odisha'),
+        ('Punjab', 'Punjab'),
+        ('Rajasthan', 'Rajasthan'),
+        ('Sikkim', 'Sikkim'),
+        ('Tamil Nadu', 'Tamil Nadu'),
+        ('Telangana', 'Telangana'),
+        ('Tripura', 'Tripura'),
+        ('Uttarakhand', 'Uttarakhand'),
+        ('Uttar Pradesh', 'Uttar Pradesh'),
+        ('West Bengal', 'West Bengal'),
+        ('Delhi', 'Delhi'),
+        # add more choices as needed
+    )
+
 
 class Technician(models.Model):
     id = models.AutoField(primary_key=True)
@@ -61,10 +94,10 @@ class Technician(models.Model):
     id_type = models.CharField(max_length=100,null=True,blank=True)
     id_proof_document = models.ImageField(upload_to='ID Proof',null=True,blank=True)
     application_form = models.ImageField(upload_to='Expert/Application Form',null=True,blank=True)
-    expert_in = models.CharField(max_length=50,null=True,blank=True)
+    rating = models.CharField(max_length=50,null=True,blank=True)
     serving_area = models.CharField(max_length=100,null=True,blank=True)
     highest_qualification = models.CharField(max_length=100,null=True,blank=True)
-    state = models.CharField(max_length=100,null=True,blank=True)
+    state = models.CharField(max_length=100,null=True,blank=True,choices=STATE_CHOICES)
     city = models.CharField(max_length=100,null=True,blank=True)
     status = models.CharField(choices=status,max_length=50,default='Active')
     created_at=models.DateField(auto_now_add=True)
@@ -131,7 +164,9 @@ class Customer(models.Model):
     admin=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     address = models.CharField(max_length=100)
     mobile = models.CharField(max_length=50)
-    is_verified = models.BooleanField(default=False)
+    state = models.CharField(max_length=100,null=True,blank=True,choices=STATE_CHOICES)
+    
+    
     def __str__(self):
         return self.admin.username
     
@@ -177,11 +212,17 @@ class Booking(models.Model):
     is_verified = models.BooleanField(default=False)
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
+    state = models.CharField(max_length=100,null=True,blank=True,choices=STATE_CHOICES)
+    city = models.CharField(max_length=100,null=True,blank=True)
+    area = models.CharField(max_length=100,null=True,blank=True)
+    
+    zip_code = models.CharField(max_length=10,null=True,blank=True)
+    address = models.TextField(null=True,blank=True)
+    description = models.TextField(null=True,blank=True) 
     order_id = models.CharField(max_length=100)
-
     def save(self, *args, **kwargs):
         if not self.order_id:
-            self.order_id = generate_order_code()
+            self.order_id = generate_ref_code()
         # if not self.user_id:
         #     self.user_id = generate_ref_code()
         super().save(*args, **kwargs)

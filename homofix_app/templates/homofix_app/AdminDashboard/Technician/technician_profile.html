@@ -202,10 +202,32 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-sm-3">
-                                    <h6 class="mb-0">Expert In</h6>
+                                    <h6 class="mb-0">Rating</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{technician.expert_in}}" name="expert_in">
+
+                                    <select class="single-select" name="rating" class="form-control">
+                                        
+                                        <option selected disabled ,"true" value="{{technician.rating}}">{{technician.rating}}</option>
+                                        
+
+                                        
+                                            <option value="1" >Star1</option>
+                                            <option value="2">Star2</option>
+                                            <option value="3">Star3</option>
+                                            <option value="4">Star4</option>
+                                            <option value="5">Star5</option>
+                                        
+                                    </select>
+                                    {% comment %} <select name="single-select form-control">
+                                        <option value="1">Star1</option>
+                                        <option value="2">Star2</option>
+                                        <option value="3">Star2</option>
+                                        <option value="4">Star4</option>
+                                        <option value="5">Star5</option>
+
+                                    </select> {% endcomment %}
+                                    {% comment %} <input type="number" class="form-control" name="expert_in"> {% endcomment %}
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -228,21 +250,31 @@
 
                             <div class="row mb-3">
                                 <div class="col-sm-3">
-                                    <h6 class="mb-0">State</h6>
+                                    <h6 class="mb-0">City</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{technician.state}}" name="state">
+                                    <input class="form-control" type="text" value="{{technician.city}}" name="city" oninput="this.value = this.value.toLowerCase()">
+                                    {% comment %} <input type="text" class="form-control" value="{{technician.city}}" name="city"> {% endcomment %}
+                                    
                                 </div>
                             </div>
 
                             <div class="row mb-3">
                                 <div class="col-sm-3">
-                                    <h6 class="mb-0">City</h6>
+                                    <h6 class="mb-0">State</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{technician.city}}" name="city">
+                                    {% comment %} <input type="text" class="form-control" value="{{technician.state}}" name="state"> {% endcomment %}
+                                    <select class="single-select" name="state" class="form-control">
+                                        <option selected disabled ,"true"> --- Select city ---</option>
+                                        {% for state in state_choices %}
+                                            <option value="{{ state.0 }}" {% if state.0 == technician.state %}selected{% endif %}>{{ state.1 }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                             </div>
+
+                            
                             <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Status</h6>

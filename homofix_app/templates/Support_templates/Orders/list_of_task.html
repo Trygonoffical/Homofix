@@ -1,6 +1,11 @@
 {% extends 'Support_templates/Base/base.html' %}
 {% load static %}
 {% block main-content %}
+<style>
+    .nowrap {
+        white-space: nowrap;
+      }
+</style>
 <div class="page-content">
     <!--breadcrumb-->
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
@@ -36,8 +41,13 @@
                         <tr>
                             <th>Order#</th>
                             <th>Expert</th>
+                            <th>Category</th>
                             <th>Product</th>
                             <th>Customer</th>
+                            <th>Mobile</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Area</th>
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
@@ -50,11 +60,12 @@
                         {% for i in task %}
                         <tr>
                             <td>
-                                #OS-000354
+                                #{{i.booking.order_id}}
                             </td>
                             <td>
                                 {{i.technician.admin.username}}
                             </td>
+                            <td>{{i.booking.product.category.category_name}}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="ms-2">
@@ -63,12 +74,16 @@
                                 </div>
                             </td>
                             <td>{{i.booking.customer.admin.username}}</td>
+                            <td>{{i.booking.customer.mobile}}</td>
+                            <td>{{i.booking.city}}</td>
+                            <td>{{i.booking.state}}</td>
+                            <td>{{i.booking.area}}</td>
                             <td>
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{i.booking.status}}</div>
                             </td>
                             <td>Rs{{i.booking.product.price}}</td>
-                            <td>{{i.booking.booking_date}}</td>
+                            <td class="nowrap">{{i.booking.booking_date}}</td>
                             {% comment %} <td>
                                 {% for techni in booking.task_set.all %}
                                 {{techni.technician.admin.username}} <!-- Display assigned technician's username -->
