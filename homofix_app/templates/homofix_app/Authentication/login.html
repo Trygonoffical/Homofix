@@ -242,7 +242,7 @@
 	}
 	</script>
 
-	<script>
+	{% comment %} <script>
 		{% for message in messages %}
 		{% if message.tags == 'error' %}
 	
@@ -250,7 +250,7 @@
 		alertify.error('Your Account is not Active');
 		{% endif %}
 		{% endfor %}
-	</script>
+	</script> {% endcomment %}
 
 	
 	

@@ -139,12 +139,23 @@
                            {% csrf_token %}
                            <div class="d-flex align-items-center">
                               <select style="width:130px;" class="form-select me-1" name="status" id="status">
+                                 {% if task.booking.status == "completed" %}
+                                 <option value="completed">Completed</option>
+                                 {% else %}
+                                 <option value="Inprocess">InProcess</option>
+                                 <option value="completed">Completed</option>
+                                 {% endif %}
+                                 
+                                 
+
+                              </select>
+                              {% comment %} <select style="width:130px;" class="form-select me-1" name="status" id="status">
                               {% for choice in task.booking.STATUS_CHOICES %}
-                              <option value="{{ choice.0 }}" {% if task.booking.status == choice.0 %}selected{% endif %}>
+                              <option value="{{ choice.0 }}" {% if task.booking.status_choice == choice.0 %}selected{% endif %}>
                               {{ choice.1 }}
                               </option>
                               {% endfor %}
-                              </select>
+                              </select> {% endcomment %}
                               {% if task.booking.status == cancelled or task.booking.status == "completed" %}
                               <button type="submit" class="btn btn-success" disabled>Update</button>
                               {% else %}

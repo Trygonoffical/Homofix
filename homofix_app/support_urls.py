@@ -16,7 +16,14 @@ urlpatterns = [
     path('Support/Booking/List_of_expert/<int:id>', SupportViews.support_List_of_expert, name='support_List_of_expert'),
     path('Support/List/Task', SupportViews.support_list_of_task, name='support_list_of_task'),
     path('Support/Order/Cancel', SupportViews.order_cancel, name='order_cancel'),
+    path('Support/Task/Counting/<int:expert_id>/', SupportViews.support_task_counting, name='support_task_counting'),
     
+#    ------------------------------ EXPERT --------------------- 
+    path('Support/Expert/list_of_expert', SupportViews.support_list_of_expert, name='support_list_of_expert'),
+    path('Support/Expert/add_expert', SupportViews.support_add_expert, name='support_add_expert'),
+    path('Support/Expert/Edit/Profile/<int:id>',SupportViews.expert_edit_profile,name="expert_edit_profile"),
+
+
 #    ------------------------------ testing for request session --------------------- 
 
     path('myView/', SupportViews.myView, name='myView'),

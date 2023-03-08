@@ -1,12 +1,13 @@
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render,HttpResponse,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
-from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,STATE_CHOICES
+from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES
 from datetime import datetime,timedelta
 from django.utils import timezone
 from django.conf import settings
+
 
 @login_required(login_url='/')
 def dashboard(request):
@@ -219,33 +220,81 @@ def cancel_booking(request,booking_id):
     return redirect('support_orders')    
 
 
+# def support_Task_assign(request):
+    
+#     if request.method == "POST":
+#         booking_id = request.POST.get('booking_id')
+#         technician_id = request.POST.get('technician_id')
+
+#         booking = Booking.objects.get(id=booking_id)
+#         technician = Technician.objects.get(id=technician_id)
+#         task = Task.objects.create(booking=booking,technician=technician)
+#         task.save()
+#         booking.status="Assign"
+#         technician.status_choice = "Assign"
+#         technician.save()
+#         # booking.save()
+#         messages.success(request,'Assign Task Successfully')
+#         return redirect('support_list_of_task')
+   
+
+
 def support_Task_assign(request):
     
     if request.method == "POST":
         booking_id = request.POST.get('booking_id')
         technician_id = request.POST.get('technician_id')
 
-        booking = Booking.objects.get(id=booking_id)
-        technician = Technician.objects.get(id=technician_id)
-        task = Task.objects.create(booking=booking,technician=technician)
+        booking = get_object_or_404(Booking, id=booking_id)
+        technician = get_object_or_404(Technician, id=technician_id)
+
+        task = Task.objects.create(
+            booking=booking,
+            technician=technician
+        )
         task.save()
-        messages.success(request,'Assign Task Successfully')
-        return redirect('support_orders')
-    # 
-    # print("technician id",tect_id)
-    return redirect('support_orders')
+
+        booking.status = "Assign"
+        booking.save()
+        
+
+        technician.status_choice = "Assign"
+        technician.save()
+
+        messages.success(request, 'Assign Task Successfully')
+        return redirect('support_list_of_task')
+
+
+
 
 def support_List_of_expert(request,id):
+    
     booking = Booking.objects.get(id=id)
     
    
-    expert = Technician.objects.filter(city=booking.city, serving_area__icontains=booking.area)
+    expert = Technician.objects.filter(city=booking.city)
+    tasks = Task.objects.filter(booking=booking)
+    
+    # expert = Technician.objects.filter(city=booking.city, serving_area__icontains=booking.area)
     context = {
         'expert':expert,
-        'booking':booking
+        'booking':booking,
+        'tasks': tasks,
+        
+        
+        
     }
+    
     return render(request,'Support_templates/Orders/list_of_expert.html',context)    
 
+def support_task_counting(request,expert_id):
+    technician = Technician.objects.get(id=expert_id)
+    print(technician)
+    task = Task.objects.filter(id=technician)
+    print("tasskkk",task)
+    print("gggggggggggg",technician)
+    return render(request,'test.html')
+    # return redirect('support_List_of_expert',expert_id)
 
 def support_list_of_task(request):
     task = Task.objects.all()
@@ -260,6 +309,132 @@ def order_cancel(request):
         'booking':booking
     }
     return render(request,'Support_templates/Orders/cancel_order.html',context)    
+
+def support_list_of_expert(request):
+    category = Category.objects.all()
+    technician = Technician.objects.all()
+    task = Task.objects.all()
+    
+    context = {
+        'category':category,
+        'technician':technician,
+        'abcc':task
+    }
+
+    return render(request,'Support_templates/Expert/expert.html',context)    
+
+
+def support_add_expert(request):
+    category = Category.objects.all()
+    technician = Technician.objects.all()
+    if request.method == "POST":
+        
+        category_id = request.POST.get('category_id')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+       
+
+        ctg = Category.objects.get(id=category_id)
+      
+        if CustomUser.objects.filter(username = username).exists():
+            # return JsonResponse({'status': 'error', 'message': 'Username is already Taken'})
+            messages.error(request,'Username is already Taken')
+            return redirect('support_list_of_expert')
+            
+        user = CustomUser.objects.create_user(username=username,password=password,email=email,user_type='2')
+        user.technician.category = ctg
+        user.technician.status = "Inactive"
+        user.save()
+        messages.success(request,'Expert Register Successfully')
+        return redirect('support_list_of_expert')
+        # if(user.is_active):
+        #     return JsonResponse({'status':'Save'})
+            
+        # else:
+        #     return JsonResponse({'status':0})
+
+    # return render(request,'homofix_app/AdminDashboard/Technician/technician.html',{'category':category,'technician':technician})
+
+
+
+def expert_edit_profile(request,id):
+    technician = Technician.objects.get(id=id)
+    state_choices = STATE_CHOICES
+    # print("ahsssssss",cit)
+    category = Category.objects.all()
+    # city_choices = [
+    #     ('city1', 'City 1'),
+    #     ('city2', 'City 2'),
+    #     ('city3', 'City 3'),
+    # ]
+    if request.method == "POST":
+        profile_pic = request.FILES.get('profile_pic')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        father_name = request.POST.get('father_name')    
+        category_id = request.POST.get('category_id')
+        mob_no = request.POST.get('mob_no')
+        present_address = request.POST.get('present_address')
+        permanent_address = request.POST.get('permanent_address')
+        permanent_address = request.POST.get('permanent_address')
+        id_proof = request.POST.get('id_proof')
+        id_nob = request.FILES.get('id_nob')
+        rating = request.POST.get('rating')
+        serving_area = request.POST.get('serving_area')
+        highest_qualification = request.POST.get('highest_qualification')
+        state = request.POST.get('state')
+        city = request.POST.get('city')
+        status = request.POST.get('status')   
+        date_of_joining = request.POST.get('date_of_joining')   
+        application_form = request.FILES.get('application_form')   
+        
+
+        technician.admin.username = username
+        technician.admin.email = email
+        if profile_pic != None:
+            technician.profile_pic=profile_pic
+
+        technician.Father_name=father_name
+        technician.mobile=mob_no
+        technician.present_address=present_address
+        technician.permanent_address=permanent_address
+        technician.Id_Proof=id_proof
+
+        if id_nob != None:
+            technician.id_proof_document=id_nob
+
+        if status == 'Deactivate':
+            technician.status = "Deactivate"
+            
+        elif status == 'Hold':
+            technician.status = 'Hold'
+        else:
+            technician.status = 'Active'
+
+        technician.rating=rating
+        technician.serving_area=serving_area
+        technician.highest_qualification=highest_qualification
+        technician.state=state
+        technician.city=city
+        technician.joining_date=date_of_joining
+        if application_form != None:
+            technician.application_form=application_form
+        
+
+        cat = Category.objects.get(id=category_id)
+
+        technician.category=cat
+
+        technician.admin.save()
+        technician.save()
+        messages.success(request,'updated sucessfully')
+        return redirect('expert_edit_profile',id=technician.id)
+        # return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
+        # return redirect('technician_edit_profile',{'technician_id': technician_id})
+    return render(request,'Support_templates/Expert/expert_profile.html',{'technician':technician,'category':category,'state_choices':state_choices})
+
 # ------------------------ Testing for session --------------------------- 
 
 def myView(request):

@@ -23,17 +23,23 @@ def expert_task_assign(request):
 
 
 
-def update_booking_status(request, booking_id):
-    booking = Booking.objects.get(id=booking_id)
+def update_booking_status(request,booking_id):
+    task = Booking.objects.get(id=booking_id)
+    
+    # user = request.user.id
+    # tech = Technician.objects.get(admin=user)
+    # print("demoooooooooooooooooo",tech)
+
+    # tec = Technician.objects.get(id=request.user.id)
+    # print("technician id",tec)
     
     if request.method == 'POST':
         status = request.POST['status']
-        booking.status = status
-        booking.save()
+        
+        # print("testingggggggggggg",xyzz.technician.status_choice)
+        task.status = status
+        task.save()
         messages.success(request, f"Booking status updated to {status}")
         return redirect('expert_task_assign')
     
-    # context = {
-    #     'booking': booking
-    # }
-    # return render(request, 'Technician_templates/Task/update_booking_status.html', context)
+   

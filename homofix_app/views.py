@@ -32,6 +32,7 @@ def login(request):
                 messages.error(request, "Your account is not active.")
                 return redirect('login')
         else:
+            # print('Invalid username or password')
             messages.error(request, "Invalid username or password.")
             return redirect('login')
 

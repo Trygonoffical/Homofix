@@ -41,6 +41,7 @@ class Category(models.Model):
 
 status = (
     ('Active','Active'),
+    ('Inactive','Inactive'),
     ('Deactivate','Deactivate'),
     ('Hold','Hold'),
 )
@@ -80,6 +81,7 @@ STATE_CHOICES = (
 
 
 class Technician(models.Model):
+   
     id = models.AutoField(primary_key=True)
     admin=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     category = models.ForeignKey(Category,on_delete=models.CASCADE)
@@ -100,6 +102,7 @@ class Technician(models.Model):
     state = models.CharField(max_length=100,null=True,blank=True,choices=STATE_CHOICES)
     city = models.CharField(max_length=100,null=True,blank=True)
     status = models.CharField(choices=status,max_length=50,default='Active')
+    # status_choice = models.CharField(choices=STATUS_CHOICES,max_length=50,default='New')
     created_at=models.DateField(auto_now_add=True)
     updated_at=models.DateField(auto_now_add=True)
     joining_date = models.DateField(null=True,blank=True)
@@ -202,9 +205,10 @@ class Addons(models.Model):
 class Booking(models.Model):
     STATUS_CHOICES = (
         ('New', 'New'),
-        ('in_process', 'In Process'),
+        ('Inprocess', 'Inprocess'),
         ('cancelled', 'Cancelled'),
-        ('completed', 'Completed')
+        ('completed', 'Completed'),
+        ('Assign', 'Assign'),
     )
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='bookings')
@@ -239,12 +243,22 @@ class feedback(models.Model):
 
 
 class Task(models.Model):
+
+    STATUS_CHOICES = (
+        ('New', 'New'),
+        ('Inprocess', 'Inprocess'),
+        ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
+        ('Assign', 'Assign'),
+    )
     
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     technician = models.ForeignKey(Technician, on_delete=models.CASCADE)
     description = models.TextField(null=True,blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
 
     def __str__(self):
         return f"Task for {self.booking.customer.admin.username} - {self.booking.product.name}"
