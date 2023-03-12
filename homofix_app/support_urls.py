@@ -17,6 +17,9 @@ urlpatterns = [
     path('Support/List/Task', SupportViews.support_list_of_task, name='support_list_of_task'),
     path('Support/Order/Cancel', SupportViews.order_cancel, name='order_cancel'),
     path('Support/Task/Counting/<int:expert_id>/', SupportViews.support_task_counting, name='support_task_counting'),
+    path('Support/Booking/Complete/', SupportViews.support_booking_complete, name='support_booking_complete'),
+    path('Support/Booking/Rebooking/Details', SupportViews.support_rebooking, name='support_rebooking'),
+    path('Support/Booking/Rebooking/Update/<int:id>', SupportViews.support_rebooking_update, name='support_rebooking_update'),
     
 #    ------------------------------ EXPERT --------------------- 
     path('Support/Expert/list_of_expert', SupportViews.support_list_of_expert, name='support_list_of_expert'),

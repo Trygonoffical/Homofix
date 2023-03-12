@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,Addons,Customer,Support,FAQ,Booking,Task
+from . models import CustomUser,AdminHOD,Technician,Product,Category,Addons,Customer,Support,FAQ,Booking,Task,Rebooking
 
 # Register your models here.
 
@@ -13,6 +13,7 @@ admin.site.register(Support)
 admin.site.register(FAQ)
 admin.site.register(Booking)
 admin.site.register(Task)
+admin.site.register(Rebooking)
 
 
 

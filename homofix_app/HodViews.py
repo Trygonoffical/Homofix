@@ -10,7 +10,10 @@ from django.db.models import Count
 
 # @login_required
 def admin_dashboard(request):
-    return render(request,'homofix_app/AdminDashboard/dashboard.html')
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    
+    return render(request,'homofix_app/AdminDashboard/dashboard.html',{'booking_count':booking_count,'new_expert_count':new_expert_count})
 
 
 def admin_profile(request):
@@ -41,7 +44,8 @@ def admin_update_profile(request):
 
 def category(request):
     category = Category.objects.all()
-    return render(request,'homofix_app/AdminDashboard/Category/category.html',{'category':category})
+    new_expert_count = Technician.objects.filter(status="New").count()
+    return render(request,'homofix_app/AdminDashboard/Category/category.html',{'category':category,'new_expert_count':new_expert_count})
 
 def add_category(request):
     if request.method == "POST":
@@ -82,7 +86,9 @@ def edit_Category(request):
 
 def technician(request):
     category = Category.objects.all()
-    technician = Technician.objects.all()
+    technician = Technician.objects.filter(status="Active")
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
     if request.method == "POST":
         
         category_id = request.POST.get('category_id')
@@ -109,7 +115,7 @@ def technician(request):
         # else:
         #     return JsonResponse({'status':0})
 
-    return render(request,'homofix_app/AdminDashboard/Technician/technician.html',{'category':category,'technician':technician})
+    return render(request,'homofix_app/AdminDashboard/Technician/technician.html',{'category':category,'technician':technician,'new_expert_count':new_expert_count,'booking_count':booking_count})
 
 
 def technician_add_category(request):
@@ -130,6 +136,8 @@ def technician_add_category(request):
         return redirect('technician')
 
 def technician_edit_profile(request,id):
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
     technician = Technician.objects.get(id=id)
     state_choices = STATE_CHOICES
     # print("ahsssssss",cit)
@@ -180,6 +188,10 @@ def technician_edit_profile(request,id):
             
         elif status == 'Hold':
             technician.status = 'Hold'
+        
+        elif status == 'New':
+            technician.status = 'New'
+
         else:
             technician.status = 'Active'
 
@@ -188,7 +200,9 @@ def technician_edit_profile(request,id):
         technician.highest_qualification=highest_qualification
         technician.state=state
         technician.city=city
-        technician.joining_date=date_of_joining
+        # technician.joining_date=date_of_joining
+        if date_of_joining:
+            technician.joining_date =date_of_joining
         if application_form != None:
             technician.application_form=application_form
         
@@ -203,7 +217,7 @@ def technician_edit_profile(request,id):
         return redirect('technician_edit_profile',id=technician.id)
         # return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
         # return redirect('technician_edit_profile',{'technician_id': technician_id})
-    return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category,'state_choices':state_choices})
+    return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category,'state_choices':state_choices,'new_expert_count':new_expert_count,'booking_count':booking_count })
 
 
 def edit_technician(request):
@@ -244,7 +258,8 @@ def product(request):
 
     product = Product.objects.all()
     category = Category.objects.all()
-
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
     if request.method == "POST":       
         
         product_pic = request.FILES.get('product_pic')
@@ -270,7 +285,7 @@ def product(request):
         return redirect('product')
         
         # return JsonResponse({'status':'Save'})
-    return render(request,'homofix_app/AdminDashboard/Product/product.html',{'product':product,'category':category})
+    return render(request,'homofix_app/AdminDashboard/Product/product.html',{'product':product,'category':category,'new_expert_count':new_expert_count,'booking_count':booking_count})
 
 
 def update_product(request):
@@ -323,6 +338,8 @@ def delete_product(request,id):
 def addons(request):
     addons = Addons.objects.all()
     product = Product.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
     if request.method == "POST":
         product_id = request.POST.get('product_id')
         desc = request.POST.get('desc')
@@ -335,7 +352,7 @@ def addons(request):
         return redirect('addons')
         
 
-    return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product})
+    return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product,'new_expert_count':new_expert_count,'booking_count':booking_count})
 
 
 
@@ -373,7 +390,9 @@ def delete_addons(request,id):
 
 def support(request):
     suppt = Support.objects.all()
-    return render(request,'homofix_app/AdminDashboard/Support/support.html',{'suppt':suppt})
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    return render(request,'homofix_app/AdminDashboard/Support/support.html',{'suppt':suppt,'new_expert_count':new_expert_count,'booking_count':booking_count})
 
 def add_support(request):
     if request.method == "POST":
@@ -401,7 +420,8 @@ def add_support(request):
 
 def support_profile(request,id):
     support = Support.objects.get(id=id)
-    return render(request,'homofix_app/AdminDashboard/Support/edit_profile.html',{'support':support})
+    new_expert_count = Technician.objects.filter(status="New").count()
+    return render(request,'homofix_app/AdminDashboard/Support/edit_profile.html',{'support':support,'new_expert_count':new_expert_count})
 
 
 
@@ -431,7 +451,7 @@ def support_update_profile(request):
 
         support.address =address 
         support.mobile =mob_no 
-        if date_of_joining != "":
+        if date_of_joining:
 
             support.joining_date =date_of_joining 
 
@@ -467,6 +487,8 @@ def delete_support(request,id):
 def add_faq(request):
     product = Product.objects.all()
     faqs = FAQ.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
     if request.method == "POST":
         product_id = request.POST.get('product_id')
         question = request.POST.get('question')
@@ -478,22 +500,27 @@ def add_faq(request):
         
     context = {
         'product':product,
-        'faqs':faqs
+        'faqs':faqs,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count
     }
 
     return render(request,'homofix_app/AdminDashboard/Faqs/faqs.html',context)
 
 
 def booking_list(request):
-    
+    booking_count = Booking.objects.filter(status = "New").count()
     booking = Booking.objects.all()
     
     technicians = Technician.objects.all()
     tasks = Task.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
     context = {
     'booking':booking,
     'technicians':technicians,
     'tasks':tasks,
+    'new_expert_count':new_expert_count,
+    'booking_count':booking_count
     
     
     
@@ -550,15 +577,39 @@ def task_assign(request):
 
 def list_of_task(request):
     task = Task.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
     context = {
-        'task':task
+        'task':task,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        
     }
     return render(request,'homofix_app/AdminDashboard/Booking_list/task.html',context)    
 
 
 def Listofcancel(request):
     booking = Booking.objects.filter(status="cancelled")
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
     context = {
-        'booking':booking
+        'booking':booking,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count
     }
     return render(request,'homofix_app/AdminDashboard/Booking_list/cancel_booking.html',context)    
+
+
+def ListofNewExpert(request):
+    category = Category.objects.all()
+    technician = Technician.objects.filter(status="New")
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    
+    context = {
+        'category' :category,
+        'technician':technician,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count
+    }
+    return render(request,'homofix_app/AdminDashboard/Notification/New_expert.html',context)

@@ -1,6 +1,6 @@
 from django.shortcuts import render,HttpResponse,redirect
 from django.contrib.auth.decorators import login_required
-from .models import Technician,Task,Booking
+from .models import Technician,Task,Booking,Rebooking
 from django.contrib import messages
 
 
@@ -42,4 +42,36 @@ def update_booking_status(request,booking_id):
         messages.success(request, f"Booking status updated to {status}")
         return redirect('expert_task_assign')
     
-   
+def expert_rebooking_Task(request):
+    user = request.user
+    
+
+    technician=Technician.objects.get(admin=user)
+    task = Rebooking.objects.filter(booking__=technician)
+    context = {
+        'task':task
+
+    }
+    return render(request,'Technician_templates/Rebooking/rebooking_Details.html',context)   
+
+
+
+def update_rebooking_status(request,booking_id):
+    task = Booking.objects.get(id=booking_id)
+    
+    # user = request.user.id
+    # tech = Technician.objects.get(admin=user)
+    # print("demoooooooooooooooooo",tech)
+
+    # tec = Technician.objects.get(id=request.user.id)
+    # print("technician id",tec)
+    
+    if request.method == 'POST':
+        status = request.POST['status']
+        
+        # print("testingggggggggggg",xyzz.technician.status_choice)
+        task.status = status
+        task.save()
+        messages.success(request, f"Booking status updated to {status}")
+        return redirect('expert_task_assign')
+ 

@@ -42,7 +42,8 @@ class Category(models.Model):
 status = (
     ('Active','Active'),
     ('Inactive','Inactive'),
-    ('Deactivate','Deactivate'),
+    ('New','New'),
+    # ('Deactivate','Deactivate'),
     ('Hold','Hold'),
 )
 
@@ -186,8 +187,11 @@ class Product(models.Model):
     description = RichTextField()
     created_at=models.DateField(auto_now_add=True)
 
-   
+    def __str__(self):
+        return self.name
+    
 
+  
 
 class FAQ(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='faqs')
@@ -201,7 +205,6 @@ class Addons(models.Model):
     created_at=models.DateField(auto_now_add=True)
 
 
-
 class Booking(models.Model):
     STATUS_CHOICES = (
         ('New', 'New'),
@@ -211,7 +214,7 @@ class Booking(models.Model):
         ('Assign', 'Assign'),
     )
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='bookings')
+    product = models.ManyToManyField(Product, related_name='bookings')
     booking_date = models.DateTimeField()
     is_verified = models.BooleanField(default=False)
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
@@ -224,6 +227,12 @@ class Booking(models.Model):
     address = models.TextField(null=True,blank=True)
     description = models.TextField(null=True,blank=True) 
     order_id = models.CharField(max_length=100)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.product.set(self.product.all())
+
+
     def save(self, *args, **kwargs):
         if not self.order_id:
             self.order_id = generate_ref_code()
@@ -232,7 +241,9 @@ class Booking(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.customer.admin.username} - {self.product.name}"
+         return f"{self.customer.admin.username} - {self.booking_date}"
+        # return f"{self.customer.admin.username} - {self.product.name}"
+
 
 
 class feedback(models.Model):
@@ -262,6 +273,28 @@ class Task(models.Model):
 
     def __str__(self):
         return f"Task for {self.booking.customer.admin.username} - {self.booking.product.name}"
+
+
+
+class Rebooking(models.Model):
+    STATUS_CHOICES = (
+        ('Assign', 'Assign'),
+        ('Inprocess', 'Inprocess'),
+        ('completed', 'Completed'),
+       
+    )
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='rebookings')
+    # new_booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='original_bookings')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        
+        self.booking.status = 'Assign'
+        self.booking.save()
+
+        super().save(*args, **kwargs)
+
 
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):

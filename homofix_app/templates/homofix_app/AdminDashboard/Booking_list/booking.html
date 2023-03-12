@@ -50,7 +50,7 @@
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
-                            {% comment %} <th>Assigned Technician</th> {% endcomment %}
+                            <th class="nowrap">Order By</th>
                             <th>Task</th>
                             <th>Action</th>
 
@@ -88,6 +88,7 @@
                                 {{techni.technician.admin.username}} <!-- Display assigned technician's username -->
                                 {% endfor %}
                             </td> {% endcomment %}
+                            <td class="nowrap">{{booking.supported_by}}</td>
                             <td>
                                 {% if booking.status == "cancelled" %}
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal"

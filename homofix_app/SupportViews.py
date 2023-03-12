@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
-from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES
+from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking
 from datetime import datetime,timedelta
 from django.utils import timezone
 from django.conf import settings
@@ -52,14 +52,24 @@ def support_profile_update(request):
         messages.success(request,'Support Updated Succesffully')
         return HttpResponseRedirect(reverse("support_profile"))
 
+
 def support_orders(request):
     # booking = Booking.objects.all() 
     technicians = Technician.objects.all()
+    order_count = Booking.objects.filter(status="New").count()
+
+    
+
+    
     tasks = Task.objects.all()
     
     # bookings = Booking.objects.filter(customer=request.user.support).select_related('product', 'supported_by')
-    support = request.user.support
-    bookings = Booking.objects.filter(supported_by=support)
+    # support = request.user.support
+    # bookings = Booking.objects.filter(supported_by=support)
+    bookings = Booking.objects.all()
+    for i in bookings:
+        print(i.product.name)
+
     if request.method == "POST":
         username = request.POST.get('username')
         mob = request.POST.get('mob')
@@ -82,7 +92,9 @@ def support_orders(request):
     context = {
     'bookings':bookings,
     'technicians':technicians,
-    'tasks':tasks
+    'tasks':tasks,
+    'order_count':order_count
+    
     
     
    }    
@@ -163,13 +175,14 @@ def support_verify_otp(request):
 
 def support_booking(request):
     prod = Product.objects.all()
+    category = Category.objects.all()
     state_choices = STATE_CHOICES
     supported_by = request.user.support
 
     if request.method == 'POST':
 
         customer_id = request.session.get('customer_id')
-        product_id = request.POST.get('product_id')
+        product_id = request.POST.getlist('product_id')
         booking_date_str = request.POST.get('booking_date')
         state = request.POST.get('state')
         zip_code = request.POST.get('zip_code')
@@ -178,8 +191,11 @@ def support_booking(request):
         area = request.POST.get('area')
         description = request.POST.get('description')
         customer = Customer.objects.get(id=customer_id)
-        product = Product.objects.get(id=product_id)
+        # product = Product.objects.getlist(id=product_id)
+        # products = [Product.objects.get(id=id) for id in product_id]
+        product = Product.objects.filter(id__in=product_id)
 
+        print("listtttttttt",product)
         # convert booking date string to datetime object
         # local_tz = pytz.timezone('Asia/Kolkata')  # replace with your local time zone
         booking_date = datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M")
@@ -187,14 +203,16 @@ def support_booking(request):
         # booking_date_utc = booking_date.astimezone(pytz.utc)
 
         # create the booking object
-        booking = Booking(customer=customer, product=product, booking_date=booking_date,state=state,zip_code=zip_code,address=address,description=description,city=city,area=area, supported_by=supported_by)
+        booking = Booking(customer=customer, booking_date=booking_date,state=state,zip_code=zip_code,address=address,description=description,city=city,area=area, supported_by=supported_by)
         booking.save()
+        booking.product.set(product)
         messages.success(request, 'Booking created successfully.')
         return redirect('support_orders')
 
     context = {
         'prod': prod,
-        'state_choices':state_choices
+        'state_choices':state_choices,
+        'category':category
     }
     return render(request, 'Support_templates/Booking/create_booking.html', context)
 
@@ -310,6 +328,36 @@ def order_cancel(request):
     }
     return render(request,'Support_templates/Orders/cancel_order.html',context)    
 
+def support_booking_complete(request):
+    task = Task.objects.filter(booking__status = "completed")
+    context = {
+        'task':task
+    }
+    return render(request,'Support_templates/Rebooking/booking_complete.html',context)    
+
+def support_rebooking(request):
+    rebooking = Rebooking.objects.all()
+    context = {
+        'rebooking' :rebooking
+    }
+    return render(request,'Support_templates/Rebooking/rebooking.html',context)    
+    
+
+def support_rebooking_update(request,id):
+    task = Task.objects.get(id=id)
+
+    if request.method == "POST":
+        rebooking = Rebooking(booking=task.booking)
+        rebooking.save()
+        messages.success(request,'Rebooking Successfully')
+        return redirect('support_booking_complete')
+        # rebooking here
+    context = {
+        'task':task
+    }
+    return render(request,'Support_templates/Rebooking/rebooking_update.html',context)    
+    
+
 def support_list_of_expert(request):
     category = Category.objects.all()
     technician = Technician.objects.all()
@@ -345,7 +393,7 @@ def support_add_expert(request):
             
         user = CustomUser.objects.create_user(username=username,password=password,email=email,user_type='2')
         user.technician.category = ctg
-        user.technician.status = "Inactive"
+        user.technician.status = "New"
         user.save()
         messages.success(request,'Expert Register Successfully')
         return redirect('support_list_of_expert')

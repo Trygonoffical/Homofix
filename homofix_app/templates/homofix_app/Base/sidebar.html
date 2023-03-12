@@ -77,14 +77,37 @@
             </a>
         </li>
 
-
+        
+         
         <li>
-            <a href="{% url 'technician' %}">
+            <a class="has-arrow" href="javascript:;">
                 <div class="parent-icon"><i class='bx bx-user-circle'></i>
                 </div>
                 <div class="menu-title">Expert</div>
             </a>
+            <ul>
+                <li>
+                    <a href="{% url 'technician' %}">
+                        <div class="parent-icon"><i class='bx bx-user-circle'></i>
+                        </div>
+                        <div class="menu-title">Expert</div>
+                    </a>
+                </li>
+                <li> 
+                    
+                    <a href="{% url 'ListofNewExpert' %}">
+                        <div class="parent-icon"><span class="alert-count">{% if new_expert_count != null %}{{new_expert_count}} {% else %} 0 {% endif %}</span><i class='bx bx-user-circle'></i>
+                        </div>
+                        <div class="menu-title">New Expert</div>
+                    </a>
+                </li>
+  
+               
+            </ul>
         </li>
+
+
+       
 
         <li>
             <a href="{% url 'admin_support' %}">
@@ -102,7 +125,11 @@
                 <div class="menu-title">Booking</div>
             </a>
             <ul>
-                <li> <a href="{% url 'booking_list' %}"><i class="bx bx-right-arrow-alt"></i>New Booking List</a>
+                <a href="{% url 'ListofNewExpert' %}">
+                   
+                </a>
+                <li> 
+                    <a href="{% url 'booking_list' %}"><span class="alert-count">{% if booking_count != null %}{{booking_count}} {% else %} 0 {% endif %}</span><i class="bx bx-right-arrow-alt"></i>New Booking List</a>
                 </li>
                 <li> <a href="{% url 'list_of_task' %}"><i class="bx bx-right-arrow-alt"></i>Assign Booking</a>
                 </li>
@@ -115,6 +142,7 @@
                
             </ul>
         </li>
+       
        
    
        

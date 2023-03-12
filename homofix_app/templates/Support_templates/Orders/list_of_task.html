@@ -51,6 +51,7 @@
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
+                            <th class="nowrap">Order By</th>
                             
                             
 
@@ -84,6 +85,7 @@
                             </td>
                             <td>Rs{{i.booking.product.price}}</td>
                             <td class="nowrap">{{i.booking.booking_date}}</td>
+                            <td class="nowrap">{{i.booking.supported_by}}</td>
                             {% comment %} <td>
                                 {% for techni in booking.task_set.all %}
                                 {{techni.technician.admin.username}} <!-- Display assigned technician's username -->

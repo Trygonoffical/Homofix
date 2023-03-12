@@ -108,7 +108,7 @@
 
 
                          {% with task=i.task_set.last %}
-                        {% if task.booking.status == "Assign" %}
+                        {% if task.booking.status == "Assign" or task.booking.status == "Inprocess" %}
                            <input class="btn btn-sm btn-danger" type="submit" value="OnProcess" disabled>
                         
                         {% else %}
@@ -181,6 +181,7 @@
                         <input class="btn btn-sm btn-warning" type="submit" value="Assign">
                      {% endif %}
                   {% endwith %} {% endcomment %}
+                  {% comment %} <input class="btn btn-sm btn-warning" type="submit" value="Assign"> {% endcomment %}
                   <input class="btn btn-sm btn-warning" type="submit" value="Assign">
 
 

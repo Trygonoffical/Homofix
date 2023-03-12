@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     
+
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
     path("Accounts/Admin/Dashboard/",HodViews.admin_dashboard,name="admin_dashboard"),
@@ -51,6 +52,11 @@ urlpatterns = [
      path('Accounts/Admin/taskAssign/', HodViews.task_assign, name='task_assign'),
      path('Accounts/Admin/ListofTask/', HodViews.list_of_task, name='list_of_task'),
      path('Accounts/Admin/Booking/Listofcancel', HodViews.Listofcancel, name='Listofcancel'),
+
+
+    ########################## Notification ##################################
+
+    path('Accounts/Admin/Notification/NewExpert', HodViews.ListofNewExpert, name='ListofNewExpert'),
     
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -48,6 +48,7 @@
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
+                            <th class="nowrap">Order By</th>
                             <th>Task</th>
                             <th>Actions</th>
                         </tr>
@@ -83,6 +84,7 @@
                             <td class="nowrap">{{booking.booking_date}}</td>
                             
                             </td>
+                            <td class="nowrap">{{booking.supported_by.admin.username}}</td>
                             <td>
                                 {% comment %} <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}">Assign Task</button>  {% endcomment %}
                                 {% if booking.status == "cancelled" %}
