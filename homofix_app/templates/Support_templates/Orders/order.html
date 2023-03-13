@@ -54,20 +54,35 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for booking in bookings %}
+                        {% for booking in bookings  %}
                         <tr {% if booking.task_set.all or booking.status == "cancelled" %}class="d-none"{% endif %}>
                             <td>
                                 #{{booking.order_id}}
                             </td>
-                            <td>{{booking.product.category.category_name}}</td>
+                            {% comment %} <td>{{booking.product.category.category_name}}</td> {% endcomment %}
+                            <td>
+                                {% if booking.product.all %}
+                                {{booking.product.first.category.category_name}}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                            
+                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     {% comment %} <div class="recent-product-img">
                                         <img src="" alt="">
                                     </div> {% endcomment %}
                                     <div class="ms-2">
-                                        <h6 class="mb-1 font-14">{{booking.product.name}}</h6>
-                                    </div>
+                                        {% if booking.product.all %}
+                                          {% for product in booking.product.all %}
+                                            <h6 class="mb-1 nowrap font-14">{{product.name}}</h6>
+                                            
+                                          {% endfor %}
+                                        {% else %}
+                                          <p>No products selected.</p>
+                                        {% endif %}
+                                      </div>
                                 </div>
                             </td>
                             <td>{{booking.customer.admin.username}}</td>

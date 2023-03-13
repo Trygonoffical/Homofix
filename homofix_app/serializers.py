@@ -6,7 +6,8 @@ class LoginSerliazer(serializers.Serializer):
     password = serializers.CharField
     class Meta:
        
-        fields = ('username','password')  
+        fields = ('id','username','password')  
+        # fields = ['username', 'email', 'first_name', 'last_name']
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:

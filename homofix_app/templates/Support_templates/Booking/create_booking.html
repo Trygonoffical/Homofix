@@ -56,15 +56,29 @@
               </div>
               <div class="mb-3">
                 <label for="inputProductTitle" class="form-label">Product Name</label>
-                <select class="single-select" name="product_id" id="select_product" multiple  required>
-                  {% comment %} <option value="" disabled selected>---SELECT---</option> {% endcomment %}
+                <select class="single-select" name="product_id" id="product-select" onchange="showQuantity()" multiple  required>
+                  
                   {% for i in prod %}
-                  <option value="{{i.category.id}}">{{i.name}}</option>
+                  <option value="{{i.id}}">{{i.name}}</option>
 
                   {% endfor %}
-                </select>
+                </select> 
+                {% comment %} <select class="single-select" name="product_id" id="product-select" onchange="showQuantity()" multiple required>
+                  {% for i in prod %}
+                      <option value="{{i.id}}">{{i.name}}</option>
+                  {% endfor %}
+              </select> {% endcomment %}
 
               </div>
+              {% for i in prod %}
+              <div id="{{i.id}}-quantity" style="display: none;">
+                  <input class="form-control" type="number" name="quantity" placeholder="Quantity">
+              </div>
+            {% endfor %}
+              
+              
+
+              
               <div class="mb-3">
                 <label for="inputDateTime" class="form-label">Select Date & Time</label>
                 <input class="form-control" type="datetime-local"  id="inputDateTime" name="booking_date" required>
@@ -129,4 +143,20 @@
   </div>
 
 </div>
+<script>
+  function showQuantity() {
+      var select = document.getElementById("product-select");
+      var options = select.options;
+      for (var i = 0; i < options.length; i++) {
+          var id = options[i].value + "-quantity";
+          var div = document.getElementById(id);
+          if (options[i].selected) {
+              div.style.display = "block";
+          } else {
+              div.style.display = "none";
+          }
+      }
+  }
+  </script>
+
 {% endblock main-content %}

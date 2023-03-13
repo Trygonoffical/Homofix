@@ -26,7 +26,14 @@ class LoginViewSet(CreateAPIView):
             login(request,user)
             user_type = user.user_type
             if user_type == '2':
-                return Response({'message': 'Logged in successfully.'}, status=status.HTTP_200_OK)
+                user_data = {
+                    'id': user.id,
+                    'username': user.username,
+                    
+                    # Add any other user fields you want to return
+                }
+                return Response({'message': 'Logged in successfully.', 'user': user_data}, status=status.HTTP_200_OK)
+                # return Response({'message': 'Logged in successfully.'}, status=status.HTTP_200_OK)
            
         else:
             return Response({'message': 'Invalid login credentials.'}, status=status.HTTP_401_UNAUTHORIZED)

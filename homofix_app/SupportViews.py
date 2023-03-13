@@ -54,18 +54,14 @@ def support_profile_update(request):
 
 
 def support_orders(request):
-    # booking = Booking.objects.all() 
+    
+
     technicians = Technician.objects.all()
     order_count = Booking.objects.filter(status="New").count()
 
-    
-
-    
+   
     tasks = Task.objects.all()
     
-    # bookings = Booking.objects.filter(customer=request.user.support).select_related('product', 'supported_by')
-    # support = request.user.support
-    # bookings = Booking.objects.filter(supported_by=support)
     bookings = Booking.objects.all()
     for i in bookings:
         print(i.product.name)
@@ -94,7 +90,6 @@ def support_orders(request):
     'technicians':technicians,
     'tasks':tasks,
     'order_count':order_count
-    
     
     
    }    
@@ -191,21 +186,15 @@ def support_booking(request):
         area = request.POST.get('area')
         description = request.POST.get('description')
         customer = Customer.objects.get(id=customer_id)
-        # product = Product.objects.getlist(id=product_id)
-        # products = [Product.objects.get(id=id) for id in product_id]
+       
         product = Product.objects.filter(id__in=product_id)
 
-        print("listtttttttt",product)
-        # convert booking date string to datetime object
-        # local_tz = pytz.timezone('Asia/Kolkata')  # replace with your local time zone
+        
         booking_date = datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M")
-        # booking_date = local_tz.localize(booking_date)
-        # booking_date_utc = booking_date.astimezone(pytz.utc)
-
-        # create the booking object
+        
         booking = Booking(customer=customer, booking_date=booking_date,state=state,zip_code=zip_code,address=address,description=description,city=city,area=area, supported_by=supported_by)
         booking.save()
-        booking.product.set(product)
+        booking.product.add(*product)
         messages.success(request, 'Booking created successfully.')
         return redirect('support_orders')
 

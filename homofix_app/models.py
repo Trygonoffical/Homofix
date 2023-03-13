@@ -213,8 +213,8 @@ class Booking(models.Model):
         ('completed', 'Completed'),
         ('Assign', 'Assign'),
     )
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='bookings')
-    product = models.ManyToManyField(Product, related_name='bookings')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    product = models.ManyToManyField(Product,related_name='bookings')
     booking_date = models.DateTimeField()
     is_verified = models.BooleanField(default=False)
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
@@ -228,9 +228,9 @@ class Booking(models.Model):
     description = models.TextField(null=True,blank=True) 
     order_id = models.CharField(max_length=100)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.product.set(self.product.all())
+    # def save(self, *args, **kwargs):
+    #     super().save(*args, **kwargs)
+    #     self.product.set(self.product.all())
 
 
     def save(self, *args, **kwargs):
