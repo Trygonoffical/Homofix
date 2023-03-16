@@ -37,7 +37,8 @@
                         
                         <tr >
                             <th>Order#</th>
-                            <th>category</th>
+                            <th>Category</th>
+                            <th>Subcategory</th>
                             <th>Product</th>
                             <th>Customer</th>
                             <th>Mobile</th>
@@ -58,14 +59,32 @@
                             <td>
                                 #{{task.booking.order_id}}
                             </td>
-                            <td>{{task.booking.product.category.category_name}}</td>
+                            {% comment %} <td>{{task.booking.product.category.category_name}}</td> {% endcomment %}
+                            <td>
+                                {% if task.booking.bookingproduct_set.exists %}
+                                    {{ task.booking.bookingproduct_set.first.product.subcategory.Category_id.category_name }}
+                                {% else %}
+                                    N/A
+                                {% endif %} 
+                            </td>
+                            <td>
+                                {% if task.booking.bookingproduct_set.exists %}
+                                    {{ task.booking.bookingproduct_set.first.product.subcategory.name }}
+                                {% else %}
+                                    N/A
+                                {% endif %} 
+                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     {% comment %} <div class="recent-product-img">
                                         <img src="" alt="">
                                     </div> {% endcomment %}
                                     <div class="ms-2">
-                                        <h6 class="mb-1 font-14">{{task.booking.product.name}}</h6>
+                                        {% comment %} <h6 class="mb-1 font-14">{{task.booking.product.name}}</h6> {% endcomment %}
+                                        {% for booking_product in task.booking.bookingproduct_set.all %}
+                                        <h6 class="mb-1 nowrap font-14">{{ booking_product.product.name }} ({{ booking_product.quantity }})</h6>
+                                        {% endfor %}
+                                        
                                     </div>
                                 </div>
                             </td>

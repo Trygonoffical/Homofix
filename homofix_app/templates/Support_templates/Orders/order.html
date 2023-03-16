@@ -1,4 +1,5 @@
 {% extends 'Support_templates/Base/base.html' %}
+{% load custom_filters %}
 {% load static %}
 {% block main-content %}
 <style>
@@ -59,29 +60,25 @@
                             <td>
                                 #{{booking.order_id}}
                             </td>
-                            {% comment %} <td>{{booking.product.category.category_name}}</td> {% endcomment %}
-                            <td>
-                                {% if booking.product.all %}
-                                {{booking.product.first.category.category_name}}
-                            {% else %}
-                                N/A
-                            {% endif %}
                             
+                            <td>
+                                {% comment %} {{booking.products.subcategory.Category_id.category_name}} {% endcomment %}
+                                {% if booking.bookingproduct_set.exists %}
+                                    {{ booking.bookingproduct_set.first.product.subcategory.Category_id.category_name }}
+                                {% else %}
+                                    N/A
+                                {% endif %} 
                             </td>
+                            
                             <td>
                                 <div class="d-flex align-items-center">
-                                    {% comment %} <div class="recent-product-img">
-                                        <img src="" alt="">
-                                    </div> {% endcomment %}
+                                  
                                     <div class="ms-2">
-                                        {% if booking.product.all %}
-                                          {% for product in booking.product.all %}
-                                            <h6 class="mb-1 nowrap font-14">{{product.name}}</h6>
-                                            
-                                          {% endfor %}
-                                        {% else %}
-                                          <p>No products selected.</p>
-                                        {% endif %}
+                                        {% for booking_product in booking.bookingproduct_set.all %}
+                                        <h6 class="mb-1 nowrap font-14">{{ booking_product.product.name }} ({{ booking_product.quantity }})</h6>
+                                        {% endfor %}
+                                        
+                                        
                                       </div>
                                 </div>
                             </td>
@@ -95,23 +92,33 @@
                                         class='bx bxs-circle me-1'></i>{{booking.status}}</div>
                             </td>
                             
-                            <td>Rs{{booking.product.price}}</td>
+                            <td>
+                                {% comment %} Rs{{total_price}} {% endcomment %}
+                                {% comment %} {% for booking_product in booking.bookingproduct_set.all %}
+                                 <h6 class="mb-1 nowrap font-14">{{ booking_product.total_price}}</h6>
+                                {% endfor %} {% endcomment %}
+                                {% if booking.bookingproduct_set.exists %}
+                                    {{ booking.bookingproduct_set.first.total_price }}
+                                {% else %}
+                                    N/A
+                                {% endif %} 
+                            </td>
                             <td class="nowrap">{{booking.booking_date}}</td>
                             
                             </td>
                             <td class="nowrap">{{booking.supported_by.admin.username}}</td>
                             <td>
-                                {% comment %} <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}">Assign Task</button>  {% endcomment %}
+                                
                                 {% if booking.status == "cancelled" %}
                                     <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}" disabled>Assign Task</button> 
                                 {% else %}
-                                    {% comment %} <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#exampleSmallModal{{booking.id}}">Assign Task</button> {% endcomment %}
+                                    
                                     <a href="{% url 'support_List_of_expert' booking.id %}"><button class="btn btn-sm btn-warning" >Assign Task</button></a>
                                 {% endif %}
                             </td>
                             <td>
                                 <div class="d-flex">
-                                    {% comment %} <span class="badge bg-warning text-dark">Warning</span> {% endcomment %}
+                                    
                                     {% if booking.status == "cancelled" or booking.status == "completed" %}
                                     <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{booking.id}}" disabled>Reschedule</button>
                                     <button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{booking.id}}" disabled>Cancel</button>
@@ -122,10 +129,7 @@
                                     {% endif %}
                                     
                                     
-                                    {% comment %} <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{booking.id}}"><span class="badge bg-warning text-dark">Reschedule</span></a>  {% endcomment %}
-                                    {% comment %} <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{booking.id}}"><i class='bx bxs-edit'></i></a>  {% endcomment %}
                                     
-                                    {% comment %} <a href="javascript:;" class="ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{booking.id}}" ><span class="badge bg-danger">Cancel</span></a> {% endcomment %}
                                 </div>
                             </td>
                         </tr>

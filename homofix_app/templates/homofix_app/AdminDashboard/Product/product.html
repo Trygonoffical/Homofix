@@ -33,6 +33,7 @@
                     <thead>
                         <tr>
                             <th>Category</th>
+                            <th>Subcategory</th>
                             <th>Product Title</th>
                             <th>Product Name</th>
                             <th>Price</th>
@@ -44,7 +45,8 @@
                     <tbody>
                         {% for i in product %}
                         <tr>
-                            <td>{{i.category.category_name}}</td>
+                            <td>{{i.subcategory.Category_id.category_name}}</td>
+                            <td>{{i.subcategory.name}}</td>
                             <td>{{i.product_title}}</td>
                             <td>{{i.name}}</td>
                             <td>{{i.price}}</td>

@@ -16,6 +16,13 @@ urlpatterns = [
     path('Add/Category',HodViews.add_category,name="add_category"),
     path('Category/Delete/<int:id>',HodViews.delete_Category,name="delete_Category"),
     path('Category/Edit/',HodViews.edit_Category,name="edit_Category"),
+
+    path('Accounts/Admin/SubCategory/',HodViews.subcategory,name="subcategory"),
+    path('Accounts/Admin/SubCategory/Edit',HodViews.edit_subcategory,name="edit_subcategory"),
+    path('Accounts/Admin/SubCategory/Delete/<int:id>',HodViews.delete_subcategory,name="delete_subcategory"),
+    path('get-subcategories/', HodViews.get_subcategories, name='get_subcategories'),
+
+
     path('Accounts/Admin/Technician',HodViews.technician,name="technician"),
     path('Accounts/Admin/Technician/AddCategory',HodViews.technician_add_category,name="technician_add_category"),
     path('Accounts/Admin/Technician/Profile/<int:id>',HodViews.technician_edit_profile,name="technician_edit_profile"),

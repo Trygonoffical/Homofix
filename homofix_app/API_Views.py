@@ -27,7 +27,7 @@ class LoginViewSet(CreateAPIView):
             user_type = user.user_type
             if user_type == '2':
                 user_data = {
-                    'id': user.id,
+                    'id': user.technician.id,
                     'username': user.username,
                     
                     # Add any other user fields you want to return

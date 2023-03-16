@@ -1,3 +1,4 @@
+
 <div class="modal fade" id="exampleVerticallycenteredModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -21,18 +22,27 @@
                         </div>
                     </div>
 
+                    
                     <div class="row mb-3">
-                                    
                         <label for="product_pic" class="col-sm-12 col-form-label">Category</label>
                         <div class="col-sm-12">
-                            <select class="form-control btn-light" name="category_id" id="">
+                            <select class="form-control btn-light" name="category_id" id="select1">
+                                <option class="text-black" value="" selected disabled> --Select--</option>
                                 {% for i in category %}
-                                 <option class="text-black" value="{{i.id}}">{{i.category_name}}</option>
+                                    <option class="text-black" value="{{i.id}}">{{i.category_name}}</option>
                                 {% endfor %}
                             </select>
-                                 
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <label for="product_pic" class="col-sm-12 col-form-label">Sub-Category</label>
+                        <div class="col-sm-12">
+                            <select class="form-control btn-light" name="sub_category_id" id="select2" disabled>
+                                <option class="text-black" value="" selected disabled> --Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                   
 
                     <div class="row mb-3">
                         <label for="inputEnterYourName" class="col-sm-12 col-form-label">Product Title</label>
@@ -98,4 +108,42 @@
     for (var i = 0; i < textareas.length; i++) {
         CKEDITOR.replace(textareas[i]);
     }
+</script>
+
+<script>
+    $(document).ready(function() {
+        // When the category dropdown changes, send an AJAX request to retrieve the corresponding subcategories
+        $("#select1").change(function() {
+            var category_id = $(this).val();
+            if (category_id) {
+                $.ajax({
+                    url: "{% url 'get_subcategories' %}",
+                    type: "GET",
+                    data: {
+                        category_id: category_id
+                    },
+                    dataType: "json",
+                    success: function(data) {
+                        // Clear the current options in the subcategory dropdown
+                        $("#select2").html("");
+                        // Add the retrieved subcategories as options to the subcategory dropdown
+                        $("#select2").append(
+                            '<option  value="" selected disabled> --Select--</option>'
+                        );
+                        $.each(data, function(key, value) {
+                            $("#select2").append(
+                                '<option class="text-black" value="' + value.id + '">' + value.name + '</option>'
+                            );
+                        });
+                        // Enable the subcategory dropdown
+                        $("#select2").prop("disabled", false);
+                    }
+                });
+            } else {
+                // If no category is selected, disable the subcategory dropdown and clear its options
+                $("#select2").prop("disabled", true);
+                $("#select2").html('<option value="" selected disabled> --Select--</option>');
+            }
+        });
+    });
 </script>

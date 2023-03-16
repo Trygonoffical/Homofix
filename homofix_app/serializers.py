@@ -12,7 +12,7 @@ class LoginSerliazer(serializers.Serializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username']
+        fields = ['username','email']
 
  
 class ExpertSerliazer(serializers.ModelSerializer):

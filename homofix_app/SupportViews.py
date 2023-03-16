@@ -3,10 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
-from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking
+from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking,BookingProduct
 from datetime import datetime,timedelta
 from django.utils import timezone
 from django.conf import settings
+from django.db.models import Sum
+
 
 
 @login_required(login_url='/')
@@ -55,16 +57,28 @@ def support_profile_update(request):
 
 def support_orders(request):
     
-
+    
     technicians = Technician.objects.all()
     order_count = Booking.objects.filter(status="New").count()
 
-   
-    tasks = Task.objects.all()
-    
+
+    # i want calcualate here 
+    tasks = Task.objects.all()   
     bookings = Booking.objects.all()
-    for i in bookings:
-        print(i.product.name)
+    
+    total_price = 0
+    # for booking in bookings:
+    #     booking_products = booking.bookingproduct_set.all()
+        
+    #     for booking_product in booking_products:
+    #         total_price += booking_product.price * booking_product.quantity
+    #     try:
+    #         booking.total_price = total_price
+    #     except Booking.DoesNotExist:
+    #     # handle the exception here
+    #         pass
+    
+
 
     if request.method == "POST":
         username = request.POST.get('username')
@@ -89,7 +103,8 @@ def support_orders(request):
     'bookings':bookings,
     'technicians':technicians,
     'tasks':tasks,
-    'order_count':order_count
+    'order_count':order_count,
+    'total_price':total_price
     
     
    }    
@@ -173,11 +188,13 @@ def support_booking(request):
     category = Category.objects.all()
     state_choices = STATE_CHOICES
     supported_by = request.user.support
+    
 
     if request.method == 'POST':
-
         customer_id = request.session.get('customer_id')
-        product_id = request.POST.getlist('product_id')
+        product_ids = request.POST.getlist('product_id')
+        quantities = request.POST.getlist('quantity')
+        # price_list = []
         booking_date_str = request.POST.get('booking_date')
         state = request.POST.get('state')
         zip_code = request.POST.get('zip_code')
@@ -185,16 +202,39 @@ def support_booking(request):
         city = request.POST.get('city')
         area = request.POST.get('area')
         description = request.POST.get('description')
+        total_amount = int(request.POST.get('total_amount'))
+        print("totalllll",total_amount)
         customer = Customer.objects.get(id=customer_id)
-       
-        product = Product.objects.filter(id__in=product_id)
-
-        
         booking_date = datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M")
-        
-        booking = Booking(customer=customer, booking_date=booking_date,state=state,zip_code=zip_code,address=address,description=description,city=city,area=area, supported_by=supported_by)
-        booking.save()
-        booking.product.add(*product)
+        # print("priceeeeeeee",price)
+        booking = Booking.objects.create(
+            customer=customer,
+            booking_date=booking_date,
+            state=state,
+            zip_code=zip_code,
+            address=address,
+            description=description,
+            city=city,
+            area=area,
+            supported_by=supported_by
+        )
+
+        for i, product_id in enumerate(product_ids):
+            product = Product.objects.get(id=product_id)
+            quantity = int(quantities[i])
+            price = int(request.POST.getlist('price')[i])
+            # price_list.append(price)
+            BookingProduct.objects.create(
+                booking=booking,
+                product=product,
+                quantity=quantity,
+                total_price=total_amount
+                # price=price
+            )
+            # total_price = sum(price_list)
+            # booking.total_price = total_price
+            booking.save()
+
         messages.success(request, 'Booking created successfully.')
         return redirect('support_orders')
 
@@ -281,6 +321,8 @@ def support_List_of_expert(request,id):
    
     expert = Technician.objects.filter(city=booking.city)
     tasks = Task.objects.filter(booking=booking)
+    
+   
     
     # expert = Technician.objects.filter(city=booking.city, serving_area__icontains=booking.area)
     context = {

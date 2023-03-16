@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,Addons,Support,FAQ,Booking,Task,STATE_CHOICES
+from .models import CustomUser,Category,Technician,Product,Addons,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -84,6 +84,48 @@ def edit_Category(request):
         messages.success(request,"Records are Updated Successfully")
         return redirect('category')
 
+def subcategory(request):
+    category = Category.objects.all()
+    sub_category = SubCategory.objects.all()
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+
+        
+        subcategory_names = request.POST.getlist('subcategory_name[]')
+        ctg_id = Category.objects.get(id=category_id)
+        print("subcategory_names",subcategory_names)
+        print("subcategory idd",category_id)
+        for name in subcategory_names:
+            subcategory = SubCategory.objects.create(Category_id=ctg_id, name=name)
+            subcategory.save()
+            
+
+    context = {
+        'category':category,
+        'sub_category':sub_category,
+    }
+    
+    return render(request,'homofix_app/AdminDashboard/Subcategory/sub_category.html',context)
+
+def edit_subcategory(request):
+    if request.method == "POST":
+        category_id = request.POST.get('category_id')
+        sub_category_id = request.POST.get('sub_category_id')
+        sub_category_name = request.POST.get('sub_category_name')
+
+        category = Category.objects.get(id=category_id)
+        
+        subcategory = SubCategory.objects.get(id=sub_category_id) 
+        subcategory.Category_id= category
+        subcategory.name= sub_category_name
+        subcategory.save()
+        messages.success(request,"Records are Updated Successfully")
+        return redirect('subcategory')
+def delete_subcategory(request,id):
+    subcategory = SubCategory.objects.get(id=id)
+    subcategory.delete()
+    messages.success(request,"Deleted")
+    return redirect('subcategory')
 def technician(request):
     category = Category.objects.all()
     technician = Technician.objects.filter(status="Active")
@@ -251,48 +293,104 @@ def delete_technician(request,id):
     return redirect('technician')
 
 
-
-
-
 def product(request):
-
     product = Product.objects.all()
     category = Category.objects.all()
+    subcategory = SubCategory.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
-    booking_count = Booking.objects.filter(status = "New").count()
-    if request.method == "POST":       
+    booking_count = Booking.objects.filter(status="New").count()
+    if request.method == "POST":
+        product_pic = request.FILES.get("product_pic")
+        product_name = request.POST.get("product_name")
+        product_title = request.POST.get("product_title")
+        price = request.POST.get("price")
+        warranty = request.POST.get("warranty")
+        description = request.POST.get("desc")
+        warranty_desc = request.POST.get("warranty_desc")
+        # category_id = request.POST.get("category_id")
+        sub_category_id = request.POST.get("sub_category_id")
+
         
-        product_pic = request.FILES.get('product_pic')
-        product_name = request.POST.get('product_name')
-        product_title = request.POST.get('product_title')
-        price = request.POST.get('price')
-        warranty = request.POST.get('warranty')
-        description = request.POST.get('desc')
-        warranty_desc = request.POST.get('warranty_desc')
-        category_id = request.POST.get('category_id')
+
+        if Product.objects.filter(name=product_name).exists():
+            messages.warning(request, "Product is already taken")
+            return redirect("product")
+
+        # cat = Category.objects.get(id=category_id)
+        subcategry = SubCategory.objects.get(id=sub_category_id)
+        product = Product.objects.create(
+            product_pic=product_pic,
+            name=product_name,
+            product_title=product_title,
+            # category=cat,
+            price=price,
+            warranty=warranty,
+            warranty_desc=warranty_desc,
+            description=description,
+            subcategory=subcategry
+        )
+        messages.success(request, "Product added successfully")
+        product.save()
+        return redirect("product")
+
+    context = {
+        "product": product,
+        "category": category,
+        "new_expert_count": new_expert_count,
+        "booking_count": booking_count,
+        "subcategory": subcategory,
+    }
+    return render(request, "homofix_app/AdminDashboard/Product/product.html", context)
+
+def get_subcategories(request):
+    category_id = request.GET.get('category_id')
+    subcategories = SubCategory.objects.filter(Category_id=category_id)
+    data = list(subcategories.values('id', 'name'))
+    return JsonResponse(data, safe=False)
+
+
+# def product(request):
+    
+
+#     product = Product.objects.all()
+#     category = Category.objects.all()
+#     subcategory = SubCategory.objects.all()
+#     new_expert_count = Technician.objects.filter(status="New").count()
+#     booking_count = Booking.objects.filter(status = "New").count()
+#     if request.method == "POST":       
+        
+#         product_pic = request.FILES.get('product_pic')
+#         product_name = request.POST.get('product_name')
+#         product_title = request.POST.get('product_title')
+#         price = request.POST.get('price')
+#         warranty = request.POST.get('warranty')
+#         description = request.POST.get('desc')
+#         warranty_desc = request.POST.get('warranty_desc')
+#         category_id = request.POST.get('category_id')
        
         
         
-        if Product.objects.filter(name = product_name).exists():
-            # return JsonResponse({'status': 'error', 'message': 'Product is already Taken'})
-            messages.warning(request,'Product is already Taken')
-            return redirect('product')
+#         if Product.objects.filter(name = product_name).exists():
+#             # return JsonResponse({'status': 'error', 'message': 'Product is already Taken'})
+#             messages.warning(request,'Product is already Taken')
+#             return redirect('product')
             
-        cat = Category.objects.get(id=category_id)
-        product = Product.objects.create(product_pic=product_pic,name=product_name,product_title=product_title,category=cat,price=price,warranty=warranty,warranty_desc=warranty_desc,description=description)
-        messages.success(request,'Product Add Successfully')
-        product.save()
-        return redirect('product')
+#         cat = Category.objects.get(id=category_id)
+#         product = Product.objects.create(product_pic=product_pic,name=product_name,product_title=product_title,category=cat,price=price,warranty=warranty,warranty_desc=warranty_desc,description=description)
+#         messages.success(request,'Product Add Successfully')
+#         product.save()
+#         return redirect('product')
         
-        # return JsonResponse({'status':'Save'})
-    return render(request,'homofix_app/AdminDashboard/Product/product.html',{'product':product,'category':category,'new_expert_count':new_expert_count,'booking_count':booking_count})
+#         # return JsonResponse({'status':'Save'})
+#     return render(request,'homofix_app/AdminDashboard/Product/product.html',{'product':product,'category':category,'new_expert_count':new_expert_count,'booking_count':booking_count,'subcategory':subcategory})
 
 
 def update_product(request):
     if request.method == "POST":
         
         product_id = request.POST.get('product_id')
-        category_id = request.POST.get('category_id')
+        # category_id = request.POST.get('category_id')
+        subcategory_id = request.POST.get('subcategory_id')
         product_pic = request.FILES.get('product_pic')
 
         product_title = request.POST.get('product_title')
@@ -304,11 +402,12 @@ def update_product(request):
         print("description",description)
 
         
-        cat = Category.objects.get(id=category_id)
+        # cat = Category.objects.get(id=category_id)
+        subcat = SubCategory.objects.get(id=subcategory_id)
         product = Product.objects.get(id=product_id)
         if product_pic != None:
             product.product_pic = product_pic
-        product.category = cat
+        product.subcategory = subcat
         product.product_title = product_title
         product.name = product_name
         product.price = price

@@ -36,7 +36,15 @@ class Category(models.Model):
     def __str__(self):
         return self.category_name
     
+class SubCategory(models.Model):
+    Category_id = models.ForeignKey(to=Category,on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    created_at=models.DateField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
 
+    def __str__(self):
+        return self.name
+    
     
 
 status = (
@@ -180,12 +188,14 @@ class Product(models.Model):
     product_pic = models.ImageField(upload_to = 'Product Image')
     product_title = models.CharField(max_length=50,null=True,blank=True)
     name = models.CharField(max_length=50)
-    category = models.ForeignKey(Category,on_delete=models.CASCADE,null=True,blank=True)
+    # category = models.ForeignKey(Category,on_delete=models.CASCADE,null=True,blank=True)
+    subcategory = models.ForeignKey(SubCategory,on_delete=models.CASCADE)
     price = models.IntegerField()
     warranty = models.CharField(max_length=50,null=True,blank=True)
     warranty_desc = RichTextField(null=True,blank=True)
     description = RichTextField()
     created_at=models.DateField(auto_now_add=True)
+    quantity = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name
@@ -214,7 +224,7 @@ class Booking(models.Model):
         ('Assign', 'Assign'),
     )
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    product = models.ManyToManyField(Product,related_name='bookings')
+    products = models.ManyToManyField(Product, related_name='bookings', through='BookingProduct')
     booking_date = models.DateTimeField()
     is_verified = models.BooleanField(default=False)
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
@@ -222,11 +232,11 @@ class Booking(models.Model):
     state = models.CharField(max_length=100,null=True,blank=True,choices=STATE_CHOICES)
     city = models.CharField(max_length=100,null=True,blank=True)
     area = models.CharField(max_length=100,null=True,blank=True)
-    
     zip_code = models.CharField(max_length=10,null=True,blank=True)
     address = models.TextField(null=True,blank=True)
     description = models.TextField(null=True,blank=True) 
     order_id = models.CharField(max_length=100)
+    
 
     # def save(self, *args, **kwargs):
     #     super().save(*args, **kwargs)
@@ -245,6 +255,24 @@ class Booking(models.Model):
         # return f"{self.customer.admin.username} - {self.product.name}"
 
 
+class BookingProduct(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+   
+    total_price = models.IntegerField()
+
+    def __str__(self):
+        return self.product.name
+    
+    # def total_price(self):
+    #     return self.quantity * self.price
+    
+    # def multiply(self, *args, **kwargs):
+    #     self.total_price = self.quantity * self.price
+    #     return self.total_price
+        
+        # super().save(*args, **kwargs)
 
 class feedback(models.Model):
     Customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
@@ -271,8 +299,8 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
 
-    def __str__(self):
-        return f"Task for {self.booking.customer.admin.username} - {self.booking.product.name}"
+    # def __str__(self):
+    #     return f"Task for {self.booking.customer.admin.username} - {self.booking.product.name}"
 
 
 

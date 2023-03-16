@@ -26,13 +26,29 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    {% comment %} <div class="row mb-3">
                                     
                         <label for="product_pic" class="col-sm-12 col-form-label">Category</label>
                         <div class="col-sm-12">
                             <select class="form-control btn-light"  name="category_id">
                                 {% for i in category %}
                                  <option class="text-black" value="{{i.id}}">{{i.category_name}}</option>
+                                {% endfor %}
+                            </select>
+                                 
+                        </div>
+                    </div> {% endcomment %}
+
+                    <div class="row mb-3">
+                                    
+                        <label for="product_pic" class="col-sm-12 col-form-label">Subcategory</label>
+                        <div class="col-sm-12">
+                            <select class="form-control btn-light"  name="subcategory_id">
+                                {% for sub in subcategory %}
+                                 {% comment %} <option class="text-black" value="{{i.id}}">{{i.name}}</option> {% endcomment %}
+                                 <option class="bg-dark" value="{{ sub.id }}" {% if sub.id == i.subcategory.id %}selected{% endif %}>
+                                    {{ sub.name }}
+                                </option>
                                 {% endfor %}
                             </select>
                                  
