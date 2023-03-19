@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer
+from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.viewsets import ViewSet,ModelViewSet
 
 
-from .models import Technician
+from .models import Technician,Task
 
 
 
@@ -60,3 +60,18 @@ class ExpertViewSet(ModelViewSet):
         return Response(serializer.data)
 
     
+
+class TaskViewSet(ModelViewSet):
+    authentication_classes = [BasicAuthentication]
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        technician_id = request.query_params.get('technician_id')
+        if technician_id:
+            tasks = self.queryset.filter(technician=technician_id)
+            serializer = self.get_serializer(tasks, many=True)
+            return Response(serializer.data)
+        else:
+            return super().list(request, *args, **kwargs)
+ 

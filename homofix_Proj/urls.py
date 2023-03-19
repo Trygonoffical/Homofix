@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 from homofix_app import API_Views
 router = DefaultRouter()
 router.register('Expert', API_Views.ExpertViewSet,basename="Expert")
+router.register('Task', API_Views.TaskViewSet,basename="Task")
 
 
 urlpatterns = [

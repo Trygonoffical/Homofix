@@ -18,13 +18,22 @@ urlpatterns = [
     path('Support/Order/Cancel', SupportViews.order_cancel, name='order_cancel'),
     path('Support/Task/Counting/<int:expert_id>/', SupportViews.support_task_counting, name='support_task_counting'),
     path('Support/Booking/Complete/', SupportViews.support_booking_complete, name='support_booking_complete'),
-    path('Support/Booking/Rebooking/Details', SupportViews.support_rebooking, name='support_rebooking'),
-    path('Support/Booking/Rebooking/Update/<int:id>', SupportViews.support_rebooking_update, name='support_rebooking_update'),
+    path('Support/Booking/Rebooking/<int:task_id>', SupportViews.support_rebooking, name='support_rebooking'),
+    path('Support/Booking/Rebooking/Details', SupportViews.support_rebooking_list, name='support_rebooking_list'),
+    path('Support/Booking/Rebooking/Update/', SupportViews.support_rebooking_update, name='support_rebooking_update'),
     
 #    ------------------------------ EXPERT --------------------- 
     path('Support/Expert/list_of_expert', SupportViews.support_list_of_expert, name='support_list_of_expert'),
     path('Support/Expert/add_expert', SupportViews.support_add_expert, name='support_add_expert'),
     path('Support/Expert/Edit/Profile/<int:id>',SupportViews.expert_edit_profile,name="expert_edit_profile"),
+
+
+#    ------------------------------ Rebooking Product --------------------- 
+
+    # path('Support/Expert/Rebooking/Product/<int:id>', SupportViews.support_rebooking_product, name='support_rebooking_product'),
+    path('Support/Expert/Rebooking/Product/<int:task_id>', SupportViews.support_rebooking_product, name='support_rebooking_product'),
+
+
 
 
 #    ------------------------------ testing for request session --------------------- 

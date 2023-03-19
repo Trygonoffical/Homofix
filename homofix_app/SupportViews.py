@@ -8,6 +8,8 @@ from datetime import datetime,timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import Sum
+from django.http import Http404
+
 
 
 
@@ -365,30 +367,122 @@ def support_booking_complete(request):
         'task':task
     }
     return render(request,'Support_templates/Rebooking/booking_complete.html',context)    
+    
 
-def support_rebooking(request):
+# def support_rebooking(request,task_id):
+#     task = get_object_or_404(Task, id=task_id)
+#     booking_id = task.booking.id
+#     booking_prod = BookingProduct.objects.filter(booking_id=booking_id)
+#     context = {
+#         'booking_prod':booking_prod
+#     }
+#     # print(booking_prod)
+#     return render(request,'Support_templates/Rebooking/rebooking.html',context) 
+
+# def support_rebooking(request, task_id):
+#     task = get_object_or_404(Task, id=task_id)
+#     booking_id = task.booking.id
+#     booking_prod = BookingProduct.objects.filter(booking_id=booking_id)
+    
+#     context = {
+#         'booking_prod': booking_prod,
+        
+#     }
+#     return render(request, 'Support_templates/Rebooking/rebooking.html', context)
+
+
+def support_rebooking(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    booking_id = task.booking.id
+    booking_products = BookingProduct.objects.filter(booking_id=booking_id).select_related('booking', 'product')
+    
+    for booking_product in booking_products:
+        rebookings = Rebooking.objects.filter(booking_product_id=booking_product.id).order_by('-id')
+        booking_product.rebookings.set(rebookings)
+
+    context = {
+        'booking_prod': booking_products
+    }
+    return render(request, 'Support_templates/Rebooking/rebooking.html', context)
+
+def support_rebooking_list(request):
     rebooking = Rebooking.objects.all()
     context = {
         'rebooking' :rebooking
     }
-    return render(request,'Support_templates/Rebooking/rebooking.html',context)    
-    
+    return render(request,'Support_templates/Rebooking/rebooking_list.html',context)    
 
-def support_rebooking_update(request,id):
-    task = Task.objects.get(id=id)
 
-    if request.method == "POST":
-        rebooking = Rebooking(booking=task.booking)
+
+def support_rebooking_update(request):
+    if request.method == 'POST':
+        booking_product_id = request.POST.get('booking_prod_id')
+        
+        booking_date = request.POST.get('booking_date')
+        
+        try:
+            # booking_product = BookingProduct.objects.get(booking_id=booking_product_id)
+            booking_product = BookingProduct.objects.filter(product_id=booking_product_id).first()
+            booking = booking_product.booking
+            task = Task.objects.get(booking=booking)
+        except (BookingProduct.DoesNotExist, Task.DoesNotExist):
+            raise Http404('BookingProduct or Task matching query does not exist.')
+        
+        # create a new rebooking object with the same booking and assign it to the same technician
+        rebooking = Rebooking.objects.create(
+            booking_product=booking_product,
+            technician=task.technician,
+            booking_date=booking_date
+        )
+        
+        # update the status of the original booking to "completed"
+        task.booking.status = "completed"
+        task.booking.save()
+        
         rebooking.save()
-        messages.success(request,'Rebooking Successfully')
+        print("successsss",rebooking)
+        messages.success(request, 'Rebooking successfully created.')
         return redirect('support_booking_complete')
-        # rebooking here
-    context = {
-        'task':task
-    }
-    return render(request,'Support_templates/Rebooking/rebooking_update.html',context)    
-    
 
+    context = {}
+    return render(request, 'Support_templates/Rebooking/booking_complete.html', context)
+
+# def support_rebooking_update(request):
+#     if request.method == 'POST':
+#         id = request.POST.get('booking_prod_id')
+#         try:
+#             task = Task.objects.get(booking__id=id)
+#         except Task.DoesNotExist:
+#             raise Http404('Task matching query does not exist.')
+        
+#         # create a new rebooking object with the same booking and assign it to the same technician
+#         rebooking = Rebooking.objects.create(
+#             booking=task.booking,
+#             technician=task.technician,
+#             booking_date=request.POST.get('booking_date')
+#         )
+#         rebooking.save()
+        
+#         # update the status of the original booking to "completed"
+#         task.booking.status = "completed"
+#         task.booking.save()
+        
+#         messages.success(request, 'Rebooking successfully created.')
+#         return redirect('support_booking_complete')
+
+#     context = {}
+#     return render(request, 'Support_templates/Rebooking/booking_complete.html', context)
+
+
+def support_rebooking_product(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    booking_id = task.booking.id
+    booking_prod = BookingProduct.objects.filter(booking_id=booking_id)
+    print(booking_prod)
+    return render(request, 'Support_templates/Rebooking/rebooking_product.html', {'booking_prod': booking_prod})
+
+
+    # return render(request,'Support_templates/Rebooking/rebooking_product.html',{'booking_prod':booking_prod})    
 def support_list_of_expert(request):
     category = Category.objects.all()
     technician = Technician.objects.all()

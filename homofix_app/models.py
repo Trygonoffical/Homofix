@@ -238,10 +238,6 @@ class Booking(models.Model):
     order_id = models.CharField(max_length=100)
     
 
-    # def save(self, *args, **kwargs):
-    #     super().save(*args, **kwargs)
-    #     self.product.set(self.product.all())
-
 
     def save(self, *args, **kwargs):
         if not self.order_id:
@@ -256,10 +252,10 @@ class Booking(models.Model):
 
 
 class BookingProduct(models.Model):
+    
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
-   
+    quantity = models.IntegerField(default=1)  
     total_price = models.IntegerField()
 
     def __str__(self):
@@ -304,24 +300,52 @@ class Task(models.Model):
 
 
 
+# class Rebooking(models.Model):
+#     STATUS_CHOICES = (
+#         ('Assign', 'Assign'),
+#         ('Inprocess', 'Inprocess'),
+#         ('completed', 'Completed'),
+       
+#     )
+#     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='rebookings')
+#     # new_booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='original_bookings')
+#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
+#     technician = models.ForeignKey(Technician, on_delete=models.CASCADE,null=True,blank=True)
+#     booking_date = models.DateTimeField(null=True, blank=True)
+#     date = models.DateTimeField(auto_now_add=True)
+
+#     def save(self, *args, **kwargs):
+        
+#         self.booking.status = 'Assign'
+#         self.booking.save()
+
+#         super().save(*args, **kwargs)
+
+
+
 class Rebooking(models.Model):
     STATUS_CHOICES = (
         ('Assign', 'Assign'),
         ('Inprocess', 'Inprocess'),
         ('completed', 'Completed'),
-       
     )
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='rebookings')
-    # new_booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='original_bookings')
+    
+    booking_product = models.ForeignKey(BookingProduct, on_delete=models.CASCADE, related_name='rebookings')
+    technician = models.ForeignKey(Technician, on_delete=models.CASCADE, null=True, blank=True)
+    booking_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
     date = models.DateTimeField(auto_now_add=True)
-
+    
     def save(self, *args, **kwargs):
-        
-        self.booking.status = 'Assign'
-        self.booking.save()
+        if not self.technician:
+            # get the technician assigned to the original Task
+            try:
+                task = Task.objects.get(booking=self.booking_product.booking, status='Assign')
+                self.technician = task.technician
+            except Task.DoesNotExist:
+                pass
+        super(Rebooking, self).save(*args, **kwargs)
 
-        super().save(*args, **kwargs)
 
 
 @receiver(post_save,sender=CustomUser)

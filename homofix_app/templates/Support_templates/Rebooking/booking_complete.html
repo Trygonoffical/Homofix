@@ -105,11 +105,16 @@
                             <td class="nowrap">{{task.booking.supported_by.admin.username}}</td>
                             <td>{{task.technician.admin.username}}</td>
                            
-                            <td>
+                            {% comment %} <td>
                                 <div class="d-flex">
-                                    <a href="{% url 'support_rebooking_update' task.id %}"><button class="btn btn-sm btn-info" >Rebooking</button></a>
+                                    <a class="mx-2" href="{% url 'support_rebooking_update' task.id %}"><button class="btn btn-sm btn-info" >Rebooking</button></a>
+                                    <a class="mx-2" href="{% url 'support_rebooking_product' task.id %}"><button class="btn btn-sm btn-info" >testing</button></a>
+                                    <a href="{% url 'support_rebooking' task.id %}"><button class="btn btn-sm btn-info" >testing2</button></a>
+                                   
                                 </div>
-                            </td>
+                            </td> {% endcomment %}
+                            {% comment %} <td class="nowrap"><button type="button" class="btn btn-light btn-sm radius-30 px-4" data-bs-toggle="modal" data-bs-target="#exampleDarkModal4">View Details</button></td> {% endcomment %}
+                            <td class="nowrap"><a href="{% url 'support_rebooking' task.id %}"><button type="button" class="btn btn-light btn-sm radius-30 px-4" data-bs-toggle="modal" data-bs-target="#exampleDarkModal4">View Details</button></a></td>
                         </tr>
 
                         <div class="col">

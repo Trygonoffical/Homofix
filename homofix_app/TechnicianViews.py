@@ -43,15 +43,17 @@ def update_booking_status(request,booking_id):
         task.save()
         messages.success(request, f"Booking status updated to {status}")
         return redirect('expert_task_assign')
+   
     
 def expert_rebooking_Task(request):
     user = request.user
     
 
     technician=Technician.objects.get(admin=user)
-    task = Rebooking.objects.filter(booking__=technician)
+    rebooking = Rebooking.objects.filter(technician=technician)
+    
     context = {
-        'task':task
+        'rebooking':rebooking
 
     }
     return render(request,'Technician_templates/Rebooking/rebooking_Details.html',context)   
