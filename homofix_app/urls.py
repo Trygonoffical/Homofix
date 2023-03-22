@@ -65,6 +65,12 @@ urlpatterns = [
 
     path('Accounts/Admin/Notification/NewExpert', HodViews.ListofNewExpert, name='ListofNewExpert'),
     
+    ########################## Rebooking ##################################
+
+    path('Accounts/Admin/Rebooking/', HodViews.Listofrebooking, name='Listofrebooking'),
+
+    ########################## Contact Us ##################################
+    path('Accounts/Admin/ContactUs/', HodViews.contactus, name='contact_us'),
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

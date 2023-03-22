@@ -3,12 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
-from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking,BookingProduct
+from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking,BookingProduct,SubCategory
 from datetime import datetime,timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import Sum
 from django.http import Http404
+import random
 
 
 
@@ -69,32 +70,34 @@ def support_orders(request):
     bookings = Booking.objects.all()
     
     total_price = 0
-    # for booking in bookings:
-    #     booking_products = booking.bookingproduct_set.all()
-        
-    #     for booking_product in booking_products:
-    #         total_price += booking_product.price * booking_product.quantity
-    #     try:
-    #         booking.total_price = total_price
-    #     except Booking.DoesNotExist:
-    #     # handle the exception here
-    #         pass
+   
     
 
 
     if request.method == "POST":
-        username = request.POST.get('username')
+        random_number = random.randint(0, 999)
+        unique_number = str(random_number).zfill(3)
+       
+        
+        # username = request.POST.get('username')
+        first_name = request.POST.get('full_name')
+        
         mob = request.POST.get('mob')
+
+        cus = Customer.objects.filter(admin__first_name=first_name)
+        print("ssss",cus)
  
-        if Customer.objects.filter(admin__username=username, mobile=mob).exists():
-            user= CustomUser.objects.get(username=username)
+        if Customer.objects.filter(admin__first_name=first_name, mobile=mob).exists():
+           
+            user= CustomUser.objects.get(first_name=first_name)
             request.session['cust_id'] = user.customer.id
             return JsonResponse({'status':'Save'})
         
         else:
-            if CustomUser.objects.filter(username=username):
-                return JsonResponse({'status':'Error'})
-            user = CustomUser.objects.create(username=username, user_type='4')    
+            # print
+        #     if CustomUser.objects.filter(username=first_name):
+        #         return JsonResponse({'status':'Error'})
+            user = CustomUser.objects.create(username=first_name+unique_number,first_name=first_name, user_type='4')    
             user.set_password(mob)
             user.customer.mobile = mob
             user.save()
@@ -209,6 +212,9 @@ def support_booking(request):
         customer = Customer.objects.get(id=customer_id)
         booking_date = datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M")
         # print("priceeeeeeee",price)
+
+        if city:
+            city = city.lower()
         booking = Booking.objects.create(
             customer=customer,
             booking_date=booking_date,
@@ -447,6 +453,24 @@ def support_rebooking_update(request):
     context = {}
     return render(request, 'Support_templates/Rebooking/booking_complete.html', context)
 
+
+
+def support_get_subcategories(request):
+    category_id = request.GET.get('category_id')
+    subcategories = SubCategory.objects.filter(Category_id=category_id)
+    data = list(subcategories.values('id', 'name'))
+    return JsonResponse(data, safe=False)
+
+def support_get_products(request):
+    subcategory_id = request.GET.get('subcategory_id')
+    if subcategory_id:
+        subcategory_id = int(subcategory_id)
+        products = Product.objects.filter(subcategory_id=subcategory_id)
+        data = [{'id': product.id,'price': product.price, 'name': product.name} for product in products]
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse([], safe=False)
+
 # def support_rebooking_update(request):
 #     if request.method == 'POST':
 #         id = request.POST.get('booking_prod_id')
@@ -608,6 +632,16 @@ def expert_edit_profile(request,id):
         # return redirect('technician_edit_profile',{'technician_id': technician_id})
     return render(request,'Support_templates/Expert/expert_profile.html',{'technician':technician,'category':category,'state_choices':state_choices})
 
+
+
+
+# ---------------------------- Invoice ------------------------------- 
+def invoice(request,booking_id):
+    booking = Booking.objects.get(id=booking_id)
+    context = {
+        'booking':booking
+    }
+    return render(request,'Support_templates/Invoice/invoice.html',context)
 # ------------------------ Testing for session --------------------------- 
 
 def myView(request):

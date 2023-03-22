@@ -38,6 +38,7 @@
                     <thead class="table-light">
                         
                         <tr >
+                            <th>SI No</th>
                             <th>Order#</th>
                             <th>category</th>
                             <th>Product</th>
@@ -52,11 +53,14 @@
                             <th class="nowrap">Order By</th>
                             <th>Task</th>
                             <th>Actions</th>
+                            <th>Print</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for booking in bookings  %}
+                        
                         <tr {% if booking.task_set.all or booking.status == "cancelled" %}class="d-none"{% endif %}>
+                            <td>#{{forloop.counter}}</td>
                             <td>
                                 #{{booking.order_id}}
                             </td>
@@ -132,6 +136,7 @@
                                     
                                 </div>
                             </td>
+                            <td><a href="{% url 'invoice' booking.id %}">invoice</a></td>
                         </tr>
 
                         <div class="col">

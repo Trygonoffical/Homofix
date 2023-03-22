@@ -44,7 +44,7 @@
                             
                             
                             <th>Status</th>
-                            <th>Action</th>
+                            {% comment %} <th>Action</th> {% endcomment %}
                             
                         </tr>
                     </thead>
@@ -66,15 +66,13 @@
                             <td><span class="badge bg-success">{{i.status}}</span></td>
                             
                             
-                            <td>
+                            {% comment %} <td>
                                 <div class="d-flex order-actions">
-                                    {% comment %} <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a> {% endcomment %}
-                                    {% comment %} <a href="javascript:;" class="ms-3"><i class='bx bxs-trash'></i></a> {% endcomment %}
+                                  
                                     <a href="{% url 'expert_edit_profile' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
-                                    {% comment %} <a data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" href=""
-                                        class="ms-3"><i class='bx bxs-trash'></i></a> {% endcomment %}
+                                    
                                 </div>
-                            </td>
+                            </td> {% endcomment %}
                            
                             
                         </tr>

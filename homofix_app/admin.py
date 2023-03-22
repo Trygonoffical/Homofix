@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,Addons,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory
+from . models import CustomUser,AdminHOD,Technician,Product,Category,Addons,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs
 
 # Register your models here.
 
@@ -16,6 +16,7 @@ admin.site.register(Task)
 admin.site.register(Rebooking)
 admin.site.register(BookingProduct)
 admin.site.register(SubCategory)
+admin.site.register(ContactUs)
 
 
 

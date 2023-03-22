@@ -149,7 +149,7 @@
                      </td>
                      {% endcomment %}
                      <td>
-                        <form method="POST" action="">
+                        <form method="POST" action="{% url 'update_rebooking_status' i.id %}">
                            {% csrf_token %}
                            <div class="d-flex align-items-center">
                               <select style="width:130px;" class="form-select me-1" name="status" id="status">
@@ -170,10 +170,17 @@
                               </option>
                               {% endfor %}
                               </select> {% endcomment %}
-                              {% if task.booking.status == cancelled or task.booking.status == "completed" %}
+                              {% comment %} {% if task.status == cancelled or task.booking.status == "completed" %}
                               <button type="submit" class="btn btn-success" disabled>Update</button>
                               {% else %}
                               <button type="submit" class="btn btn-success">Update</button>
+                              {% endif %} {% endcomment %}
+                              {% if i.status == "completed" %}
+                              <button type="submit" class="btn btn-success" disabled>Update</button>
+                              {% else %}
+                              <button type="submit" class="btn btn-success">Update</button>
+
+                              
                               {% endif %}
                            </div>
                         </form>

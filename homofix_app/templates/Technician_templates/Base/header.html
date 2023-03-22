@@ -17,7 +17,7 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown dropdown-large">
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">	<i class='bx bx-category'></i>
+                        <a hidden class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">	<i class='bx bx-category'></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
                             <div class="row row-cols-3 g-3 p-3">
@@ -55,7 +55,7 @@
                         </div>
                     </li>
                     <li class="nav-item dropdown dropdown-large">
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <span class="alert-count">7</span>
+                        <a hidden class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <span class="alert-count">7</span>
                             <i class='bx bx-bell'></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
@@ -171,7 +171,7 @@
                         </div>
                     </li>
                     <li class="nav-item dropdown dropdown-large">
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <span class="alert-count">8</span>
+                        <a hidden class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <span class="alert-count">8</span>
                             <i class='bx bx-comment'></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
@@ -324,15 +324,21 @@
             </div>
             <div class="user-box dropdown">
                 <a class="d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="{% static 'assets/images/avatars/avatar-2.png' %}" class="user-img" alt="user avatar">
+                    {% comment %} <img src="{% static 'assets/images/avatars/avatar-2.png' %}" class="user-img" alt="user avatar"> {% endcomment %}
+                    {% if user.support.profile_pic.url != ""  %}
+                        <img src="{{user.support.profile_pic.url}}" alt="Admin" class="user-img" width="110">
+                    {% else %}
+                        <img src="{% static 'assets/images/nww.jpg' %}" alt="Admin" class="user-img" width="110">
+                    {% endif %}
                     <div class="user-info ps-3">
                         <p class="user-name mb-0">{{user.username}}</p>
                         {% comment %} <p class="designattion mb-0">Web Designer</p> {% endcomment %}
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="{% url 'admin_profile' %}"><i class="bx bx-user"></i><span>Profile</span></a>
-                    </li>
+                                    
+                <li><a class="dropdown-item" href=""><i class="bx bx-user"></i><span>Profile</span></a>
+                </li>
                     
                     
                    

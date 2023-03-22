@@ -61,7 +61,8 @@ def expert_rebooking_Task(request):
 
 
 def update_rebooking_status(request,booking_id):
-    task = Booking.objects.get(id=booking_id)
+    print("heloooooo")
+    task = Rebooking.objects.get(id=booking_id)
     
     # user = request.user.id
     # tech = Technician.objects.get(admin=user)

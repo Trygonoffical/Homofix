@@ -117,11 +117,11 @@ class Technician(models.Model):
     joining_date = models.DateField(null=True,blank=True)
     objects=models.Manager()
 
+
     def save(self, *args, **kwargs):
         if not self.expert_id:
             self.expert_id = generate_expert_code()
-        # if not self.user_id:
-        #     self.user_id = generate_ref_code()
+        
         super().save(*args, **kwargs)
 
     # def save(self, *args, **kwargs):
@@ -241,7 +241,7 @@ class Booking(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_id:
-            self.order_id = generate_ref_code()
+            self.order_id = generate_order_code()
         # if not self.user_id:
         #     self.user_id = generate_ref_code()
         super().save(*args, **kwargs)
@@ -347,7 +347,15 @@ class Rebooking(models.Model):
         super(Rebooking, self).save(*args, **kwargs)
 
 
+class ContactUs(models.Model):
+    name = models.CharField(max_length=20)
+    mobile = models.CharField(max_length=20)
+    description = models.CharField(max_length=200)
+    date = models.DateField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+    
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):
     if created:

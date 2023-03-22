@@ -147,11 +147,32 @@
                 <li> <a href="{% url 'Listofcancel' %}"><i class="bx bx-right-arrow-alt"></i>Cancel Booking</a>
                 </li>
                 
-               
-             
               
                
             </ul>
+        </li>
+        
+        <li>
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Rebooking</div>
+            </a>
+            <ul>
+               
+                <li> 
+                    <a href="{% url 'Listofrebooking' %}"><span class="alert-count">{% if rebooking_count != null %}{{rebooking_count}} {% else %} 0 {% endif %}</span><i class="bx bx-right-arrow-alt"></i> Rebooking List</a>
+                </li>
+                
+                
+              
+               
+            </ul>
+        </li>
+
+        
+        <li> 
+            <a href="{% url 'contact_us' %}"></span><i class="bx bx-right-arrow-alt"></i>Contact Us</a>
         </li>
        
        

@@ -21,7 +21,8 @@ urlpatterns = [
     path('Support/Booking/Rebooking/<int:task_id>', SupportViews.support_rebooking, name='support_rebooking'),
     path('Support/Booking/Rebooking/Details', SupportViews.support_rebooking_list, name='support_rebooking_list'),
     path('Support/Booking/Rebooking/Update/', SupportViews.support_rebooking_update, name='support_rebooking_update'),
-    
+    path('Support/Booking/Rebooking/get-subcategories/', SupportViews.support_get_subcategories, name='support_get_subcategories'),
+    path('Support/Booking/Rebooking/get-products/', SupportViews.support_get_products, name='support_get_products'),
 #    ------------------------------ EXPERT --------------------- 
     path('Support/Expert/list_of_expert', SupportViews.support_list_of_expert, name='support_list_of_expert'),
     path('Support/Expert/add_expert', SupportViews.support_add_expert, name='support_add_expert'),
@@ -40,6 +41,11 @@ urlpatterns = [
 
     path('myView/', SupportViews.myView, name='myView'),
     path('another_view/', SupportViews.another_view, name='another_view'),
+
+# --------------------------- Invoice --------------------- 
+
+    path('Invoice/<int:booking_id>', SupportViews.invoice, name='invoice'),
+
 
 
 ]

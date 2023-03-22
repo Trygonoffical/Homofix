@@ -6,6 +6,7 @@ from homofix_app import API_Views
 router = DefaultRouter()
 router.register('Expert', API_Views.ExpertViewSet,basename="Expert")
 router.register('Task', API_Views.TaskViewSet,basename="Task")
+router.register('Rebooking', API_Views.RebookingViewSet,basename="Rebooking")
 
 
 urlpatterns = [

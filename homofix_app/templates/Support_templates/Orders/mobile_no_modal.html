@@ -12,8 +12,11 @@
                 <form id="mobile-no-form" method="POST">
                     {% csrf_token %}
 
-                    <div class="input-group mb-2">
+                    {% comment %} <div class="input-group mb-2">
                         <input type="text" class="form-control" placeholder="Enter Username" name="username" required>
+                    </div> {% endcomment %}
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" placeholder="Enter a Name" name="full_name" required>
                     </div>
 
                     <div class="input-group">

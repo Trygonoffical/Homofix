@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer
+from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.viewsets import ViewSet,ModelViewSet
 
 
-from .models import Technician,Task
+from .models import Technician,Task,Rebooking
 
 
 
@@ -75,3 +75,16 @@ class TaskViewSet(ModelViewSet):
         else:
             return super().list(request, *args, **kwargs)
  
+
+
+
+class RebookingViewSet(ModelViewSet):
+    
+    authentication_classes = [BasicAuthentication]
+    serializer_class = RebookingSerializer
+    queryset = Rebooking.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data) 
