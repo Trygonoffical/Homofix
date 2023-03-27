@@ -186,13 +186,17 @@ class BookingProductSerializer(serializers.ModelSerializer):
         model = BookingProduct
         fields = ['id', 'booking', 'product', 'quantity', 'total_price']
 
+class TechnicianSerializer(serializers.ModelSerializer):
+    admin_id = serializers.ReadOnlyField(source='admin.id')
+
+    class Meta:
+        model = Technician
+        fields = ['admin_id']
 
 class RebookingSerializer(serializers.ModelSerializer):
     booking_product = BookingProductSerializer()
-    # technician = serializers.StringRelatedField()
-    # booking_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    # booking = BokingSerializer()
-
+    
+   
     class Meta:
         model = Rebooking
         fields = "__all__"

@@ -21,9 +21,13 @@ urlpatterns = [
     path('Accounts/Admin/SubCategory/Edit',HodViews.edit_subcategory,name="edit_subcategory"),
     path('Accounts/Admin/SubCategory/Delete/<int:id>',HodViews.delete_subcategory,name="delete_subcategory"),
     path('get-subcategories/', HodViews.get_subcategories, name='get_subcategories'),
+    path('get-products/', HodViews.get_products, name='get_products'),
 
+
+# ----------------------------------------- Technician ------------------------- 
 
     path('Accounts/Admin/Technician',HodViews.technician,name="technician"),
+    path('Accounts/Admin/ADD/Technician',HodViews.add_technician,name="add_technician"),
     path('Accounts/Admin/Technician/AddCategory',HodViews.technician_add_category,name="technician_add_category"),
     path('Accounts/Admin/Technician/Profile/<int:id>',HodViews.technician_edit_profile,name="technician_edit_profile"),
     path('Accounts/Admin/Technician/Edit',HodViews.edit_technician,name="edit_technician"),
@@ -51,6 +55,8 @@ urlpatterns = [
 
     ########################## FAQS ##################################
     path('Accounts/Admin/FAQ', HodViews.add_faq, name='add_faq'),
+    path('Accounts/Admin/FAQ/Update', HodViews.update_add_faq, name='update_add_faq'),
+    path('Accounts/Admin/FAQ/Delete/<int:id>/', HodViews.delete_faq, name='delete_faq'),
 
     ########################## Booking List ##################################
      path('Accounts/Admin/BookingList', HodViews.booking_list, name='booking_list'),

@@ -4,12 +4,15 @@ from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
 from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking,BookingProduct,SubCategory
-from datetime import datetime,timedelta
+# from datetime import datetime,timedelta
+from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import Sum
 from django.http import Http404
 import random
+import datetime
+
 
 
 
@@ -60,9 +63,11 @@ def support_profile_update(request):
 
 def support_orders(request):
     
-    
     technicians = Technician.objects.all()
     order_count = Booking.objects.filter(status="New").count()
+    user = request.user
+    support = Support.objects.get(admin=user)
+    
 
 
     # i want calcualate here 
@@ -109,7 +114,8 @@ def support_orders(request):
     'technicians':technicians,
     'tasks':tasks,
     'order_count':order_count,
-    'total_price':total_price
+    'total_price':total_price,
+    'support':support
     
     
    }    
@@ -188,6 +194,7 @@ def support_verify_otp(request):
 #     return render(request, 'Support_templates/Booking/create_booking.html', context)
 
 
+
 def support_booking(request):
     prod = Product.objects.all()
     category = Category.objects.all()
@@ -199,7 +206,7 @@ def support_booking(request):
         customer_id = request.session.get('customer_id')
         product_ids = request.POST.getlist('product_id')
         quantities = request.POST.getlist('quantity')
-        # price_list = []
+        
         booking_date_str = request.POST.get('booking_date')
         state = request.POST.get('state')
         zip_code = request.POST.get('zip_code')
@@ -208,11 +215,10 @@ def support_booking(request):
         area = request.POST.get('area')
         description = request.POST.get('description')
         total_amount = int(request.POST.get('total_amount'))
-        print("totalllll",total_amount)
+        
         customer = Customer.objects.get(id=customer_id)
-        booking_date = datetime.strptime(booking_date_str, "%Y-%m-%dT%H:%M")
-        # print("priceeeeeeee",price)
-
+        booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
+        
         if city:
             city = city.lower()
         booking = Booking.objects.create(
@@ -231,7 +237,7 @@ def support_booking(request):
             product = Product.objects.get(id=product_id)
             quantity = int(quantities[i])
             price = int(request.POST.getlist('price')[i])
-            # price_list.append(price)
+            
             BookingProduct.objects.create(
                 booking=booking,
                 product=product,
@@ -257,7 +263,9 @@ def reschedule_booking(request):
     if request.method == "POST":
 
         booking_id=request.POST.get('booking_id')
-        booking_date=request.POST.get('booking_date')
+        booking_date_str = request.POST.get('booking_date')
+        booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
+        print("booking date",booking_date)
         booking = Booking.objects.get(id=booking_id)
         booking.booking_date = booking_date
         booking.save()
@@ -400,6 +408,9 @@ def support_booking_complete(request):
 def support_rebooking(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     booking_id = task.booking.id
+    user = request.user
+    support = Support.objects.get(admin=user)
+    
     booking_products = BookingProduct.objects.filter(booking_id=booking_id).select_related('booking', 'product')
     
     for booking_product in booking_products:
@@ -407,14 +418,17 @@ def support_rebooking(request, task_id):
         booking_product.rebookings.set(rebookings)
 
     context = {
-        'booking_prod': booking_products
+        'booking_prod': booking_products,
+        'support':support
+        
     }
     return render(request, 'Support_templates/Rebooking/rebooking.html', context)
 
 def support_rebooking_list(request):
     rebooking = Rebooking.objects.all()
     context = {
-        'rebooking' :rebooking
+        'rebooking' :rebooking,
+        
     }
     return render(request,'Support_templates/Rebooking/rebooking_list.html',context)    
 

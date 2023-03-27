@@ -93,7 +93,7 @@ class Technician(models.Model):
    
     id = models.AutoField(primary_key=True)
     admin=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
-    category = models.ForeignKey(Category,on_delete=models.CASCADE)
+    subcategories = models.ManyToManyField(SubCategory, blank=True)
     profile_pic = models.ImageField(upload_to = 'Technician', null= True, blank=True)
     mobile = models.CharField(max_length=20,blank=True,null=True)
     expert_id = models.CharField(max_length=12,blank=True)
@@ -148,18 +148,34 @@ class Support(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     profile_pic = models.ImageField(upload_to='Support', null=True, blank=True)
     address = models.CharField(max_length=100)
+    permanent_address = models.CharField(max_length=50,null=True,blank=True)
+    father_name = models.CharField(max_length=100,null=True,blank=True)
     mobile = models.CharField(max_length=50)
+    marital_status = models.CharField(max_length=50,null=True,blank=True)
+    d_o_b = models.CharField(max_length=50,null=True,blank=True)
     status = models.CharField(choices=status, max_length=50, default='Active')
     bookings = models.ManyToManyField('Booking', blank=True, related_name='supported_by_staff')
     support_id = models.CharField(max_length=12,blank=True)
     joining_date = models.DateField(null=True,blank=True)
-    application_form = models.ImageField(upload_to='Support/Application Form',null=True,blank=True)
+    application_form = models.FileField(upload_to='Support/Application Form',null=True,blank=True)
+    document_form = models.FileField(upload_to='Support/Document Form',null=True,blank=True)
+    can_assign_task = models.BooleanField(default=False)
+    can_new_booking = models.BooleanField(default=False)
+    can_cancel_booking = models.BooleanField(default=False)
+    can_rebooking = models.BooleanField(default=False)
+    can_expert_create = models.BooleanField(default=False)
+    can_contact_us_enquiry = models.BooleanField(default=False)
+
+    # def can_assign_task(self, user):
+    #     return user.has_perm('homofix_app.assign_task')
+    
+    # def can_cancel_order(self, user):
+    #     return user.has_perm('homofix_app.cancel_order')
 
     def save(self, *args, **kwargs):
         if not self.support_id:
             self.support_id = generate_support_code()
-        # if not self.user_id:
-        #     self.user_id = generate_ref_code()
+        
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -191,12 +207,13 @@ class Product(models.Model):
     # category = models.ForeignKey(Category,on_delete=models.CASCADE,null=True,blank=True)
     subcategory = models.ForeignKey(SubCategory,on_delete=models.CASCADE)
     price = models.IntegerField()
+    dis_amt = models.IntegerField(null=True,blank=True)
     warranty = models.CharField(max_length=50,null=True,blank=True)
     warranty_desc = RichTextField(null=True,blank=True)
     description = RichTextField()
     created_at=models.DateField(auto_now_add=True)
     quantity = models.IntegerField(default=1)
-
+    
     def __str__(self):
         return self.name
     
@@ -362,11 +379,14 @@ def create_user_profile(sender,instance,created,**kwargs):
         if instance.user_type=='1':
             AdminHOD.objects.create(admin=instance)
         if instance.user_type=='2':
-            category = Category.objects.first()
-            Technician.objects.create(admin=instance,category=category,present_address="")
+            technician = Technician.objects.create(admin=instance, present_address="")
+            technician.subcategories.set([SubCategory.objects.first()])
         if instance.user_type=='3':
             
-            Support.objects.create(admin=instance,address="")
+            Support.objects.create(admin=instance, address="")
+            # support.can_assign_task = instance.has_perm('homofix_app.assign_task')
+            # support.can_cancel_booking = instance.has_perm('homofix_app.cancel_order')
+            # support.save()
         if instance.user_type=='4':
             
             Customer.objects.create(admin=instance,address="")

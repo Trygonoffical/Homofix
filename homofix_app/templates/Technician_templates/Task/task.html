@@ -59,7 +59,7 @@
                                     N/A
                                 {% endif %} 
                      </td> {% endcomment %}
-                     <td>{{ task.booking.id }}</td>
+                     <td>{{ task.booking.order_id }}</td>
                      <td>
                         {% if task.booking.bookingproduct_set.exists %}
                                     {{ task.booking.bookingproduct_set.first.product.subcategory.Category_id.category_name }}

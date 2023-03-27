@@ -47,10 +47,7 @@
                         <div class="mb-3">
                            <label for="inputProductTitle" class="form-label">Product Name</label>
                            <select class="single-select" name="product_id" id="product-select" onchange="showQuantity()" multiple  required>
-                              {% comment %} {% for i in prod %}
                               
-                              <option value="{{i.id}}" data-rate="{{i.price}}">{{i.name}} - {{i.price}}</option>
-                              {% endfor %} {% endcomment %}
                               <option class="text-black" value="" selected disabled> --Select--</option>
                            </select>
                         </div>

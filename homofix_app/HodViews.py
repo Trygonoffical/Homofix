@@ -6,6 +6,9 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count
+import random
+from django.contrib.auth.models import Permission
+
 
 
 # @login_required
@@ -130,6 +133,7 @@ def delete_subcategory(request,id):
     subcategory.delete()
     messages.success(request,"Deleted")
     return redirect('subcategory')
+
 def technician(request):
     category = Category.objects.all()
     technician = Technician.objects.filter(status="Active")
@@ -146,6 +150,7 @@ def technician(request):
        
 
         ctg = Category.objects.get(id=category_id)
+        
       
         if CustomUser.objects.filter(username = username).exists():
             # return JsonResponse({'status': 'error', 'message': 'Username is already Taken'})
@@ -164,6 +169,43 @@ def technician(request):
 
     return render(request,'homofix_app/AdminDashboard/Technician/technician.html',{'category':category,'technician':technician,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count})
 
+
+
+
+def add_technician(request):
+    
+    category = Category.objects.all()
+    subcategory = SubCategory.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    if request.method == "POST":
+        random_number = random.randint(0, 999)
+        unique_number = str(random_number).zfill(3)
+        
+        sub_category_id = request.POST.getlist('sub_category_id')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        
+        subcat = SubCategory.objects.filter(id__in=sub_category_id)
+        user = CustomUser.objects.create_user(first_name=first_name,last_name=last_name,username=first_name+unique_number,password=password,email=email,user_type='2')
+        user.technician.subcategories.set(subcat)
+        user.save()
+        messages.success(request,'Technician Register Successfully')
+        return redirect('technician')
+       
+
+    context = {
+        'category':category,
+        'subcategory':subcategory,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+    }
+    return render(request,'homofix_app/AdminDashboard/Technician/add_technician.html',context)
 
 def technician_add_category(request):
     if request.method == "POST":
@@ -189,18 +231,16 @@ def technician_edit_profile(request,id):
     state_choices = STATE_CHOICES
     # print("ahsssssss",cit)
     category = Category.objects.all()
+    subcategories = technician.subcategories.all()
     rebooking_count = Rebooking.objects.all().count()
-    # city_choices = [
-    #     ('city1', 'City 1'),
-    #     ('city2', 'City 2'),
-    #     ('city3', 'City 3'),
-    # ]
+   
     if request.method == "POST":
         profile_pic = request.FILES.get('profile_pic')
         username = request.POST.get('username')
         email = request.POST.get('email')
         father_name = request.POST.get('father_name')    
-        category_id = request.POST.get('category_id')
+        # category_id = request.POST.get('category_id')
+        subcategory_id = request.POST.getlist('sub_category_id')
         mob_no = request.POST.get('mob_no')
         present_address = request.POST.get('present_address')
         permanent_address = request.POST.get('permanent_address')
@@ -247,6 +287,8 @@ def technician_edit_profile(request,id):
         technician.serving_area=serving_area
         technician.highest_qualification=highest_qualification
         technician.state=state
+        if city:
+            city = city.lower()
         technician.city=city
         # technician.joining_date=date_of_joining
         if date_of_joining:
@@ -255,9 +297,11 @@ def technician_edit_profile(request,id):
             technician.application_form=application_form
         
 
-        cat = Category.objects.get(id=category_id)
-
-        technician.category=cat
+        # cat = Category.objects.get(id=category_id)
+        if subcategory_id:
+            subcategories = SubCategory.objects.filter(id__in=subcategory_id)
+            technician.subcategories.set(subcategories)
+           
 
         technician.admin.save()
         technician.save()
@@ -265,7 +309,7 @@ def technician_edit_profile(request,id):
         return redirect('technician_edit_profile',id=technician.id)
         # return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
         # return redirect('technician_edit_profile',{'technician_id': technician_id})
-    return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category,'state_choices':state_choices,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count })
+    return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category,'subcategories': subcategories,'state_choices':state_choices,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count })
 
 
 def edit_technician(request):
@@ -311,6 +355,7 @@ def product(request):
         product_name = request.POST.get("product_name")
         product_title = request.POST.get("product_title")
         price = request.POST.get("price")
+        discount_amt = request.POST.get("discount_amt")
         warranty = request.POST.get("warranty")
         description = request.POST.get("desc")
         warranty_desc = request.POST.get("warranty_desc")
@@ -335,6 +380,8 @@ def product(request):
             warranty_desc=warranty_desc,
             description=description,
             subcategory=subcategry,
+            dis_amt=discount_amt
+
             
         )
         messages.success(request, "Product added successfully")
@@ -357,6 +404,18 @@ def get_subcategories(request):
     data = list(subcategories.values('id', 'name'))
     return JsonResponse(data, safe=False)
 
+
+
+
+def get_products(request):
+    subcategory_id = request.GET.get('subcategory_id')
+    if subcategory_id:
+        subcategory_id = int(subcategory_id)
+        products = Product.objects.filter(subcategory_id=subcategory_id)
+        data = [{'id': product.id,'price': product.price, 'name': product.name} for product in products]
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse([], safe=False)
 
 # def product(request):
     
@@ -405,6 +464,7 @@ def update_product(request):
         product_title = request.POST.get('product_title')
         product_name = request.POST.get('product_name')
         price = request.POST.get('price')
+        discount_price = request.POST.get('discount_price')
         warranty = request.POST.get('warranty')
         description = request.POST.get('description')
 
@@ -420,6 +480,7 @@ def update_product(request):
         product.product_title = product_title
         product.name = product_name
         product.price = price
+        product.dis_amt = discount_price
         product.warranty = warranty
         product.description = description
 
@@ -505,35 +566,48 @@ def support(request):
     return render(request,'homofix_app/AdminDashboard/Support/support.html',{'suppt':suppt,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count})
 
 def add_support(request):
+    
     if request.method == "POST":
-        
-        
-        username = request.POST.get('username')
+        random_number = random.randint(0, 999)
+        unique_number = str(random_number).zfill(3)
+        # username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         email = request.POST.get('email')
         password = request.POST.get('password')
-
-      
-        if CustomUser.objects.filter(username = username).exists():
-            messages.error(request,'Username is already Taken')
-            return redirect('admin_support')
+        can_new_booking = request.POST.get('new_booking')
+        can_cancel_booking = request.POST.get('can_cancel_booking')
+        can_rebooking = request.POST.get('can_rebooking')
+        can_assign_task = request.POST.get('can_assign_task')
+        can_new_expert = request.POST.get('can_new_expert')
+        print("new expert",can_new_expert)
+        can_customer_enquiry = request.POST.get('can_customer_enquiry')
+        
+        # if CustomUser.objects.filter(username=username).exists():
+        #     messages.error(request, 'Username is already taken')
+        #     return redirect('admin_support')
             
-        user = CustomUser.objects.create_user(username=username,password=password,email=email,user_type='3')
+        user = CustomUser.objects.create_user(first_name=first_name,last_name=last_name,username=first_name+unique_number, password=password, email=email, user_type='3')
+        user.support.can_new_booking = True if can_new_booking == 'on' else False
+        user.support.can_cancel_booking = True if can_cancel_booking == 'on' else False
+        user.support.can_rebooking = True if can_rebooking == 'on' else False
+        user.support.can_assign_task = True if can_assign_task == 'on' else False
+        user.support.can_expert_create = True if can_new_expert == 'on' else False
+        user.support.can_contact_us_enquiry = True if can_customer_enquiry == 'on' else False
         
         user.save()
-        messages.success(request,'Support Register Successfully')
+        messages.success(request, 'Support registered successfully')
         return redirect('admin_support')
         
-        
-
     return redirect('admin_support')
 
 
 def support_profile(request,id):
+    
     support = Support.objects.get(id=id)
     new_expert_count = Technician.objects.filter(status="New").count()
     rebooking_count = Rebooking.objects.all().count()
     return render(request,'homofix_app/AdminDashboard/Support/edit_profile.html',{'support':support,'new_expert_count':new_expert_count,'rebooking_count':rebooking_count})
-
 
 
 def support_update_profile(request):
@@ -542,42 +616,76 @@ def support_update_profile(request):
        
         profile_pic = request.FILES.get('profile_pic') 
         username = request.POST.get('username')
+        father_name = request.POST.get('father_name')
+        marital_status = request.POST.get('marital_status')
+        dob = request.POST.get('dob')
         email = request.POST.get('email')
         mob_no = request.POST.get('mob_no')
         address = request.POST.get('address')
+        permanent_address = request.POST.get('permanent_address')
         date_of_joining = request.POST.get('date_of_joining')
         status = request.POST.get('status')
         application_form = request.FILES.get('application_form')
+        document_form = request.FILES.get('document_form')
+        # print("application form", application_form)
+
+
+        # Permission 
+        can_new_booking = request.POST.get('new_booking')
+        can_cancel_booking = request.POST.get('can_cancel_booking')
+        can_rebooking = request.POST.get('can_rebooking')
+        can_assign_task = request.POST.get('can_assign_task')
+        can_new_expert = request.POST.get('can_new_expert')
+        can_customer_enquiry = request.POST.get('can_customer_enquiry')
+
         support = Support.objects.get(id=support_id)
 
-       
-        support.admin.username =username 
-        support.admin.email =email
-        if profile_pic != None:
-            support.profile_pic =profile_pic
+        support.admin.username = username 
+        support.admin.email = email
+        if profile_pic:
+            support.profile_pic = profile_pic
         
-        if application_form != None:
-            support.application_form =application_form
+        if application_form:
+            support.application_form=application_form
+
+        if document_form:
+            support.document_form=document_form
+
+        
+        # if application_form:
+        #     application_form_str = ','.join(str(file) for file in application_form)
+        #     support.application_form = application_form_str
+
+        support.address = address 
+        support.permanent_address = permanent_address 
+        support.father_name = father_name 
+        support.marital_status = marital_status 
+        support.d_o_b = dob 
+        support.mobile = mob_no 
 
 
-        support.address =address 
-        support.mobile =mob_no 
+        support.can_new_booking = True if can_new_booking == 'on' else False
+        support.can_cancel_booking = True if can_cancel_booking == 'on' else False
+        support.can_rebooking = True if can_rebooking == 'on' else False
+        support.can_assign_task = True if can_assign_task == 'on' else False
+        support.can_expert_create = True if can_new_expert == 'on' else False
+        support.can_contact_us_enquiry = True if can_customer_enquiry == 'on' else False
+
+
         if date_of_joining:
-
-            support.joining_date =date_of_joining 
+            support.joining_date = date_of_joining 
 
         if status == 'Deactivate':
             support.status = "Deactivate"
-            
         elif status == 'Hold':
             support.status = 'Hold'
         else:
             support.status = 'Active'
 
-        support.save()
-        messages.success(request,'Support Updated Succesffully')
-        return HttpResponseRedirect(reverse("support_profile",args=[support_id]))
 
+        support.save()
+        messages.success(request, 'Support Updated Succesffully')
+        return HttpResponseRedirect(reverse("support_profile",args=[support_id]))
 
 
 def delete_support(request,id):
@@ -597,6 +705,7 @@ def delete_support(request,id):
 
 def add_faq(request):
     product = Product.objects.all()
+    category = Category.objects.all()
     faqs = FAQ.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
@@ -615,10 +724,35 @@ def add_faq(request):
         'faqs':faqs,
         'new_expert_count':new_expert_count,
         'booking_count':booking_count,
-        'rebooking_count':rebooking_count
+        'rebooking_count':rebooking_count,
+        'category':category,
     }
 
     return render(request,'homofix_app/AdminDashboard/Faqs/faqs.html',context)
+
+def update_add_faq(request):
+    if request.method == "POST":
+        faq_id = request.POST.get('faq_id')
+        product_id = request.POST.get('product_id')
+        question = request.POST.get('question')
+        answer = request.POST.get('answer')
+        prod_id = Product.objects.get(id=product_id)
+        faq = FAQ.objects.get(id=faq_id)
+        faq.product = prod_id
+        faq.question = question
+        faq.answer = answer
+        faq.save()
+        messages.success(request,'FAQ Updated Successfully')
+        return redirect('add_faq')
+
+
+
+def delete_faq(request,id):
+    faq = FAQ.objects.get(id=id)
+    faq.delete()
+    messages.success(request, " FAQ deleted successfully.")
+    return redirect('add_faq')
+
 
 
 def booking_list(request):

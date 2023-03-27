@@ -33,6 +33,7 @@
                     <thead>
                         <tr>
                             <th>Category</th>
+                            <th>Subcategory</th>
                             <th>Product Title</th>
                             <th>Product Name</th>
                             <th>Question</th>
@@ -44,7 +45,8 @@
                     <tbody>
                         {% for i in faqs %}
                         <tr>
-                            <td>{{i.product.category.category_name}}</td>
+                            <td>{{i.product.subcategory.Category_id.category_name}}</td>
+                            <td>{{i.product.subcategory.name}}</td>
                             <td>{{i.product.product_title}}</td>
                             <td>{{i.product.name}}</td>
                             <td>{{i.question}}</td>
@@ -63,8 +65,8 @@
 
                         <div class="col">
                            
-                            {% include 'homofix_app/AdminDashboard/Product/edit_product_modal.html' %}
-                            {% include 'homofix_app/AdminDashboard/Product/delete_product_modal.html' %}
+                            {% include 'homofix_app/AdminDashboard/Faqs/edit_faqs_modal.html' %}
+                            {% include 'homofix_app/AdminDashboard/Faqs/delete_faqs_modal.html' %}
                         </div>
                         {% endfor %}
                        

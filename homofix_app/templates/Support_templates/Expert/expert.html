@@ -44,7 +44,7 @@
                             
                             
                             <th>Status</th>
-                            {% comment %} <th>Action</th> {% endcomment %}
+                            <th>Action</th>
                             
                         </tr>
                     </thead>
@@ -66,18 +66,18 @@
                             <td><span class="badge bg-success">{{i.status}}</span></td>
                             
                             
-                            {% comment %} <td>
+                             <td>
                                 <div class="d-flex order-actions">
                                   
                                     <a href="{% url 'expert_edit_profile' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
                                     
                                 </div>
-                            </td> {% endcomment %}
+                            </td> 
                            
                             
                         </tr>
                         <div class="col">
-                            {% include 'homofix_app/AdminDashboard/Technician/edit_technician_modal.html' %}
+                            {% comment %} {% include 'homofix_app/AdminDashboard/Technician/edit_technician_modal.html' %} {% endcomment %}
                             {% comment %} {% include 'homofix_app/AdminDashboard/Technician/delete_technician_modal.html' %} {% endcomment %}
                         </div>
                         {% endfor %}

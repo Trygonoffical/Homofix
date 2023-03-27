@@ -9,7 +9,7 @@ admin.site.register(AdminHOD)
 admin.site.register(Product)
 admin.site.register(Addons)
 admin.site.register(Customer)
-admin.site.register(Support)
+# admin.site.register(Support)
 admin.site.register(FAQ)
 admin.site.register(Booking)
 admin.site.register(Task)
@@ -23,7 +23,14 @@ admin.site.register(ContactUs)
 
 @admin.register(Technician)
 class TechnicianAdmin(admin.ModelAdmin):
-    list_display=['id','admin','category']
+    list_display=['id','admin']
+
+
+@admin.register(Support)
+class SupportAdmin(admin.ModelAdmin):
+    list_display=['id','admin','can_new_booking','can_cancel_booking','can_rebooking','can_assign_task','can_expert_create','can_contact_us_enquiry']
+
+    
 
 
 

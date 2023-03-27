@@ -28,8 +28,10 @@
     <hr>
 
     {% include 'homofix_app/Base/messages.html' %}
+    {% if support.can_new_booking == True %}
     <div class="ms-auto mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#exampleDangerModal"><a href="javascript:;"
             class="btn btn-light radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>Add New Order</a></div>
+    {% endif %}
     <div class="card">
 
         <div class="card-body">
@@ -51,7 +53,9 @@
                             <th>Total</th>
                             <th>Date</th>
                             <th class="nowrap">Order By</th>
+                            {% if support.can_assign_task == True %}
                             <th>Task</th>
+                            {% endif %}
                             <th>Actions</th>
                             <th>Print</th>
                         </tr>
@@ -110,7 +114,14 @@
                             <td class="nowrap">{{booking.booking_date}}</td>
                             
                             </td>
-                            <td class="nowrap">{{booking.supported_by.admin.username}}</td>
+                            <td class="nowrap">
+                            {% if booking.supported_by %}
+                                {{booking.supported_by.admin.username}}
+                            {% else %}
+                                Website
+                            {% endif %}
+                            </td>
+                            {% if support.can_assign_task == True %}
                             <td>
                                 
                                 {% if booking.status == "cancelled" %}
@@ -120,6 +131,7 @@
                                     <a href="{% url 'support_List_of_expert' booking.id %}"><button class="btn btn-sm btn-warning" >Assign Task</button></a>
                                 {% endif %}
                             </td>
+                            {% endif %}
                             <td>
                                 <div class="d-flex">
                                     
@@ -128,9 +140,12 @@
                                     <button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{booking.id}}" disabled>Cancel</button>
                                     {% else %}
                                     <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{booking.id}}">Reschedule</button>
-                                    <button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{booking.id}}">Cancel</button>
                                     
                                     {% endif %}
+                                    {% if support.can_cancel_booking == True %}
+                                    <button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{booking.id}}">Cancel</button>
+                                    {% endif %}
+                                    
                                     
                                     
                                     
