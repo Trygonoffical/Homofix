@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,Addons,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs
+from . models import CustomUser,AdminHOD,Technician,Product,Category,Addons,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage
 
 # Register your models here.
 
@@ -17,6 +17,7 @@ admin.site.register(Rebooking)
 admin.site.register(BookingProduct)
 admin.site.register(SubCategory)
 admin.site.register(ContactUs)
+admin.site.register(HodSharePercentage)
 
 
 
@@ -37,5 +38,10 @@ class SupportAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display=['id','category_name']
+    
+
+@admin.register(JobEnquiry)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display=['id','name','mobile','email','resume','date']
     
     

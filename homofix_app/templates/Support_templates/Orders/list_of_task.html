@@ -59,6 +59,7 @@
                     </thead>
                     <tbody>
                         {% for i in task %}
+                        {% if i.booking.status != 'completed'  %}
                         <tr>
                             <td>
                                 #{{i.booking.order_id}}
@@ -110,6 +111,7 @@
                             {% include 'homofix_app/AdminDashboard/Booking_list/delete_order_modal.html' %}
                             {% include 'homofix_app/AdminDashboard/Booking_list/assign_task_modal.html' %}
                         </div> {% endcomment %}
+                        {% endif %}
                         {% endfor %}
 
 

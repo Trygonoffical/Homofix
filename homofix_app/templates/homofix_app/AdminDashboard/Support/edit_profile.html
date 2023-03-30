@@ -15,6 +15,15 @@
                 </ol>
             </nav>
         </div>
+
+        <div class="ms-auto">
+            <div class="btn-group">
+                <a href="{% url 'support_history' support.id %}"><button type="button" class="btn btn-light">History</button></a>
+                
+                
+                
+            </div>
+        </div>
       
     </div>
     <center>{% include 'homofix_app/Base/messages.html' %}</center>
@@ -84,7 +93,23 @@
                                     <h6 class="mb-0">Username</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{support.admin.username}}" name="username">
+                                    <input type="text" class="form-control" value="{{support.admin.username}}" name="username" readonly>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">First Name</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{support.admin.first_name}}" name="firstname" >
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Last Name</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{support.admin.last_name}}" name="lastname" >
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -236,7 +261,7 @@
 
                             <div class="row mb-3">
                                 <label for="inputEnterYourName" class="col-sm-12 col-form-label">Permissions</label>
-                                <div class="col-sm-6">
+                                <div class="col-sm-4">
                                   <div class="form-check form-inline">
                                     {% comment %} <input class="form-check-input" type="checkbox" name="new_booking" id="new_booking">
                                     <label class="form-check-label" for="new_booking">
@@ -262,7 +287,7 @@
                                     </label>
                                   </div>
                                 </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-4">
                                   <div class="form-check form-inline">
                                     
                                     <input class="form-check-input" type="checkbox" name="can_assign_task" id="can_assign_task" {% if support.can_assign_task == True %}checked{% endif %}>
@@ -286,6 +311,19 @@
                                   </div>
                                   <!-- Add more checkboxes for other permissions if needed -->
                                 </div>
+
+                                <div class="col-sm-4">
+                                  <div class="form-check form-inline">
+                                    
+                                    <input class="form-check-input" type="checkbox" name="can_job_enquiry" id="can_assign_task" {% if support.can_job_enquiry == True %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_assign_task">
+                                      Job Enquiry
+                                    </label>
+                                  </div>
+                                 
+                                  
+                                  <!-- Add more checkboxes for other permissions if needed -->
+                                </div>
                             </div>
 
                           
@@ -298,6 +336,7 @@
                                     <input type="submit" class="btn btn-light px-4" value="Save Changes">
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
                 </form>

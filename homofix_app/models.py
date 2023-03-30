@@ -89,6 +89,52 @@ STATE_CHOICES = (
     )
 
 
+class Support(models.Model):
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    profile_pic = models.ImageField(upload_to='Support', null=True, blank=True)
+    address = models.CharField(max_length=100)
+    permanent_address = models.CharField(max_length=50,null=True,blank=True)
+    father_name = models.CharField(max_length=100,null=True,blank=True)
+    mobile = models.CharField(max_length=50)
+    marital_status = models.CharField(max_length=50,null=True,blank=True)
+    d_o_b = models.CharField(max_length=50,null=True,blank=True)
+    status = models.CharField(choices=status, max_length=50, default='Active')
+    bookings = models.ManyToManyField('Booking', blank=True, related_name='supported_by_staff')
+    support_id = models.CharField(max_length=12,blank=True)
+    joining_date = models.DateField(null=True,blank=True)
+    application_form = models.FileField(upload_to='Support/Application Form',null=True,blank=True)
+    document_form = models.FileField(upload_to='Support/Document Form',null=True,blank=True)
+    can_assign_task = models.BooleanField(default=False)
+    can_new_booking = models.BooleanField(default=False)
+    can_cancel_booking = models.BooleanField(default=False)
+    can_rebooking = models.BooleanField(default=False)
+    can_expert_create = models.BooleanField(default=False)
+    can_contact_us_enquiry = models.BooleanField(default=False)
+    can_job_enquiry = models.BooleanField(default=False)
+
+    # def can_assign_task(self, user):
+    #     return user.has_perm('homofix_app.assign_task')
+    
+    # def can_cancel_order(self, user):
+    #     return user.has_perm('homofix_app.cancel_order')
+
+    def save(self, *args, **kwargs):
+        if not self.support_id:
+            self.support_id = generate_support_code()
+        
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.application_form:
+            if os.path.isfile(self.application_form.path):
+                os.remove(self.application_form.path)
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return self.admin.username
+
+
+
 class Technician(models.Model):
    
     id = models.AutoField(primary_key=True)
@@ -112,6 +158,7 @@ class Technician(models.Model):
     city = models.CharField(max_length=100,null=True,blank=True)
     status = models.CharField(choices=status,max_length=50,default='Active')
     # status_choice = models.CharField(choices=STATUS_CHOICES,max_length=50,default='New')
+    supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True)
     created_at=models.DateField(auto_now_add=True)
     updated_at=models.DateField(auto_now_add=True)
     joining_date = models.DateField(null=True,blank=True)
@@ -144,56 +191,15 @@ class Technician(models.Model):
         super().delete(*args, **kwargs)
 
 
-class Support(models.Model):
-    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    profile_pic = models.ImageField(upload_to='Support', null=True, blank=True)
-    address = models.CharField(max_length=100)
-    permanent_address = models.CharField(max_length=50,null=True,blank=True)
-    father_name = models.CharField(max_length=100,null=True,blank=True)
-    mobile = models.CharField(max_length=50)
-    marital_status = models.CharField(max_length=50,null=True,blank=True)
-    d_o_b = models.CharField(max_length=50,null=True,blank=True)
-    status = models.CharField(choices=status, max_length=50, default='Active')
-    bookings = models.ManyToManyField('Booking', blank=True, related_name='supported_by_staff')
-    support_id = models.CharField(max_length=12,blank=True)
-    joining_date = models.DateField(null=True,blank=True)
-    application_form = models.FileField(upload_to='Support/Application Form',null=True,blank=True)
-    document_form = models.FileField(upload_to='Support/Document Form',null=True,blank=True)
-    can_assign_task = models.BooleanField(default=False)
-    can_new_booking = models.BooleanField(default=False)
-    can_cancel_booking = models.BooleanField(default=False)
-    can_rebooking = models.BooleanField(default=False)
-    can_expert_create = models.BooleanField(default=False)
-    can_contact_us_enquiry = models.BooleanField(default=False)
-
-    # def can_assign_task(self, user):
-    #     return user.has_perm('homofix_app.assign_task')
-    
-    # def can_cancel_order(self, user):
-    #     return user.has_perm('homofix_app.cancel_order')
-
-    def save(self, *args, **kwargs):
-        if not self.support_id:
-            self.support_id = generate_support_code()
-        
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.application_form:
-            if os.path.isfile(self.application_form.path):
-                os.remove(self.application_form.path)
-        super().delete(*args, **kwargs)
-
-    def __str__(self):
-        return self.admin.username
-
-
 class Customer(models.Model):
     admin=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     address = models.CharField(max_length=100)
     mobile = models.CharField(max_length=50)
+    city = models.CharField(max_length=50,null=True,blank=True)
     state = models.CharField(max_length=100,null=True,blank=True,choices=STATE_CHOICES)
-    
+    area = models.CharField(max_length=50,null=True,blank=True)
+    zipcode = models.IntegerField(null=True,blank=True)
+    date = models.DateField(auto_now_add=True,null=True,blank=True)
     
     def __str__(self):
         return self.admin.username
@@ -287,6 +293,12 @@ class BookingProduct(models.Model):
         
         # super().save(*args, **kwargs)
 
+
+class HodSharePercentage(models.Model):
+    percentage = models.IntegerField()
+    date = models.DateField(auto_now_add=True,null=True,blank=True)
+
+
 class feedback(models.Model):
     Customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
     Product = models.ForeignKey(Product,on_delete=models.CASCADE)
@@ -307,7 +319,7 @@ class Task(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     technician = models.ForeignKey(Technician, on_delete=models.CASCADE)
     description = models.TextField(null=True,blank=True)
-    
+    supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
@@ -339,6 +351,14 @@ class Task(models.Model):
 #         super().save(*args, **kwargs)
 
 
+class Share(models.Model):
+    # booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    hod_share_percentage = models.ForeignKey(HodSharePercentage, on_delete=models.CASCADE)
+    technician_share = models.IntegerField(default=0)
+    hod_share = models.IntegerField(default=0)
+    date = models.DateField(auto_now_add=True,null=True,blank=True)
+
 
 class Rebooking(models.Model):
     STATUS_CHOICES = (
@@ -368,6 +388,17 @@ class ContactUs(models.Model):
     name = models.CharField(max_length=20)
     mobile = models.CharField(max_length=20)
     description = models.CharField(max_length=200)
+    date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class JobEnquiry(models.Model):
+    name = models.CharField(max_length=50)    
+    mobile = models.CharField(max_length=20)
+    email = models.EmailField(max_length=100)
+    resume = models.FileField(upload_to='Job/Job Enquiry Form',null=True,blank=True)
     date = models.DateField(auto_now_add=True)
 
     def __str__(self):

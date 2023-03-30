@@ -42,9 +42,9 @@
                             <th>Price</th>                         
                             <th class="nowrap">Assign</th>
                             <th>Warranty</th>
-                            {% if support.can_rebooking == True %}
+                            
                             <th>Actions</th> 
-                            {% endif %}
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -59,13 +59,13 @@
                             <td>Rs {{i.product.price}}</td>
                          
                             <td class="nowrap">{{i.booking.supported_by.admin.username}}</td>
-                            <td>{{i.product.warranty}}</td>
-                            {% if support.can_rebooking == True %}
+                            <td>{{i.product.warranty}} days</td>
+                           
                             <td>
                                
                                 <a class="mx-2" href="javascript:;" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.product.id}}"><button class="btn btn-sm btn-info"  >Rebooking</button></a>
                             </td>
-                            {% endif %}
+                            
                             
                             
                            

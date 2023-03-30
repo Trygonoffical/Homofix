@@ -1,6 +1,8 @@
 {% extends 'Support_templates/Base/base.html' %}
+
 {% load static %}
 {% block main-content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <div class="page-content">
     <!--breadcrumb-->
@@ -108,15 +110,37 @@
                                     <h6 class="mb-0">Category</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select class="single-select" name="category_id">
-                                        {% comment %} <option value="{{technician.category.id}}" disabled>{{technician.category.category_name}}</option> {% endcomment %}
+                                    {% comment %} <select class="single-select" name="category_id" id="select1">
+                                        
                                         {% for i in category %}
-                                        <option value="{{i.id}}" {% if i.id == technician.category.id %}selected{% endif %}>{{i.category_name}}</option>
+                                        <option value="{{i.id}}" >{{i.category_name}}</option>
+                                        {% endfor %}
+                                    </select> {% endcomment %}
+                                    <select class="form-control btn-light" name="category_id" id="select1">
+                                        <option class="text-black" value="" selected disabled> --Select--</option>
+                                        {% for i in category %}
+                                            <option class="text-black" value="{{i.id}}">{{i.category_name}}</option>
                                         {% endfor %}
                                     </select>
                                     
                                 </div>
                             </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Subcategory</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    {% comment %} <select class="single-select" name="sub_category_id" id="product-select" multiple >
+                                        <option class="text-black" value="" selected disabled> --Select--</option>
+                                    </select> {% endcomment %}
+                                    <select class="single-select" name="sub_category_id" id="product-select" multiple >
+                                        <option class="text-black" value="" selected disabled> --Select--</option>
+                                    </select>
+                                    
+                                </div>
+                            </div>
+                            
                             
                             <div class="row mb-3">
                                 <div class="col-sm-3">
@@ -230,14 +254,7 @@
                                     {% comment %} <input type="number" class="form-control" name="expert_in"> {% endcomment %}
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3">
-                                    <h6 class="mb-0">Serving Area</h6>
-                                </div>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{technician.serving_area}}" name="serving_area">
-                                </div>
-                            </div>
+                            
 
                             <div class="row mb-3">
                                 <div class="col-sm-3">
@@ -274,6 +291,15 @@
                                 </div>
                             </div>
 
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Serving Area</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{technician.serving_area}}" name="serving_area">
+                                </div>
+                            </div>
+
                             
                             <div class="row mb-3">
                                 <div class="col-sm-3">
@@ -299,7 +325,8 @@
                                     <h6 class="mb-0">Joining Date</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control datepicker" value="{{ technician.joining_date|date:'Y-m-d'}}" name="date_of_joining">
+                                    {% comment %} <input type="text" class="form-control datepicker" value="{{ technician.joining_date|date:'Y-m-d'}}" name="date_of_joining"> {% endcomment %}
+                                    <input type="date" class="form-control datepicker" value="{{ technician.joining_date|date:'Y-m-d'}}" name="date_of_joining">
                                     {% comment %} <input type="text" class="form-control datepicker" data-date-format="d-m-Y" placeholder="dd-mm-yyyy" value="{{ technician.joining_date|date:'Y-m-d' }}" name="date_of_joining"> {% endcomment %}
 
                                 </div>
@@ -322,4 +349,45 @@
         </div>
     </div>
 </div>
+
+
+
+<script>
+    $(document).ready(function() {
+        // When the category dropdown changes, send an AJAX request to retrieve the corresponding subcategories
+        $("#select1").change(function() {
+            var category_id = $(this).val();
+            if (category_id) {
+                $.ajax({
+                    url: "{% url 'support_get_subcategories' %}",
+                    type: "GET",
+                    data: {
+                        category_id: category_id
+                    },
+                    dataType: "json",
+                    success: function(data) {
+                        // Clear the current options in the subcategory dropdown
+                        $("#product-select").html("");
+                        // Add the retrieved subcategories as options to the subcategory dropdown
+                        $("#product-select").append(
+                            '<option  value="" selected disabled> --Select--</option>'
+                        );
+                        $.each(data, function(key, value) {
+                            $("#product-select").append(
+                                '<option class="text-black" value="' + value.id + '">' + value.name + '</option>'
+                            );
+                        });
+                        // Enable the subcategory dropdown
+                        $("#product-select").prop("disabled", false);
+                    }
+                });
+            } else {
+                // If no category is selected, disable the subcategory dropdown and clear its options
+                $("#product-select").prop("disabled", true);
+                $("#product-select").html('<option value="" selected disabled> --Select--</option>');
+            }
+        });
+    });
+ </script>
+ 
 {% endblock main-content %}

@@ -15,6 +15,14 @@
                 </ol>
             </nav>
         </div>
+        <div class="ms-auto">
+            <div class="btn-group">
+                <a href="{% url 'technician_history' technician.id %}"><button type="button" class="btn btn-light">History</button></a>
+                
+                
+                
+            </div>
+        </div>
       
     </div>
     <center>{% include 'homofix_app/Base/messages.html' %}</center>
@@ -80,10 +88,26 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-sm-3">
-                                    <h6 class="mb-0">Full Name</h6>
+                                    <h6 class="mb-0">First Name</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{technician.admin.username}}" name="username">
+                                    <input type="text" class="form-control" value="{{technician.admin.first_name}}" name="first_name" >
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Last Name</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{technician.admin.last_name}}" name="last_name" >
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Username</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{technician.admin.username}}" name="username" readonly>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -345,6 +369,7 @@
                                     <input type="submit" class="btn btn-light px-4" value="Save Changes">
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
                 </form>

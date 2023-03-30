@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseRedirect
 from django.urls import reverse
-from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking,BookingProduct,SubCategory
+from .models import Support,Customer,Product,Booking,CustomUser,Task,Technician,Category,STATE_CHOICES,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry
 # from datetime import datetime,timedelta
 from datetime import timedelta
 from django.utils import timezone
@@ -19,7 +19,14 @@ import datetime
 
 @login_required(login_url='/')
 def dashboard(request):
-    return render(request,'Support_templates/Dashboard/dashboard.html')
+    user = request.user
+    support = Support.objects.get(admin=user)  
+    context = {
+        
+        'support':support
+    }
+
+    return render(request,'Support_templates/Dashboard/dashboard.html',context)
 
 def support_profile(request):
     return render(request,'Support_templates/Profile/profile.html')
@@ -72,7 +79,7 @@ def support_orders(request):
 
     # i want calcualate here 
     tasks = Task.objects.all()   
-    bookings = Booking.objects.all()
+    bookings = Booking.objects.filter(status="New")
     
     total_price = 0
    
@@ -196,6 +203,8 @@ def support_verify_otp(request):
 
 
 def support_booking(request):
+    user = request.user
+    support = Support.objects.get(admin=user)
     prod = Product.objects.all()
     category = Category.objects.all()
     state_choices = STATE_CHOICES
@@ -255,7 +264,8 @@ def support_booking(request):
     context = {
         'prod': prod,
         'state_choices':state_choices,
-        'category':category
+        'category':category,
+        'support':support
     }
     return render(request, 'Support_templates/Booking/create_booking.html', context)
 
@@ -303,6 +313,8 @@ def cancel_booking(request,booking_id):
 
 
 def support_Task_assign(request):
+    user = request.user
+    support = Support.objects.get(admin=user)
     
     if request.method == "POST":
         booking_id = request.POST.get('booking_id')
@@ -310,10 +322,11 @@ def support_Task_assign(request):
 
         booking = get_object_or_404(Booking, id=booking_id)
         technician = get_object_or_404(Technician, id=technician_id)
-
+        supported_by = request.user.support
         task = Task.objects.create(
             booking=booking,
-            technician=technician
+            technician=technician,
+            supported_by=supported_by
         )
         task.save()
 
@@ -362,23 +375,38 @@ def support_task_counting(request,expert_id):
     # return redirect('support_List_of_expert',expert_id)
 
 def support_list_of_task(request):
+    user = request.user
+    support = Support.objects.get(admin=user)
+    order_count = Booking.objects.filter(status="New").count()
     task = Task.objects.all()
     context = {
-        'task':task
+        'task':task,
+        'support':support,
+        'order_count':order_count,
     }
     return render(request,'Support_templates/Orders/list_of_task.html',context)    
 
 def order_cancel(request):
+    user = request.user
+    support = Support.objects.get(admin=user)
+    order_count = Booking.objects.filter(status="New").count()
     booking = Booking.objects.filter(status="cancelled")
     context = {
-        'booking':booking
+        'booking':booking,
+        'support':support,
+        'order_count':order_count,
     }
     return render(request,'Support_templates/Orders/cancel_order.html',context)    
 
 def support_booking_complete(request):
+    user = request.user
+    support = Support.objects.get(admin=user)  
+    order_count = Booking.objects.filter(status="New").count()
     task = Task.objects.filter(booking__status = "completed")
     context = {
-        'task':task
+        'task':task,
+        'support':support,
+        'order_count':order_count,
     }
     return render(request,'Support_templates/Rebooking/booking_complete.html',context)    
     
@@ -425,9 +453,14 @@ def support_rebooking(request, task_id):
     return render(request, 'Support_templates/Rebooking/rebooking.html', context)
 
 def support_rebooking_list(request):
+    user = request.user
+    support = Support.objects.get(admin=user)  
+    order_count = Booking.objects.filter(status="New").count()
     rebooking = Rebooking.objects.all()
     context = {
         'rebooking' :rebooking,
+        'support':support,
+        'order_count':order_count,
         
     }
     return render(request,'Support_templates/Rebooking/rebooking_list.html',context)    
@@ -442,7 +475,7 @@ def support_rebooking_update(request):
         
         try:
             # booking_product = BookingProduct.objects.get(booking_id=booking_product_id)
-            booking_product = BookingProduct.objects.filter(product_id=booking_product_id).first()
+            booking_product = BookingProduct.objects.filter(booking=booking_product_id).first()
             booking = booking_product.booking
             task = Task.objects.get(booking=booking)
         except (BookingProduct.DoesNotExist, Task.DoesNotExist):
@@ -521,15 +554,64 @@ def support_rebooking_product(request, task_id):
 
 
     # return render(request,'Support_templates/Rebooking/rebooking_product.html',{'booking_prod':booking_prod})    
+def support_expert_add(request):
+    
+    category = Category.objects.all()
+    user = request.user
+    support = Support.objects.get(admin=user) 
+    order_count = Booking.objects.filter(status="New").count()
+    if request.method == "POST":
+        current_user = request.user
+        
+        random_number = random.randint(0, 999)
+        unique_number = str(random_number).zfill(3)
+        sub_category_id = request.POST.getlist('sub_category_id')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        subcat = SubCategory.objects.filter(id__in=sub_category_id)
+        # category_id = request.POST.get('category_id')
+        # username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+       
+
+        # ctg = Category.objects.get(id=category_id)
+      
+        # if CustomUser.objects.filter(username = username).exists():
+        #     # return JsonResponse({'status': 'error', 'message': 'Username is already Taken'})
+        #     messages.error(request,'Username is already Taken')
+        #     return redirect('support_list_of_expert')
+        supported_by = request.user.support 
+        user = CustomUser.objects.create_user(first_name=first_name,last_name=last_name,username=first_name+unique_number,password=password,email=email,user_type='2')
+        user.technician.subcategories.set(subcat)
+        user.technician.status = "New"
+        user.technician.supported_by = supported_by
+        user.save()
+        messages.success(request,'Expert Register Successfully')
+        return redirect('support_list_of_expert')
+
+    context = {
+        'category':category,
+        'support':support,
+        'order_count':order_count,
+    }
+    return render(request,'Support_templates/Expert/add_expert.html',context)
 def support_list_of_expert(request):
+    user = request.user
+    support = Support.objects.get(admin=user)  
+
     category = Category.objects.all()
     technician = Technician.objects.all()
     task = Task.objects.all()
+    order_count = Booking.objects.filter(status="New").count()
     
     context = {
         'category':category,
         'technician':technician,
-        'abcc':task
+        'abcc':task,
+        'support':support,
+        'order_count':order_count,
     }
 
     return render(request,'Support_templates/Expert/expert.html',context)    
@@ -571,7 +653,10 @@ def support_add_expert(request):
 
 
 def expert_edit_profile(request,id):
+    user = request.user
+    support = Support.objects.get(admin=user) 
     technician = Technician.objects.get(id=id)
+    order_count = Booking.objects.filter(status="New").count()
     state_choices = STATE_CHOICES
     # print("ahsssssss",cit)
     category = Category.objects.all()
@@ -585,7 +670,8 @@ def expert_edit_profile(request,id):
         username = request.POST.get('username')
         email = request.POST.get('email')
         father_name = request.POST.get('father_name')    
-        category_id = request.POST.get('category_id')
+        # category_id = request.POST.get('category_id')
+        subcategory_id = request.POST.getlist('sub_category_id')
         mob_no = request.POST.get('mob_no')
         present_address = request.POST.get('present_address')
         permanent_address = request.POST.get('permanent_address')
@@ -634,9 +720,13 @@ def expert_edit_profile(request,id):
             technician.application_form=application_form
         
 
-        cat = Category.objects.get(id=category_id)
+        # cat = Category.objects.get(id=category_id)
+        if subcategory_id:
+            subcategories = SubCategory.objects.filter(id__in=subcategory_id)
+            technician.subcategories.set(subcategories)
+           
 
-        technician.category=cat
+        # technician.category=cat
 
         technician.admin.save()
         technician.save()
@@ -644,7 +734,7 @@ def expert_edit_profile(request,id):
         return redirect('expert_edit_profile',id=technician.id)
         # return render(request,'homofix_app/AdminDashboard/Technician/technician_profile.html',{'technician':technician,'category':category})
         # return redirect('technician_edit_profile',{'technician_id': technician_id})
-    return render(request,'Support_templates/Expert/expert_profile.html',{'technician':technician,'category':category,'state_choices':state_choices})
+    return render(request,'Support_templates/Expert/expert_profile.html',{'technician':technician,'category':category,'state_choices':state_choices,'support':support,'order_count':order_count,})
 
 
 
@@ -656,6 +746,32 @@ def invoice(request,booking_id):
         'booking':booking
     }
     return render(request,'Support_templates/Invoice/invoice.html',context)
+
+
+# -------------------------------- Contact Us -------------------------- 
+
+
+
+
+def support_contact_us(request):
+    user = request.user
+    support = Support.objects.get(admin=user)   
+    contact_us = ContactUs.objects.all()
+    context = {
+        'contact_us':contact_us,
+        'support':support
+    }
+
+    return render(request,'Support_templates/ContactUs/contact_us.html',context)    
+
+def support_job_enquiry(request):
+    job_enquiry = JobEnquiry.objects.all()
+    context = {
+        'job_enquiry':job_enquiry
+    }
+
+    return render(request,'Support_templates/JobEnquiry/job_enquiry.html',context)
+
 # ------------------------ Testing for session --------------------------- 
 
 def myView(request):

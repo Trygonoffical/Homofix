@@ -32,6 +32,7 @@ urlpatterns = [
     path('Accounts/Admin/Technician/Profile/<int:id>',HodViews.technician_edit_profile,name="technician_edit_profile"),
     path('Accounts/Admin/Technician/Edit',HodViews.edit_technician,name="edit_technician"),
     path('Accounts/Technician/Delete/<int:id>',HodViews.delete_technician,name="delete_technician"),
+    path('Accounts/Technician/History/<int:id>',HodViews.technician_history,name="technician_history"),
     path('Accounts/Admin/Product',HodViews.product,name="product"),
     path('Accounts/Admin/Product/Update',HodViews.update_product,name="update_product"),
     path('Accounts/Admin/Product/Delete/<int:id>',HodViews.delete_product,name="delete_product"),
@@ -51,6 +52,7 @@ urlpatterns = [
     path('Accounts/Admin/Support/Profile/<int:id>',HodViews.support_profile,name="support_profile"),
     path('Accounts/Admin/Support/Profile/Update/',HodViews.support_update_profile,name="support_update_profile"),
     path('Accounts/Admin/Support/Delete/<int:id>/',HodViews.delete_support,name="delete_support"),
+    path('Accounts/Admin/Support/History/<int:id>/',HodViews.support_history,name="support_history"),
     
 
     ########################## FAQS ##################################
@@ -77,6 +79,21 @@ urlpatterns = [
 
     ########################## Contact Us ##################################
     path('Accounts/Admin/ContactUs/', HodViews.contactus, name='contact_us'),
+
+    ########################## Job Enquiry ##################################
+    path('Accounts/Admin/Job/Enquiry', HodViews.admin_job_enquiry, name='admin_job_enquiry'),
+
+    ########################## Job Enquiry ##################################
+    path('Accounts/Admin/Share/Percantage', HodViews.admin_share_percentage, name='admin_share_percentage'),
+    path('Accounts/Admin/Share/List', HodViews.admin_share_list, name='admin_share_list'),
+
+
+    ########################## Customer ##################################
+
+    path('Accounts/Admin/Customer/List', HodViews.admin_customer_list, name='admin_customer_list'),
+    path('Accounts/Admin/Customer/Edit/<int:id>', HodViews.admin_customer_edit, name='admin_customer_edit'),
+    path('Accounts/Admin/Customer/History/<int:id>', HodViews.admin_customer_history, name='admin_customer_history'),
+
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

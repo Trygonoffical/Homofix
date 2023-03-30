@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register('Expert', API_Views.ExpertViewSet,basename="Expert")
 router.register('Task', API_Views.TaskViewSet,basename="Task")
 router.register('Rebooking', API_Views.RebookingViewSet,basename="Rebooking")
+router.register('JobEnquiry', API_Views.JobEnquiryViewSet,basename="JobEnquiry")
 
 
 urlpatterns = [

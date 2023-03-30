@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
 
@@ -161,7 +161,7 @@ class customerSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'address', 'mobile', 'state']
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializerr(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'name', 'description', 'price', 'product_pic']
@@ -177,7 +177,7 @@ class BokingSerializer(serializers.ModelSerializer):
 
 
 class BookingProductSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
+    product = ProductSerializerr()
     booking = BokingSerializer()
     
     # booking = serializers.PrimaryKeyRelatedField(queryset=Booking.objects.all())
@@ -193,10 +193,24 @@ class TechnicianSerializer(serializers.ModelSerializer):
         model = Technician
         fields = ['admin_id']
 
+
+
 class RebookingSerializer(serializers.ModelSerializer):
     booking_product = BookingProductSerializer()
     
    
     class Meta:
         model = Rebooking
+        fields = "__all__"
+
+
+
+
+
+
+# --------------------------- JOb ENQUIRY ------------------------------- 
+
+class JobEnquirySerliazer(serializers.ModelSerializer):
+    class Meta:
+        model = JobEnquiry
         fields = "__all__"

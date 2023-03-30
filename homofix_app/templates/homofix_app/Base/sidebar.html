@@ -170,9 +170,54 @@
             </ul>
         </li>
 
+        <li>
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Cusotmer</div>
+            </a>
+            <ul>
+               
+                <li> 
+                    <a href="{% url 'admin_customer_list' %}"><span class="alert-count">{% if customer_count != null %}{{customer_count}} {% else %} 0 {% endif %}</span><i class="bx bx-right-arrow-alt"></i> List of Customer </a>
+                </li>
+                
+                
+              
+               
+            </ul>
+        </li>
+
         
         <li> 
             <a href="{% url 'contact_us' %}"></span><i class="bx bx-right-arrow-alt"></i>Contact Us</a>
+        </li>
+        
+        <li> 
+            <a href="{% url 'admin_job_enquiry' %}"></span><i class="bx bx-right-arrow-alt"></i>Job Enquiry</a>
+        </li>
+        
+       
+        
+        <li class="mb-3">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Share Percentage</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href="{% url 'admin_share_percentage' %}"></span><i class="bx bx-right-arrow-alt"></i> Percentage History</a>
+                </li> 
+                
+                <li> 
+                    <a href="{% url 'admin_share_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Share</a>
+                </li> 
+                
+              
+               
+            </ul>
         </li>
        
        

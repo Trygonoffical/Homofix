@@ -25,7 +25,7 @@
         
         <li class="menu-label"><hr></li>
 
-
+        {% if support.can_new_booking == True %}
         <li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-store'></i>
@@ -34,15 +34,21 @@
             </a>
             <ul>
                 
-                 
+                
                 <li> <a href="{% url 'support_orders' %}"><span class="alert-count">{% if order_count != null %}{{order_count}} {% else %} 0 {% endif %}</span><i class="bx bx-right-arrow-alt"></i>New Order</a>
                 </li>
+                
                 <li> <a href="{% url 'support_list_of_task' %}"><i class="bx bx-right-arrow-alt"></i>Assign Order</a>
                 </li>
+                
+                
                 <li> <a href="{% url 'order_cancel' %}"><i class="bx bx-right-arrow-alt"></i>Cancel Order</a>
                 </li>
+                
             </ul>
         </li>
+        {% endif %}
+        {% if support.can_rebooking == True %}
         <li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-store'></i>
@@ -59,6 +65,8 @@
                 
             </ul>
         </li>
+        {% endif %}
+        {% if support.can_expert_create == True %}
         <li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-user-circle'></i>
@@ -73,6 +81,17 @@
                 
             </ul>
         </li>
+        {% endif %}
+        {% if support.can_contact_us_enquiry == True %}
+        <li> 
+            <a href="{% url 'support_contact_us' %}"></span><i class="bx bx-right-arrow-alt"></i>Contact Us</a>
+        </li>
+        {% endif %}
+        {% if support.can_job_enquiry == True %}
+        <li> 
+            <a href="{% url 'support_job_enquiry' %}"></span><i class="bx bx-right-arrow-alt"></i>Job Enquiry</a>
+        </li>
+        {% endif %}
         {% comment %} <li>
             <a href="{% url 'category' %}">
                 <div class="parent-icon"><i class='bx bx-cookie'></i>

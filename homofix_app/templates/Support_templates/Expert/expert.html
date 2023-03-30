@@ -22,7 +22,7 @@
     <h6 class="mb-0 text-uppercase">List of Technician</h6>
     <hr>
 	{% include 'homofix_app/Base/messages.html' %}
-	<div class="ms-auto mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal"><a href="javascript:;" class="btn btn-light  mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>New Expert</a></div>
+	<div class="ms-auto mt-2 mb-2" ><a href="{% url 'support_expert_add' %}" class="btn btn-light  mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>New Expert</a></div>
     <div class="card">
         
         <div class="card-body">
@@ -35,7 +35,9 @@
                             <th>#SR No.</th>
                             <th>Expert ID</th>
                             <th>Name</th>
+                            <th>Username</th>
                             <th>Category</th>
+                            <th>Subcategory</th>
                             <th>Mobile</th>
                             <th>Email</th>
                             <th>City</th>
@@ -53,8 +55,19 @@
                         <tr>
                             <td>{{forloop.counter}}</td>
                             <td>{{i.expert_id}}</td>
+                            <td>{{i.admin.first_name}}</td>
                             <td>{{i.admin.username}}</td>
-                            <td>{{i.category.category_name}}</td>
+                            {% comment %} <td>{{i.category.category_name}}</td> {% endcomment %}
+                            <td>
+                                {% if i.subcategories.exists %}
+                                {{ i.subcategories.last.Category_id.category_name }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for subcategory in i.subcategories.all %}
+                                {{ subcategory.name }}
+                                {% endfor %}
+                            </td>
                             <td>{{i.mobile}}</td>
                             <td>{{i.admin.email}}</td>
                             <td>{{i.city}}</td>
