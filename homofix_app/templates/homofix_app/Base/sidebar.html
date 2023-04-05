@@ -79,14 +79,32 @@
 
        
        
+         
+
         
-        {% comment %} <li>
-            <a href="{% url 'addons' %}">
-                <div class="parent-icon"><i class='bx bx-user-circle'></i>
+        <li>
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
                 </div>
-                <div class="menu-title">Addon</div>
+                <div class="menu-title">Addons</div>
             </a>
-        </li> {% endcomment %}
+            <ul>
+                <li>
+                    <a href="{% url 'addons' %}">
+                        <div class="parent-icon"><i class='bx bx-right-arrow-alt'></i>
+                        </div>
+                        <div class="menu-title">Addon Products</div>
+                    </a>
+                </li>  
+                <li> <a href="{% url 'addons_details' %}"><i class="bx bx-right-arrow-alt"></i>Addon Details</a>
+                </li>
+               
+             
+              
+               
+            </ul>
+        </li>
+
 
         
          
@@ -188,24 +206,16 @@
             </ul>
         </li>
 
-        
-        <li> 
-            <a href="{% url 'contact_us' %}"></span><i class="bx bx-right-arrow-alt"></i>Contact Us</a>
-        </li>
-        
-        <li> 
-            <a href="{% url 'admin_job_enquiry' %}"></span><i class="bx bx-right-arrow-alt"></i>Job Enquiry</a>
-        </li>
-        
+       
        
         
-        <li class="mb-3">
+        <li class="">
             <a class="has-arrow" href="javascript:;">
                 <div class="parent-icon"><i class='bx bx-store'></i>
                 </div>
                 <div class="menu-title">Share Percentage</div>
             </a>
-            <ul class="mb-3">
+            <ul class="">
                
                 <li> 
                     <a href="{% url 'admin_share_percentage' %}"></span><i class="bx bx-right-arrow-alt"></i> Percentage History</a>
@@ -219,6 +229,38 @@
                
             </ul>
         </li>
+        
+        <li class="">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Customer Payment</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href="{% url 'admin_customer_payment' %}"></span><i class="bx bx-right-arrow-alt"></i> List Of Payment</a>
+                </li> 
+                
+                {% comment %} <li> 
+                    <a href="{% url 'admin_share_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Share</a>
+                </li>  {% endcomment %}
+                
+              
+               
+            </ul>
+        </li>
+
+
+         
+        <li> 
+            <a href="{% url 'contact_us' %}"></span><i class="bx bx-right-arrow-alt"></i>Contact Us</a>
+        </li>
+        
+        <li> 
+            <a href="{% url 'admin_job_enquiry' %}"></span><i class="bx bx-right-arrow-alt"></i>Job Enquiry</a>
+        </li>
+        
        
        
    

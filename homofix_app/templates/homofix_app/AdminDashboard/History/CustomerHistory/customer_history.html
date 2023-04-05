@@ -27,16 +27,13 @@
     <h6 class="mb-0 text-uppercase">Customer Booking History</h6>
     <hr>
 
-    {% include 'homofix_app/Base/messages.html' %}
-    {% comment %} <div class="ms-auto mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#exampleDangerModal"><a
-            href="javascript:;" class="btn btn-light radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>Add New
-            Order</a></div> {% endcomment %}
+   
     <div class="card">
 
         <div class="card-body">
 
             <div class="table-responsive">
-                <table id="example2" class=" table  mb-0">
+                <table id="example" class=" table  mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>Order#</th>
@@ -61,7 +58,7 @@
                                 #OS-000354
                             </td>
                             <td>
-                                {% comment %} {{booking.product.category}} {% endcomment %}
+                                
                                 {% if booking.bookingproduct_set.exists %}
                                     {{ booking.bookingproduct_set.first.product.subcategory.Category_id.category_name }}
                                 {% else %}
@@ -71,7 +68,7 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="ms-2">
-                                        {% comment %} <h6 class="mb-1 font-14">{{booking.product.name}}</h6> {% endcomment %}
+                                        
                                                                                 
                                         {% for booking_product in booking.bookingproduct_set.all %}
                                         <h6 class="mb-1 nowrap font-14">{{ booking_product.product.name }} ({{ booking_product.quantity }})</h6>
@@ -88,7 +85,7 @@
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{booking.status}}</div>
                             </td>
-                            {% comment %} <td>Rs{{booking.product.price}}</td> {% endcomment %}
+                            
                             <td>
                                 {% if booking.bookingproduct_set.exists %}
                                     Rs.{{ booking.bookingproduct_set.first.total_price }}
@@ -101,12 +98,8 @@
                             
                           
                         </tr>
-                        <div class="col">
-                            {% include 'homofix_app/AdminDashboard/Booking_list/reschudle_model.html' %}
-                            {% include 'homofix_app/AdminDashboard/Booking_list/delete_order_modal.html' %}
-                            {% include 'homofix_app/AdminDashboard/Booking_list/assign_task_modal.html' %}
-                        </div>
                         {% endfor %}
+                       
 
 
 
@@ -124,15 +117,123 @@
 
         </div>
     </div>
+
+    {% comment %} -------------------------- Payment History --------------------------- {% endcomment %}
+    <h6 class="mb-0 text-uppercase">Customer Payment History</h6>
+    <hr>
+
+   
+    <div class="card">
+
+        
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="example2" class=" table  mb-0">
+                    <thead class="table-light">
+                        
+                        <tr >
+                            <th>SI No</th>
+                            <th>Order#</th>
+                            <th>category</th>
+                            <th>Product</th>
+                            <th>Customer</th>
+                            <th>Mobile</th>
+                            <th>City</th>
+                            <th>State</th> 
+                            <th>Area</th> 
+                            <th>Sub Total</th>
+                            <th>Total Amt</th>
+                            <th>Date</th>
+                            <th class="nowrap">Payment Mode</th>                          
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payment  %}
+                        
+                        <tr >
+                            <td>#{{forloop.counter}}</td>
+                            <td>
+                                #{{payment.booking_id.order_id}}
+                            </td>
+                            
+                            <td>
+                                {% comment %} {{booking.products.subcategory.Category_id.category_name}} {% endcomment %}
+                                {% if payment.booking_id.bookingproduct_set.exists %}
+                                    {{ payment.booking_id.bookingproduct_set.first.product.subcategory.Category_id.category_name }}
+                                {% else %}
+                                    N/A
+                                {% endif %} 
+                            </td>
+                            
+                            <td>
+                                <div class="d-flex align-items-center">
+                                  
+                                    <div class="ms-2">
+                                        {% for booking_product in payment.booking_id.bookingproduct_set.all %}
+                                        <h6 class="mb-1 nowrap font-14">{{ booking_product.product.name }} ({{ booking_product.quantity }})</h6>
+                                        {% endfor %}
+                                        
+                                        
+                                      </div>
+                                </div>
+                            </td>
+                            <td>{{payment.booking_id.customer.admin.username}}</td>
+                            <td>{{payment.booking_id.customer.mobile}}</td>
+                            <td>{{payment.booking_id.city}}</td>
+                            <td>{{payment.booking_id.state}}</td>
+                            <td>{{payment.booking_id.area}}</td>
+                            {% comment %} <td>
+                                <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
+                                        class='bx bxs-circle me-1'></i>{{payment.booking_id.status}}</div>
+                            </td> {% endcomment %}
+                            
+                            <td>
+                                {% comment %} Rs{{total_price}} {% endcomment %}
+                                {% comment %} {% for booking_product in booking.bookingproduct_set.all %}
+                                 <h6 class="mb-1 nowrap font-14">{{ booking_product.total_price}}</h6>
+                                {% endfor %} {% endcomment %}
+                                {% if payment.booking_id.bookingproduct_set.exists %}
+                                    {{ payment.booking_id.bookingproduct_set.first.total_price }}
+                                {% else %}
+                                    N/A
+                                {% endif %} 
+                            </td>
+                            <td>
+                                {{payment.total_price_with_tax}}
+                            </td>
+                            <td class="nowrap">{{payment.date}}</td>
+                            
+                            </td>
+                            <td class="nowrap">
+                                {{payment.payment_mode}}
+                            </td>
+                            
+                            
+                        </tr>
+
+                        <div class="col">
+                           
+                            {% comment %} {% include 'Support_templates/Orders/reschudle_model.html' %}
+                            {% include 'Support_templates/Orders/delete_order_modal.html' %}
+                            {% include 'Support_templates/Orders/assign_task_modal.html' %} {% endcomment %}
+                        </div>
+                        {% endfor %}
+
+
+
+                    </tbody>
+                    
+                </table>
+            </div>
+
+
+        </div>
+    </div>
 </div>
 
 
 
-<div class="col">
-
-    <!-- Modal -->
-    {% include 'Support_templates/Orders/mobile_no_modal.html' %}
-</div>
 
 
 

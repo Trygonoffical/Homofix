@@ -8,6 +8,11 @@ router.register('Expert', API_Views.ExpertViewSet,basename="Expert")
 router.register('Task', API_Views.TaskViewSet,basename="Task")
 router.register('Rebooking', API_Views.RebookingViewSet,basename="Rebooking")
 router.register('JobEnquiry', API_Views.JobEnquiryViewSet,basename="JobEnquiry")
+router.register('Product', API_Views.ProductViewSet,basename="Product")
+router.register('Booking', API_Views.BookingViewSet,basename="Booking")
+router.register('Kyc', API_Views.KycViewSet,basename="Kyc")
+router.register('SpareParts', API_Views.SparePartsViewSet,basename="SpareParts")
+router.register('Addons', API_Views.AddonsViewSet,basename="Addons")
 
 
 urlpatterns = [

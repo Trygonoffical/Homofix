@@ -1,11 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 from .utils import generate_ref_code,generate_expert_code,generate_support_code,generate_order_code
 from ckeditor.fields import RichTextField
 import os
 from django.utils import timezone
+from django.db.models.functions import Coalesce
+from django.db.models import Sum
+from decimal import Decimal
+import datetime
+
 
 # Create your models here.
 
@@ -112,23 +117,19 @@ class Support(models.Model):
     can_contact_us_enquiry = models.BooleanField(default=False)
     can_job_enquiry = models.BooleanField(default=False)
 
-    # def can_assign_task(self, user):
-    #     return user.has_perm('homofix_app.assign_task')
-    
-    # def can_cancel_order(self, user):
-    #     return user.has_perm('homofix_app.cancel_order')
+   
 
     def save(self, *args, **kwargs):
         if not self.support_id:
-            self.support_id = generate_support_code()
-        
+            last_support = Support.objects.order_by('-id').first()
+            if last_support and '-' in last_support.support_id:
+                last_id = int(last_support.support_id.split('-')[1])
+            else:
+                last_id = 2300
+            new_id = last_id + 1
+            self.support_id = f'HS-{new_id:03}'
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        if self.application_form:
-            if os.path.isfile(self.application_form.path):
-                os.remove(self.application_form.path)
-        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.admin.username
@@ -142,7 +143,9 @@ class Technician(models.Model):
     subcategories = models.ManyToManyField(SubCategory, blank=True)
     profile_pic = models.ImageField(upload_to = 'Technician', null= True, blank=True)
     mobile = models.CharField(max_length=20,blank=True,null=True)
-    expert_id = models.CharField(max_length=12,blank=True)
+    # expert_id = models.CharField(max_length=12,blank=True)
+    expert_id = models.CharField(max_length=12, blank=True)
+
     # user_id = models.CharField(max_length=12,blank=True)
     Father_name = models.CharField(max_length=100,null=True,blank=True)
     present_address = models.TextField(null=True,blank=True)
@@ -167,8 +170,13 @@ class Technician(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.expert_id:
-            self.expert_id = generate_expert_code()
-        
+            last_technician = Technician.objects.order_by('-id').first()
+            if last_technician:
+                last_id = int(last_technician.expert_id.split('-')[1])
+            else:
+                last_id = 0
+            new_id = last_id + 1
+            self.expert_id = f'HE-{new_id:03}'
         super().save(*args, **kwargs)
 
     # def save(self, *args, **kwargs):
@@ -189,6 +197,10 @@ class Technician(models.Model):
             if os.path.isfile(self.profile_pic.path):
                 os.remove(self.profile_pic.path)
         super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.expert_id)
+ 
 
 
 class Customer(models.Model):
@@ -232,10 +244,7 @@ class FAQ(models.Model):
     answer = RichTextField()
 
 
-class Addons(models.Model):
-    product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    description = RichTextField()
-    created_at=models.DateField(auto_now_add=True)
+
 
 
 class Booking(models.Model):
@@ -245,6 +254,7 @@ class Booking(models.Model):
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
         ('Assign', 'Assign'),
+        ('Proceed', 'Proceed'),
     )
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     products = models.ManyToManyField(Product, related_name='bookings', through='BookingProduct')
@@ -258,21 +268,27 @@ class Booking(models.Model):
     zip_code = models.CharField(max_length=10,null=True,blank=True)
     address = models.TextField(null=True,blank=True)
     description = models.TextField(null=True,blank=True) 
-    order_id = models.CharField(max_length=100)
-    
+    order_id = models.CharField(max_length=9, unique=True, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
         if not self.order_id:
-            self.order_id = generate_order_code()
-        # if not self.user_id:
-        #     self.user_id = generate_ref_code()
+            today = datetime.datetime.now()
+            year_month = today.strftime('%Y%m')
+            last_order = Booking.objects.filter(order_id__startswith=year_month).order_by('-id').first()
+            if last_order:
+                last_id = int(last_order.order_id.split('-')[-1])
+            else:
+                last_id = 0
+            new_id = last_id + 1
+            self.order_id = f'{year_month}-{new_id:03}'
         super().save(*args, **kwargs)
+
+
 
     def __str__(self):
          return f"{self.customer.admin.username} - {self.booking_date}"
-        # return f"{self.customer.admin.username} - {self.product.name}"
-
+        
 
 class BookingProduct(models.Model):
     
@@ -280,6 +296,15 @@ class BookingProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)  
     total_price = models.IntegerField()
+    total_price_with_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+
+    def save(self, *args, **kwargs):
+        # Calculate the total price with tax
+        total_price_with_tax = self.total_price * Decimal('1.18')
+        # Set the total price with tax for this booking product
+        self.total_price_with_tax = total_price_with_tax
+        super(BookingProduct, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.product.name
@@ -294,11 +319,49 @@ class BookingProduct(models.Model):
         # super().save(*args, **kwargs)
 
 
+class SpareParts(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    spare_part = models.CharField(max_length=100,null=True,blank=True)
+    price = models.IntegerField(null=True,blank=True)
+    description = models.TextField()
+    created_at=models.DateField(auto_now_add=True)
+
+
+
+# class Addon(models.Model):
+    
+#     booking = models.ForeignKey(Booking,on_delete=models.CASCADE)
+#     # addon_product = models.ManyToManyField(AddonsProduct)
+#     addon_product = models.ForeignKey(AddonsProduct,on_delete=models.CASCADE)
+#     quantity = models.IntegerField(default=1)
+#     date = models.DateField(auto_now_add=True)
+#     description = models.TextField(null=True,blank=True)
+
+
+class Addon(models.Model):
+    booking_prod_id = models.ForeignKey(BookingProduct,on_delete=models.CASCADE)
+    addon_products = models.ForeignKey(SpareParts,on_delete=models.CASCADE)
+    # addon_products = models.ManyToManyField(SpareParts,related_name='addons')
+    quantity = models.IntegerField(default=1)
+    date = models.DateField(auto_now_add=True)
+    description = models.TextField(null=True,blank=True)
+
+
 class HodSharePercentage(models.Model):
     percentage = models.IntegerField()
     date = models.DateField(auto_now_add=True,null=True,blank=True)
 
 
+
+   
+class TechnicianLocation(models.Model):
+    technician = models.ForeignKey(Technician, on_delete=models.CASCADE,null=True,blank=True)
+    booking = models.ForeignKey(Booking,on_delete=models.CASCADE,null=True,blank=True)
+    location = models.CharField(max_length=100,null=True,blank=True)
+    date = models.DateField(auto_now_add=True,null=True,blank=True)
+    # latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    # longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    # timestamp = models.DateTimeField(auto_now_add=True)
 class feedback(models.Model):
     Customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
     Product = models.ForeignKey(Product,on_delete=models.CASCADE)
@@ -308,13 +371,6 @@ class feedback(models.Model):
 
 class Task(models.Model):
 
-    STATUS_CHOICES = (
-        ('New', 'New'),
-        ('Inprocess', 'Inprocess'),
-        ('cancelled', 'Cancelled'),
-        ('completed', 'Completed'),
-        ('Assign', 'Assign'),
-    )
     
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     technician = models.ForeignKey(Technician, on_delete=models.CASCADE)
@@ -322,7 +378,8 @@ class Task(models.Model):
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
+    
+    # status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Assign')
 
     # def __str__(self):
     #     return f"Task for {self.booking.customer.admin.username} - {self.booking.product.name}"
@@ -358,6 +415,39 @@ class Share(models.Model):
     technician_share = models.IntegerField(default=0)
     hod_share = models.IntegerField(default=0)
     date = models.DateField(auto_now_add=True,null=True,blank=True)
+
+
+
+class Wallet(models.Model):
+    technician = models.ForeignKey(Technician, on_delete=models.CASCADE)
+    total_share = models.IntegerField(default=0)
+
+    def add_bonus(self, bonus_amount):
+        self.total_share += bonus_amount
+        self.save()
+
+    def deduct_amount(self, amount):
+        self.total_share -= amount
+        self.save()
+
+    def __str__(self):
+        return self.technician.admin.username
+    
+
+class WalletHistory(models.Model):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    TYPE_CHOICES = (
+        ('bonus', 'Bonus'),
+        ('deduction', 'Deduction'),
+    )
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    amount = models.IntegerField()
+    description = models.CharField(max_length=100)
+    date = models.DateField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.wallet.technician.admin.username)
+    
 
 
 class Rebooking(models.Model):
@@ -403,6 +493,41 @@ class JobEnquiry(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Payment(models.Model):
+    PAYMENT_CHOICES = (
+        ('Online', 'Online'),
+        ('Cash On Services', 'Cash On Services'),
+        ('Qr', 'Qr'),
+    )
+    booking_id = models.ForeignKey(Booking,on_delete=models.CASCADE)  
+    payment_mode = models.CharField(max_length=20, choices=PAYMENT_CHOICES)
+    # total_price_with_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    date = models.DateField(auto_now_add=True,null=True,blank=True)
+
+    # def save(self, *args, **kwargs):
+    #     # Get the booking associated with this payment
+    #     booking = self.booking_id
+    #     # Calculate the total price with tax
+    #     total_price_with_tax = booking.bookingproduct_set.aggregate(
+    #         total=Coalesce(Sum('total_price'), 0) * Decimal('1.18')
+    #     )['total']
+    #     # Set the total price with tax for this payment
+    #     self.total_price_with_tax = total_price_with_tax
+    #     super(Payment, self).save(*args, **kwargs)
+    
+    def __str__(self):
+        return str(self.booking_id)
+    
+class Kyc(models.Model):
+    technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
+    Ac_no = models.CharField(max_length=50)
+    ifsc_code = models.CharField(max_length=50)
+    branch = models.CharField(max_length=50)
+    bank_holder_name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.technician_id
     
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):
@@ -434,5 +559,45 @@ def save_user_profile(sender,instance,**kwargs):
         instance.support.save()
     if instance.user_type=='4':
         instance.customer.save()
-   
-    
+
+
+# @receiver(post_save, sender=Addon)
+# def update_booking_on_addon_save(sender, instance, **kwargs):
+#     booking = instance.booking
+#     for addons_product in instance.addon_products.all():
+#         booking = Booking.objects.get(id=4)
+#         product = Product.objects.get(id=1)
+#         booking_product = BookingProduct.objects.create(booking=booking, product=product, quantity=2, total_price=200)
+#         booking_product.save()
+        # booking.products.add(booking_product)
+
+
+# @receiver(post_save, sender=Addon)
+# def update_booking_on_addon_save(sender, instance, **kwargs):
+#     booking = instance.booking
+#     booking.products.add(*instance.addon_products.all())
+# @receiver(m2m_changed, sender=Addon.addon_products.through)
+# def update_booking(sender, instance, **kwargs):
+#     """
+#     Update the products of the associated booking when an add-on product is added
+#     or removed from an Addon instance.
+#     """
+#     if kwargs['action'] in ('post_add', 'post_remove', 'post_clear'):
+#         booking = instance.booking
+#         addon_products = instance.addon_products.all()
+#         booking.products.set(list(booking.products.all()) + list(addon_products))    
+
+# @receiver(post_save, sender=Booking)
+# def update_technician_location(sender, instance, created, **kwargs):
+#     if not created and instance.status == 'completed':
+#         technicians = instance.task_set.values_list('technician', flat=True).distinct()
+#         for technician_id in technicians:
+#             latitude, longitude = get_technician_location_from_some_service(technician_id)
+#             if latitude and longitude:
+#                 location, created = TechnicianLocation.objects.update_or_create(
+#                     technician_id=technician_id,
+#                     defaults={
+#                         'latitude': latitude,
+#                         'longitude': longitude,
+#                     }
+#                 )

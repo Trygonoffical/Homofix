@@ -176,9 +176,12 @@
                               <select style="width:130px;" class="form-select me-1" name="status" id="status">
                                  {% if task.booking.status == "completed" %}
                                  <option value="completed">Completed</option>
+                                 {% elif task.booking.status == "Proceed" %}
+                                 <option value="Proceed">Proceed</option>
                                  {% else %}
+                                 <option value="Proceed">Proceed</option>
                                  <option value="Inprocess">InProcess</option>
-                                 <option value="completed">Completed</option>
+                                 {% comment %} <option value="completed">Completed</option> {% endcomment %}
                                  {% endif %}
                                  
                                  
@@ -193,6 +196,8 @@
                               </select> {% endcomment %}
                               {% if task.booking.status == cancelled or task.booking.status == "completed" %}
                               <button type="submit" class="btn btn-success" disabled>Update</button>
+                              {% elif task.booking.status == 'Proceed' %}
+                              <a href="{% url 'expert_task_proceed' task.booking.id %}"><button type="button" class="btn btn-success">Proceed</button></a>
                               {% else %}
                               <button type="submit" class="btn btn-success">Update</button>
                               {% endif %}

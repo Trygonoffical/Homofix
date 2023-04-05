@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,Addons,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -368,13 +368,135 @@ def delete_technician(request,id):
 def technician_history(request,id):
     task = Task.objects.filter(technician=id)
     rebooking = Rebooking.objects.filter(technician=id)
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
     context = {
         'task':task,
-        'rebooking':rebooking
+        'rebooking':rebooking,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
     }
    
     return render(request,'homofix_app/AdminDashboard/History/task_history.html',context)
    
+
+# def technician_payment_history(request,id):
+
+#     technician = Technician.objects.get(id=id)
+#     wallet_history = WalletHistory.objects.filter(wallet__technician=technician)
+    
+    
+#     share = Share.objects.filter(task__technician=technician)
+#     new_expert_count = Technician.objects.filter(status="New").count()
+#     booking_count = Booking.objects.filter(status = "New").count()
+#     rebooking_count = Rebooking.objects.all().count()
+#     customer_count = Customer.objects.all().count() 
+    
+#     wallet = Wallet.objects.get(technician=technician) 
+    
+
+#     if request.method == "POST":
+        
+#         type = request.POST.get('type')
+#         amount = int(request.POST.get('amount'))
+#         description = request.POST.get('description')
+
+#         history = WalletHistory(wallet=wallet,type=type,amount=amount,description=description)
+#         if history.type == 'bonus':
+#             wallet.total_share += history.amount
+#         else:
+#             wallet.total_share -= history.amount
+#         wallet.save()
+#         history.save()
+#         messages.success(request, f"{'Wallet Add  Successfully'}")
+#         return redirect('technician_payment_history',technician.id)
+        
+        
+    
+
+
+#     context = {
+        
+#         'new_expert_count':new_expert_count,
+#         'booking_count':booking_count,
+#         'rebooking_count':rebooking_count,
+#         'customer_count':customer_count,
+#         'share':share,
+#         'wallet_history':wallet_history,
+#         'wallet':wallet
+#     }
+   
+#     return render(request,'homofix_app/AdminDashboard/History/ExpertPaymentHistory/expert_payment_history.html',context)
+
+
+def technician_payment_history(request,id):
+
+    technician = Technician.objects.get(id=id)
+    wallet_history = WalletHistory.objects.filter(wallet__technician=technician)
+    
+    
+    share = Share.objects.filter(task__technician=technician)
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count() 
+    
+    try:
+        wallet = Wallet.objects.get(technician=technician)
+    except Wallet.DoesNotExist:
+        wallet = None
+        messages.warning(request, 'No wallet found for this technician.')
+    
+
+    if request.method == "POST":
+        
+        type = request.POST.get('type')
+        amount = int(request.POST.get('amount'))
+        description = request.POST.get('description')
+
+        if wallet:
+            history = WalletHistory(wallet=wallet,type=type,amount=amount,description=description)
+            if history.type == 'bonus':
+                wallet.total_share += history.amount
+            else:
+                wallet.total_share -= history.amount
+            wallet.save()
+            history.save()
+            messages.success(request, 'Wallet transaction successfully added.')
+        else:
+            messages.warning(request, 'No wallet found for this technician.')
+        
+        return redirect('technician_payment_history',technician.id)
+        
+        
+    
+
+
+    context = {
+        
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+        'share':share,
+        'wallet_history':wallet_history,
+        'wallet':wallet
+    }
+   
+    return render(request,'homofix_app/AdminDashboard/History/ExpertPaymentHistory/expert_payment_history.html',context)
+
+
+
+    # return render(request,'homofix_app/AdminDashboard/History/ExpertPaymentHistory/expert_payment_history.html',context)
+    
+    # wallet = Wallet.object.get(technician=id)
+    # technician = Technician.objects.get(id=wallet)
+    # print("technician id",technician)
+    # return redirect('technician_payment_history',technician.id)  
 
 def product(request):
     product = Product.objects.all()
@@ -435,7 +557,9 @@ def product(request):
 
 def get_subcategories(request):
     category_id = request.GET.get('category_id')
+    print("category_id",category_id)
     subcategories = SubCategory.objects.filter(Category_id=category_id)
+   
     data = list(subcategories.values('id', 'name'))
     return JsonResponse(data, safe=False)
 
@@ -447,7 +571,7 @@ def get_products(request):
     if subcategory_id:
         subcategory_id = int(subcategory_id)
         products = Product.objects.filter(subcategory_id=subcategory_id)
-        data = [{'id': product.id,'price': product.price, 'name': product.name} for product in products]
+        data = [{'id': product.id, 'name': product.name} for product in products]
         return JsonResponse(data, safe=False)
     else:
         return JsonResponse([], safe=False)
@@ -539,8 +663,10 @@ def delete_product(request,id):
 
 ######################## Addons #####################
 
+
 def addons(request):
-    addons = Addons.objects.all()
+    category = Category.objects.all()
+    addons = SpareParts.objects.all()
     product = Product.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
@@ -548,48 +674,57 @@ def addons(request):
     customer_count = Customer.objects.all().count()
     if request.method == "POST":
         product_id = request.POST.get('product_id')
+        spare_part = request.POST.get('spare_part')
+        price = request.POST.get('price')
         desc = request.POST.get('desc')
-
         prod = Product.objects.get(id=product_id)
-
-        ad = Addons.objects.create(product=prod,description=desc)
-        prod.save()
-        messages.success(request,'Addon Add Successfully')
+        addon = SpareParts.objects.create(product=prod,spare_part=spare_part,price=price,description=desc)
+        
+        messages.success(request,'Addons Product Add Successfully')
         return redirect('addons')
         
 
-    return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count,'customer_count':customer_count})
+    return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count,'customer_count':customer_count,'category':category})
 
 
 
 def update_addons(request):
 
     if request.method == "POST":
-        product_id  = request.POST.get('product_id')
         addon_id  = request.POST.get('addon_id')
-        description  = request.POST.get('description')
-
-        print("sssssssssssssssssssssss",product_id)
+        print("addon id",addon_id)
+        product_id  = request.POST.get('product_id')
+        spare_part  = request.POST.get('spare_part')
+        price  = request.POST.get('price')
+        description  = request.POST.get('desc')
+  
         product = Product.objects.get(id=product_id)
-        addons = Addons.objects.get(id=addon_id)
+        addons_prod = SpareParts.objects.get(id=addon_id)
         
-        addons.product = product
-        addons.description =description
-        print("sssssssssssssssssssssss",product_id)
-        addons.save()
-        messages.success(request,'Addons Updated Successfully')
+        addons_prod.product = product
+        addons_prod.spare_part = spare_part
+        addons_prod.price = price
+        addons_prod.description =description
+        
+        addons_prod.save()
+        messages.success(request,'SpareParts Updated Successfully')
         return redirect('addons')
 
     
 
 def delete_addons(request,id):
 
-    addon = Addons.objects.get(id=id)
+    addon = SpareParts.objects.get(id=id)
     addon.delete()
     messages.success(request, "Addon deleted successfully.")
     return redirect('addons')
 
-
+def addons_details(request):
+    addon = Addon.objects.all()
+    context = {
+        'addon':addon
+    }
+    return render(request,'homofix_app/AdminDashboard/Addons/addons_detail.html')
 
 
 # --------------------- SUPPORT CREATION --------------------- 
@@ -1102,13 +1237,42 @@ def admin_customer_edit(request,id):
 
 def admin_customer_history(request,id):
     customer = Customer.objects.get(id=id)
-    print("customerr id",customer)
+    
     booking = Booking.objects.filter(customer_id=id)
-    print("helloooo",booking)
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    payment = Payment.objects.filter(booking_id=id)
+   
     context = {
         'customer':customer,
-        'booking':booking
+        'booking':booking,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+        'payment':payment
     }
 
 
     return render(request,'homofix_app/AdminDashboard/History/CustomerHistory/customer_history.html',context)
+
+
+# --------------------------- Customer Payment Details -----------------------------    
+
+def admin_customer_payment(request):
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    payment = Payment.objects.all()
+    context = {
+        'payment':payment,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+    }
+
+    return render(request,'homofix_app/AdminDashboard/CustomerPayment/list_of_payment.html',context)

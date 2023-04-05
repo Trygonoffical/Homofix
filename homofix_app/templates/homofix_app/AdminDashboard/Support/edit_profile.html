@@ -188,7 +188,7 @@
                                 <div class="col-sm-9">
                                     <select class=" single-select form-control btn-light dropdown-toggle" name="marital_status">
                                         
-                                        <option class="bg-dark" value="Single" {% if support.marital_status == "Single" %}selected{% endif %}>Single</option>
+                                        {% comment %} <option class="bg-dark" value="Single" {% if support.marital_status == "Single" %}selected{% endif %}>Single</option> {% endcomment %}
                                         <option class="bg-dark" value="Married" {% if support.marital_status == "Married" %}selected{% endif %}>Married</option>
                                         <option class="bg-dark" value="Unmarried" {% if support.marital_status == "Unmarried" %}selected{% endif %}>Unmarried</option>
                                         

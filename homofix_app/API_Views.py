@@ -1,14 +1,14 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer
+from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
 # from homofix_app.EmailBackEnd import EmailBackEnd
+from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet,ModelViewSet
 
-
-from .models import Technician,Task,Rebooking,JobEnquiry
+from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon
 
 
 
@@ -74,7 +74,21 @@ class TaskViewSet(ModelViewSet):
             return Response(serializer.data)
         else:
             return super().list(request, *args, **kwargs)
- 
+    
+    @action(detail=False, methods=['PATCH'])
+    def update_booking_status(self, request):
+        booking_id = request.data.get('booking_id')
+        status = request.data.get('status')
+        if booking_id and status:
+            try:
+                booking = Booking.objects.get(id=booking_id)
+                booking.status = status
+                booking.save()
+                return Response({'success': True})
+            except Booking.DoesNotExist:
+                return Response({'success': False, 'message': 'Booking not found.'})
+        else:
+            return Response({'success': False, 'message': 'Booking id and status are required.'})
 
 
 
@@ -92,7 +106,18 @@ class RebookingViewSet(ModelViewSet):
     serializer_class  = RebookingSerializer
     
 
+# ---------------- Booking --------------------- 
 
+
+class BookingViewSet(ModelViewSet):
+    queryset = Booking.objects.all()     
+    serializer_class  = BokingSerializer
+     
+
+class KycViewSet(ModelViewSet):
+    queryset = Kyc.objects.all()     
+    serializer_class  = KycSerializer
+     
 
 # ------------------------------- Job Enquiry --------------------------- 
 
@@ -100,4 +125,22 @@ class RebookingViewSet(ModelViewSet):
 class JobEnquiryViewSet(ModelViewSet):
     queryset = JobEnquiry.objects.all()     
     serializer_class  = JobEnquirySerliazer
+     
+
+
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()     
+    serializer_class  = ProductSerializer
+     
+
+
+class SparePartsViewSet(ModelViewSet):
+    queryset = SpareParts.objects.all()     
+    serializer_class  = SparePartsSerializer
+     
+
+
+class AddonsViewSet(ModelViewSet):
+    queryset = Addon.objects.all()     
+    serializer_class  = AddonsSerializer
      

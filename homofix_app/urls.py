@@ -4,6 +4,7 @@ from homofix_app import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 urlpatterns = [
     
 
@@ -33,6 +34,8 @@ urlpatterns = [
     path('Accounts/Admin/Technician/Edit',HodViews.edit_technician,name="edit_technician"),
     path('Accounts/Technician/Delete/<int:id>',HodViews.delete_technician,name="delete_technician"),
     path('Accounts/Technician/History/<int:id>',HodViews.technician_history,name="technician_history"),
+    path('Accounts/Technician/Payment/History/<int:id>',HodViews.technician_payment_history,name="technician_payment_history"),
+    # path('Accounts/Technician/ADD/Payment/History',HodViews.technician_add_payment_history,name="technician_add_payment_history"),
     path('Accounts/Admin/Product',HodViews.product,name="product"),
     path('Accounts/Admin/Product/Update',HodViews.update_product,name="update_product"),
     path('Accounts/Admin/Product/Delete/<int:id>',HodViews.delete_product,name="delete_product"),
@@ -42,6 +45,7 @@ urlpatterns = [
     path('Accounts/Admin/Addons',HodViews.addons,name="addons"),
     path('Accounts/Admin/Addons/Edit',HodViews.update_addons,name="update_addons"),
     path('Accounts/Admin/Addons/Delete/<int:id>',HodViews.delete_addons,name="delete_addons"),
+    path('Accounts/Admin/Addons/Details/',HodViews.addons_details,name="addons_details"),
 
 
 
@@ -94,6 +98,8 @@ urlpatterns = [
     path('Accounts/Admin/Customer/Edit/<int:id>', HodViews.admin_customer_edit, name='admin_customer_edit'),
     path('Accounts/Admin/Customer/History/<int:id>', HodViews.admin_customer_history, name='admin_customer_history'),
 
+    ########################## Customer Payment Details ##################################
+    path('Accounts/Admin/Customer/Payment/Details', HodViews.admin_customer_payment, name='admin_customer_payment'),
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

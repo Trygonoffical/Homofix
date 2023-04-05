@@ -12,6 +12,8 @@ from django.db.models import Sum
 from django.http import Http404
 import random
 import datetime
+import requests
+import urllib.parse
 
 
 
@@ -68,6 +70,68 @@ def support_profile_update(request):
         return HttpResponseRedirect(reverse("support_profile"))
 
 
+# def support_orders(request):
+    
+#     technicians = Technician.objects.all()
+#     order_count = Booking.objects.filter(status="New").count()
+#     user = request.user
+#     support = Support.objects.get(admin=user)
+    
+
+
+#     # i want calcualate here 
+#     tasks = Task.objects.all()   
+#     bookings = Booking.objects.filter(status="New")
+    
+#     total_price = 0
+   
+    
+
+
+#     if request.method == "POST":
+       
+#         random_number = random.randint(0, 999)
+#         unique_number = str(random_number).zfill(3)
+       
+        
+#         # username = request.POST.get('username')
+#         first_name = request.POST.get('full_name')
+        
+#         mob = request.POST.get('mob')
+
+#         cus = Customer.objects.filter(admin__first_name=first_name)
+        
+ 
+#         if Customer.objects.filter(admin__first_name=first_name, mobile=mob).exists():
+           
+#             user= CustomUser.objects.get(first_name=first_name)
+#             request.session['cust_id'] = user.customer.id
+#             return JsonResponse({'status':'Save'})
+        
+#         else:
+#             # print
+#         #     if CustomUser.objects.filter(username=first_name):
+#         #         return JsonResponse({'status':'Error'})
+#             user = CustomUser.objects.create(username=first_name+unique_number,first_name=first_name, user_type='4')    
+#             user.set_password(mob)
+#             user.customer.mobile = mob
+#             user.save()
+#             request.session['customer_id'] = user.customer.id
+#             return JsonResponse({'status':'Save'})
+
+#     context = {
+#     'bookings':bookings,
+#     'technicians':technicians,
+#     'tasks':tasks,
+#     'order_count':order_count,
+#     'total_price':total_price,
+#     'support':support
+    
+    
+#    }    
+#     return render(request, 'Support_templates/Orders/order.html',context)
+
+
 def support_orders(request):
     
     technicians = Technician.objects.all()
@@ -87,34 +151,48 @@ def support_orders(request):
 
 
     if request.method == "POST":
-        random_number = random.randint(0, 999)
-        unique_number = str(random_number).zfill(3)
+        # print("testing")
+        otp_number = random.randint(0,9999)
+        otp_unique = str(otp_number).zfill(3)
+       
+        first_name = request.POST.get('full_name')      
+        mob = request.POST.get('mob')
+
+
+        request.session['full_name'] = first_name
+        request.session['mob'] = mob
+        request.session['otp'] = otp_unique
+
+
+        auth_key = "IQkJfqxEfD5l3qCu"
+        sender_id = "TRYGON"
+        route = 2
+        number = mob
+        # message = f"Dear {first_name} {otp_unique} is the OTP for your verify mobile number . In case you have not requested this, please contact us at info@trygon.in"
+        message = f"Dear {first_name} {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+        print("messageeeeeeee",message)
+        # message = "Dear armuu 1005 is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+        template_id = "1707162192151162124"
+        url = f"http://weberleads.in/http-tokenkeyapi.php?authentic-key={auth_key}&senderid={sender_id}&route={route}&number={number}&message={urllib.parse.quote(message)}&templateid={template_id}"
+        response = requests.get(url) 
+                
+        # if response.ok:
+        #     print("SMS message sent successfully")
+            
+        # else:
+        #     print("Error sending SMS message")
+        return JsonResponse({'status':'Save'})
+       
+        
        
         
         # username = request.POST.get('username')
-        first_name = request.POST.get('full_name')
+       
+        # cus = Customer.objects.filter(admin__first_name=first_name)
         
-        mob = request.POST.get('mob')
-
-        cus = Customer.objects.filter(admin__first_name=first_name)
-        print("ssss",cus)
  
-        if Customer.objects.filter(admin__first_name=first_name, mobile=mob).exists():
-           
-            user= CustomUser.objects.get(first_name=first_name)
-            request.session['cust_id'] = user.customer.id
-            return JsonResponse({'status':'Save'})
         
-        else:
-            # print
-        #     if CustomUser.objects.filter(username=first_name):
-        #         return JsonResponse({'status':'Error'})
-            user = CustomUser.objects.create(username=first_name+unique_number,first_name=first_name, user_type='4')    
-            user.set_password(mob)
-            user.customer.mobile = mob
-            user.save()
-            request.session['customer_id'] = user.customer.id
-            return JsonResponse({'status':'Save'})
+        
 
     context = {
     'bookings':bookings,
@@ -127,6 +205,7 @@ def support_orders(request):
     
    }    
     return render(request, 'Support_templates/Orders/order.html',context)
+
 
 
 
@@ -158,18 +237,33 @@ def support_otp(request):
 
 def support_verify_otp(request):
     if request.method == "POST":
+        otp_num = request.session.get('otp', 'Default value if key does not exist')
+        
+        
+
         otp = request.POST.get('otp')
-        if otp == '1234':  
+        if otp == otp_num:  
             # OTP is correct, redirect to success page
             # return HttpResponse('otp sucess')
             
+            random_number = random.randint(0, 999)
+            unique_number = str(random_number).zfill(3)
+       
+            first_name = request.session.get('full_name', 'Default value if key does not exist')
+            mob = request.session.get('mob', 'Default value if key does not exist')
+            user = CustomUser.objects.create(username=first_name+unique_number,first_name=first_name, user_type='4')    
+            user.set_password(mob)
+            user.customer.mobile = mob
+            user.save()
+            request.session['customer_id'] = user.customer.id
+
             return JsonResponse({'status': 'Save', 'message': 'otp is match'})
             # return redirect('support_orders')
         else:
             # OTP is incorrect, show error message and reload the page
             # messages.error(request, 'Invalid OTP. Please try again.')
             
-            return JsonResponse({'status': 'error', 'message': 'otp is not valid'})
+            return JsonResponse({'status': 'error', 'message': 'otp is not eeee valid'})
             # return render(request, 'Support_templates/OTP/otp.html')
     # return render(request, 'Support_templates/Orders/otp_modal.html')
 

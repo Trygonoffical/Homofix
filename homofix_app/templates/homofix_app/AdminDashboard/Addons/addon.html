@@ -33,10 +33,12 @@
                     <thead>
                         <tr>
                             <th>Category</th>
-                            <th>Product Title</th>
+                            <th>Subcategory</th>
+                            {% comment %} <th>Product Title</th> {% endcomment %}
                             <th>Product Name</th>
+                            <th>Spare Part</th>
                             <th>Price</th>
-                            <th>Warranty</th>
+                            <th>Description</th>
                             <th>Action</th>
                             
                         </tr>
@@ -44,11 +46,13 @@
                     <tbody>
                         {% for i in addons %}
                         <tr>
-                            <td>{{i.product.category}}</td>
-                            <td>{{i.product.product_title}}</td>
+                            <td>{{i.product.subcategory.Category_id.category_name}}</td>
+                            <td>{{i.product.subcategory.name}}</td>
+                            {% comment %} <td>{{i.product.product_title}}</td> {% endcomment %}
                             <td>{{i.product.name}}</td>
-                            <td>{{i.product.price}}</td>
-                            <td>{{i.product.warranty}}</td>
+                            <td>{{i.spare_part}}</td>
+                            <td>{{i.price}}</td>
+                            <td>{{i.description}}</td>
                             {% comment %} <td>{{i.updated_at}}</td> {% endcomment %}
                             <td>
                                 <div class="d-flex order-actions">

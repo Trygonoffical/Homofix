@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon
+
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
 
@@ -52,11 +53,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
         return obj.warranty_desc.replace('\r\n', '').strip().replace('<p>', '').replace('</p>', '')
 
+class techSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Technician
+        fields = "__all__"
 
 
 class BookingSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer()
     products = ProductSerializer(many=True)
+    
     
 
     class Meta:
@@ -66,6 +72,9 @@ class BookingSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     booking = BookingSerializer()
+    technician = techSerializer()
+   
+    
  
 
     class Meta:
@@ -74,6 +83,29 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 
+# class BokingSerializer(serializers.ModelSerializer):
+#     # booking = BookingSerializer()
+ 
+
+#     class Meta:
+#         model = Booking
+#         fields = "__all__"
+
+
+class KycSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Kyc
+        fields = "__all__"
+
+
+# ------------------------------- PRODUCT ------------------
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
+    
 # ----------------------- Rebooking ------------------------
 
 # class customerSerializer(serializers.ModelSerializer):
@@ -167,13 +199,15 @@ class ProductSerializerr(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'price', 'product_pic']
 
 
+
 class BokingSerializer(serializers.ModelSerializer):
-    customer = customerSerializer()
+    # customer = customerSerializer()
     # products = BookingProductSerializer(source='bookingproduct_set', many=True)
 
     class Meta:
         model = Booking
-        fields = ['id', 'customer', 'booking_date', 'is_verified', 'supported_by', 'status', 'products']
+        fields = "__all__"
+        # fields = ['id', 'customer', 'booking_date', 'is_verified', 'supported_by', 'status', 'products']
 
 
 class BookingProductSerializer(serializers.ModelSerializer):
@@ -191,7 +225,8 @@ class TechnicianSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Technician
-        fields = ['admin_id']
+        # fields = ['admin_id']
+        fields = "__all__"
 
 
 
@@ -213,4 +248,38 @@ class RebookingSerializer(serializers.ModelSerializer):
 class JobEnquirySerliazer(serializers.ModelSerializer):
     class Meta:
         model = JobEnquiry
+        fields = "__all__"
+
+
+
+# --------------------------------------- SparePARTS ----------------------         
+
+
+class SparePartsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = SpareParts
+        fields = ['product','spare_part','price','description']
+
+# --------------------------------------- SparePARTS ----------------------         
+
+# class AddonsSerializer(serializers.ModelSerializer):
+    
+#     class Meta:
+#         model = Addon
+#         fields = "__all__"
+
+
+class BookingProdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookingProduct
+        fields = ['id','booking', 'product', 'quantity', 'total_price', 'total_price_with_tax']
+
+
+class AddonsSerializer(serializers.ModelSerializer):
+    # booking_prod_id = BookingProdSerializer()
+    
+    class Meta:
+        model = Addon
+        # fields = ['id', 'booking_product', 'addon_products', 'quantity', 'date', 'description']
         fields = "__all__"
