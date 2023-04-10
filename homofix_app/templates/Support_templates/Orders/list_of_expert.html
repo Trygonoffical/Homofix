@@ -71,11 +71,11 @@
                               {{ booking_product.product.name }} 
                               {% endfor %}
                            </td>
-                           <td>{{booking.customer.admin.username}}</td>
+                           <td>{{booking.customer.admin.first_name}}</td>
                            <td>{{booking.customer.mobile}}</td>
-                           <td>{{booking.city}}</td>
-                           <td>{{booking.state}}</td>
-                           <td>{{booking.area}}</td>
+                           <td>{{booking.customer.city}}</td>
+                           <td>{{booking.customer.state}}</td>
+                           <td>{{booking.customer.area}}</td>
                            <td>
                               {% if booking.bookingproduct_set.exists %}
                                     Rs.{{ booking.bookingproduct_set.first.total_price }}
@@ -113,7 +113,7 @@
                </thead>
                <tbody>
                   {% for i in expert %}
-                  
+                  {% if i.status == "Active" %}
                   <tr >
                      <td>
                         #{{i.expert_id}}
@@ -215,6 +215,7 @@
                      </td>
                      
                   </tr>
+                  {% endif %}
                   {% endfor %}
                </tbody>
             </table>

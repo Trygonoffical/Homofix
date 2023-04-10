@@ -31,7 +31,7 @@ def expert_task_assign(request):
 def update_booking_status(request,booking_id):
     booking = Booking.objects.get(id=booking_id)
     task = Task.objects.get(booking=booking)
-    booking_product = BookingProduct.objects.filter(booking=booking)
+    # booking_product = BookingProduct.objects.filter(booking=booking)
    
     if request.method == 'POST':
         status = request.POST['status']
@@ -39,33 +39,37 @@ def update_booking_status(request,booking_id):
         # print("testingggggggggggg",xyzz.technician.status_choice)
         booking.status = status
         booking.save()
-        if status == 'completed':
-            booking_amount = booking_product.total_price
-            hod_share_percentage = HodSharePercentage.objects.latest('id')
-            hod_share_percentage_value = hod_share_percentage.percentage
-            hod_share = booking_amount * (hod_share_percentage_value / 100)
-            technician_share = booking_amount - hod_share
+        return redirect('expert_task_assign')
+        # if status == 'completed':
+        #     booking_amount = booking.total_amount
+        #     hod_share_percentage = HodSharePercentage.objects.latest('id')
+        #     hod_share_percentage_value = hod_share_percentage.percentage
+        #     hod_share = booking_amount * (hod_share_percentage_value / 100)
+        #     tax_rate = 0.18  # replace with your actual tax rate
+        #     hod_share = hod_share+(hod_share*tax_rate)
+        
+        #     technician_share = booking_amount - hod_share
             
             
-            share = Share.objects.create(
-                task=task,
+        #     share = Share.objects.create(
+        #         task=task,
                
-                hod_share_percentage=hod_share_percentage,
-                technician_share=technician_share,
-                hod_share=hod_share
-            )
-            share.save()
-            # Update the technician's wallet with their share
-            technician = task.technician
-            wallet, created = Wallet.objects.get_or_create(technician=technician)
-            wallet.total_share += technician_share
-            wallet.save()
-            messages.success(request, f"Booking status updated to {status}. Share data created.")
-            return redirect('expert_task_assign')
-        else:
-            messages.success(request, f"Booking status updated to {status}")
-        # messages.success(request, f"Booking status updated to {status}")
-            return redirect('expert_task_assign')
+        #         hod_share_percentage=hod_share_percentage,
+        #         technician_share=technician_share,
+        #         hod_share=hod_share
+        #     )
+        #     share.save()
+        #     # Update the technician's wallet with their share
+        #     technician = task.technician
+        #     wallet, created = Wallet.objects.get_or_create(technician=technician)
+        #     wallet.total_share += technician_share
+        #     wallet.save()
+        #     messages.success(request, f"Booking status updated to {status}. Share data created.")
+        #     return redirect('expert_task_assign')
+        # else:
+        #     messages.success(request, f"Booking status updated to {status}")
+        # # messages.success(request, f"Booking status updated to {status}")
+        #     return redirect('expert_task_assign')
    
 
 def expert_task_proceed(request,booking_id):

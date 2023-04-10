@@ -1,14 +1,16 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer
+from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
 # from homofix_app.EmailBackEnd import EmailBackEnd
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet,ModelViewSet
+from rest_framework.views import APIView
 
-from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon
+from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation
+
 
 
 
@@ -22,6 +24,7 @@ class LoginViewSet(CreateAPIView):
         user=authenticate(request, username=username, password = password)
         
         
+
         if user!=None:
             login(request,user)
             user_type = user.user_type
@@ -61,6 +64,7 @@ class ExpertViewSet(ModelViewSet):
 
     
 
+
 class TaskViewSet(ModelViewSet):
     authentication_classes = [BasicAuthentication]
     serializer_class = TaskSerializer
@@ -75,8 +79,9 @@ class TaskViewSet(ModelViewSet):
         else:
             return super().list(request, *args, **kwargs)
     
-    @action(detail=False, methods=['PATCH'])
-    def update_booking_status(self, request):
+
+    # @action(detail=False, methods=['PATCH'])
+    def put(self, request):
         booking_id = request.data.get('booking_id')
         status = request.data.get('status')
         if booking_id and status:
@@ -139,8 +144,42 @@ class SparePartsViewSet(ModelViewSet):
     serializer_class  = SparePartsSerializer
      
 
-
 class AddonsViewSet(ModelViewSet):
     queryset = Addon.objects.all()     
     serializer_class  = AddonsSerializer
      
+
+class AddonsGetViewSet(ModelViewSet):
+    queryset = Addon.objects.all()     
+    serializer_class  = AddonsGetSerializer
+     
+
+
+
+# ----------------- Technician Location -------------------- 
+
+
+class TechnicianLocationViewSet(ModelViewSet):
+    serializer_class = TechnicianLocationSerializer
+    queryset = TechnicianLocation.objects.all()
+    def post(self, request):
+        booking_id = request.data.get('booking_id')
+        location = request.data.get('location')
+        print("booking id",booking_id)
+        if booking_id and location:
+            try:
+                booking = Booking.objects.get(id=booking_id)
+                technician_location = TechnicianLocation.objects.get(
+                    technician=booking.technician,
+                    booking=booking
+                )
+                technician_location.location = location
+                technician_location.save()
+                return Response({'success': True})
+            except (Booking.DoesNotExist, TechnicianLocation.DoesNotExist):
+                return Response({'success': False, 'message': 'Booking or technician location not found.'})
+        else:
+            return Response({'success': False, 'message': 'Booking id and location are required.'})
+
+        
+        

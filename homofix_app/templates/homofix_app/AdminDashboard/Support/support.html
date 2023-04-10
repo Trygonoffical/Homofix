@@ -44,6 +44,7 @@
                             <th>Assign</th>
                             <th>New Expert</th>
                             <th>Customer Enquiry</th>
+                            <th>Job Enquiry</th>
                             <th>Action</th>
                             
                         </tr>
@@ -100,6 +101,13 @@
                             </td>
                             <td>
                                 {% if i.can_contact_us_enquiry %}
+                                <span class="badge rounded-pill bg-info text-dark">Yes</span>
+                              {% else %}
+                                <span class="badge rounded-pill bg-danger">No</span>
+                              {% endif %}
+                            </td>
+                            <td>
+                                {% if i.can_job_enquiry %}
                                 <span class="badge rounded-pill bg-info text-dark">Yes</span>
                               {% else %}
                                 <span class="badge rounded-pill bg-danger">No</span>

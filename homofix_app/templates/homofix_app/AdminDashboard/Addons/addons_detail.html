@@ -32,37 +32,41 @@
                 <table id="example2" class="table table-striped">
                     <thead>
                         <tr>
+                            <th>#SI NO</th>
                             <th>#Order</th>
                             <th>Category</th>
                             <th>Subcategory</th>
                             {% comment %} <th>Product Title</th> {% endcomment %}
                             <th>Product Name</th>
                             <th>Spare Part</th>
-                            <th>Price</th>
+                            <th>Total Price</th>
                             <th>Description</th>
-                            <th>Action</th>
+                            {% comment %} <th>Action</th> {% endcomment %}
                             
                         </tr>
                     </thead>
                     <tbody>
                         {% for i in addon %}
                         <tr>
-                            <td>{{i.booking.order_id}}</td>
-                            <td>{{i.addon_product.product.subcategory.Category_id.category_name}}</td>
-                            <td>{{i.product.subcategory.name}}</td>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{i.booking_prod_id.booking.order_id}}</td>
+                            {% comment %} <td>{{i.booking_prod_id.addon_product.product.subcategory.Category_id.category_name}}</td> {% endcomment %}
+                            <td>{{i.booking_prod_id.product.subcategory.Category_id.category_name}}</td>
+                            <td>{{i.booking_prod_id.product.subcategory.name}}</td>
+
                             {% comment %} <td>{{i.product.product_title}}</td> {% endcomment %}
-                            <td>{{i.product.name}}</td>
-                            <td>{{i.spare_part}}</td>
-                            <td>{{i.price}}</td>
+                            <td>{{i.booking_prod_id.product.name}}</td>
+                            <td>{{i.addon_products.spare_part}}</td>
+                            <td>{{i.booking_prod_id.booking.total_amount}}</td>
                             <td>{{i.description}}</td>
                             {% comment %} <td>{{i.updated_at}}</td> {% endcomment %}
-                            <td>
+                            {% comment %} <td>
                                 <div class="d-flex order-actions">
                                     <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a>
                                     <a href="javascript:;" class="ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" ><i class='bx bxs-trash'></i></a>
                                 </div>
                             </td>
-                           
+                            {% endcomment %}
                             
                         </tr>
 

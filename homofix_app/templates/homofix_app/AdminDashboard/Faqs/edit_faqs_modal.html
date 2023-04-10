@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add FAQs</h5>
+                <h5 class="modal-title">Edit FAQs</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <P class="text-center mt-2" id="msg"></P>
@@ -24,10 +24,13 @@
                                     <option class="text-black" value="{{cat.id}}">{{cat.category_name}}</option>
                                 {% endfor %}
                             </select> {% endcomment %}
-                            <select class="form-select" name="category_id" id="select_category" required>
+                            <select class="form-select" name="category_id" id="edit_faq_select_category" required>
                                 <option value="" disabled selected>---SELECT---</option>
-                                {% for i in category %}
-                                <option class="bg-info" value="{{i.id}}">{{i.category_name}}</option>
+                                {% for cat in category %}
+                                
+                                <option class="bg-dark" value="{{ cat.id }}" {% if i.product.subcategory.Category_id_id == cat.id %}selected{% endif %}>{{cat.category_name}}</option>
+                                {% comment %} <option class="bg-info" value="{{i.id}}">{{i.category_name}}</option> {% endcomment %}
+                                
                                 {% endfor %}
                              </select>
                         
@@ -40,9 +43,16 @@
                             {% comment %} <select class="form-control btn-light" name="sub_category_id" id="select2" disabled>
                                 <option class="text-black" value="" selected disabled> --Select--</option>
                             </select> {% endcomment %}
-                            <select class="form-select" name="sub_category_id" id="select_subcategory" required>
+                            <select class="form-select" name="sub_category_id" id="edit_faq_select_subcategory" required>
                               
-                                <option  value="" selected disabled> --Select--</option>
+                                {% comment %} <option  value="" selected disabled> --Select--</option> {% endcomment %}
+                                {% for sub in subcategory %}
+                                 {% if i.product.subcategory.Category_id_id == sub.Category_id.id %}
+                                 <option class="bg-dark" value="{{ sub.id }}" {% if sub.id == i.subcategory.id %}selected{% endif %}>
+                                    {{ sub.name }}
+                                </option>
+                                {% endif %}
+                                {% endfor %}
                              </select>
                         
                         </div>
@@ -58,9 +68,16 @@
                                     <option value="{{i.id}}">{{i.name}}</option>
                                 {% endfor %}
                             </select> {% endcomment %}
-                            <select class="form-select" name="product_id" id="product-select"    required>
+                            <select class="form-select" name="product_id" id="edit_faq_product-select"    required>
+                                {% for prod in product %}
+                                 {% if i.product.subcategory.Category_id_id == prod.subcategory.Category_id.id %}
+                                 <option class="bg-dark" value="{{ prod.id }}" {% if prod.id == i.product.subcategory.Category_id_id %}selected{% endif %}>
+                                    {{ prod.name }}
+                                </option>
+                                {% endif %}
+                                {% endfor %}
                               
-                                <option  value="" selected disabled> --Select--</option>
+                                {% comment %} <option  value="" selected disabled> --Select--</option> {% endcomment %}
                              </select>
                         </div>
                     </div>
@@ -88,7 +105,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Update</button>
                 
                 {% comment %} <button type="submit" class="btn btn-primary">Save </button> {% endcomment %}
             </div>
@@ -97,7 +114,7 @@
     </div>
 </div>
 
-
+{% comment %} 
 <script>
     // select all textarea elements on the page
     var textareas = document.getElementsByTagName('textarea');
@@ -106,7 +123,7 @@
     for (var i = 0; i < textareas.length; i++) {
         CKEDITOR.replace(textareas[i]);
     }
-</script>
+</script> {% endcomment %}
 
 
 {% comment %} 
@@ -153,7 +170,7 @@
 <script>
     $(document).ready(function() {
        // When the category dropdown changes, send an AJAX request to retrieve the corresponding subcategories
-       $("#select_category").change(function() {
+       $("#edit_faq_select_category").change(function() {
          var category_id = $(this).val();
          if (category_id) {
            $.ajax({
@@ -165,25 +182,25 @@
              dataType: "json",
              success: function(data) {
                // Clear the current options in the subcategory dropdown
-               $("#select_subcategory").html("");
+               $("#edit_faq_select_subcategory").html("");
                // Add the retrieved subcategories as options to the subcategory dropdown
-               $("#select_subcategory").append('<option value="" selected disabled> --Select--</option>');
+               $("#edit_faq_select_subcategory").append('<option value="" selected disabled> --Select--</option>');
                $.each(data, function(key, value) {
-                 $("#select_subcategory").append('<option class="" value="' + value.id + '">' + value.name + '</option>');
+                 $("#edit_faq_select_subcategory").append('<option class="" value="' + value.id + '">' + value.name + '</option>');
                });
                // Enable the subcategory dropdown
-               $("#select_subcategory").prop("disabled", false);
+               $("#edit_faq_select_subcategory").prop("disabled", false);
              }
            });
          } else {
            // If no category is selected, disable the subcategory dropdown and clear its options
-           $("#select_subcategory").prop("disabled", true);
-           $("#select_subcategory").html('<option value="" selected disabled> --Select--</option>');
+           $("#edit_faq_select_subcategory").prop("disabled", true);
+           $("#edit_faq_select_subcategory").html('<option value="" selected disabled> --Select--</option>');
          }
        });
        
        // When the subcategory dropdown changes, send an AJAX request to retrieve the corresponding products
-       $("#select_subcategory").change(function() {
+       $("#edit_faq_select_subcategory").change(function() {
           var subcategory_id = $(this).val();
         
           if (subcategory_id) {
@@ -196,10 +213,10 @@
               dataType: "json",
               success: function(data) {
                 // Clear the current options in the product selection dropdown
-                $("#product-select").html("");
+                $("#edit_faq_product-select").html("");
                 // Add the retrieved products as options to the product selection dropdown
                 $.each(data, function(key, value) {
-                  $("#product-select").append(
+                  $("#edit_faq_product-select").append(
                     '<option value="' + value.id + '" data-rate="' + value.price + '">' + value.name +  '</option>'
                   );
                 });
@@ -207,8 +224,8 @@
             });
           } else {
             // If no subcategory is selected, disable the product selection dropdown and clear its options
-            $("#product-select").prop("disabled", true);
-            $("#product-select").html('<option value="" selected disabled> --Select--</option>');
+            $("#edit_faq_product-select").prop("disabled", true);
+            $("#edit_faq_product-select").html('<option value="" selected disabled> --Select--</option>');
           }
         });
         

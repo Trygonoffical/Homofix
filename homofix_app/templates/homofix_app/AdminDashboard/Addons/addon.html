@@ -32,6 +32,7 @@
                 <table id="example2" class="table table-striped">
                     <thead>
                         <tr>
+                            <th>#SI No</th>
                             <th>Category</th>
                             <th>Subcategory</th>
                             {% comment %} <th>Product Title</th> {% endcomment %}
@@ -46,6 +47,7 @@
                     <tbody>
                         {% for i in addons %}
                         <tr>
+                            <td>{{forloop.counter}}</td>
                             <td>{{i.product.subcategory.Category_id.category_name}}</td>
                             <td>{{i.product.subcategory.name}}</td>
                             {% comment %} <td>{{i.product.product_title}}</td> {% endcomment %}

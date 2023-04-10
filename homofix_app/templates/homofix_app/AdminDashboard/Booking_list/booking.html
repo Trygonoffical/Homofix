@@ -39,7 +39,8 @@
                 <table id="example2" class=" table  mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Order#</th>
+                            <th>#SI No</th>
+                            <th>#Order</th>
                             <th>Category</th>
                             <th>Product</th>
                             <th>Customer</th>
@@ -58,7 +59,9 @@
                     </thead>
                     <tbody>
                         {% for booking in booking %}
+                        
                         <tr {% if booking.task_set.all or booking.status == "cancelled" %}class="d-none"{% endif %}>
+                            <td>{{forloop.counter}}</td>
                             <td>
                                 #OS-000354
                             </td>
@@ -81,11 +84,11 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>{{booking.customer.admin.username}}</td>
+                            <td>{{booking.customer.admin.first_name}}</td>
                             <td>{{booking.customer.mobile}}</td>
-                            <td>{{booking.city}}</td>
-                            <td>{{booking.state}}</td>
-                            <td>{{booking.area}}</td>
+                            <td>{{booking.customer.city}}</td>
+                            <td>{{booking.customer.state}}</td>
+                            <td>{{booking.customer.area}}</td>
                             <td>
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{booking.status}}</div>

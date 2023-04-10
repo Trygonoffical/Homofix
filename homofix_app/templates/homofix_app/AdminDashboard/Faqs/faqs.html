@@ -32,6 +32,7 @@
                 <table id="example2" class="table table-striped">
                     <thead>
                         <tr>
+                            <th>#SI NO</th>
                             <th>Category</th>
                             <th>Subcategory</th>
                             <th>Product Title</th>
@@ -45,6 +46,7 @@
                     <tbody>
                         {% for i in faqs %}
                         <tr>
+                            <td>{{forloop.counter}}</td>
                             <td>{{i.product.subcategory.Category_id.category_name}}</td>
                             <td>{{i.product.subcategory.name}}</td>
                             <td>{{i.product.product_title}}</td>

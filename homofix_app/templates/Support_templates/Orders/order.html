@@ -49,7 +49,9 @@
                             <th>City</th>
                             <th>State</th> 
                             <th>Area</th> 
+                            <th>zipcode</th> 
                             <th>Status</th>
+                            {% comment %} <th class="nowrap">Discounted Price</th> {% endcomment %}
                             <th>Total</th>
                             <th>Date</th>
                             <th class="nowrap">Order By</th>
@@ -57,7 +59,7 @@
                             <th>Task</th>
                             {% endif %}
                             <th>Actions</th>
-                            <th>Print</th>
+                            {% comment %} <th>Print</th> {% endcomment %}
                         </tr>
                     </thead>
                     <tbody>
@@ -90,15 +92,21 @@
                                       </div>
                                 </div>
                             </td>
-                            <td>{{booking.customer.admin.username}}</td>
+                            <td>{{booking.customer.admin.first_name}}</td>
                             <td>{{booking.customer.mobile}}</td>
-                            <td>{{booking.city}}</td>
-                            <td>{{booking.state}}</td>
-                            <td>{{booking.area}}</td>
+                            <td>{{booking.customer.city}}</td>
+                            <td>{{booking.customer.state}}</td>
+                            <td>{{booking.customer.area}}</td>
+                            <td>{{booking.customer.zipcode}}</td>
                             <td>
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{booking.status}}</div>
                             </td>
+                            {% comment %} <td>{% if booking.bookingproduct_set.exists %}
+                                Rs {{ booking.bookingproduct_set.first.product.dis_amt}}
+                            {% else %}
+                                N/A
+                            {% endif %} </td> {% endcomment %}
                             
                             <td>
                                 {% comment %} Rs{{total_price}} {% endcomment %}
@@ -106,7 +114,7 @@
                                  <h6 class="mb-1 nowrap font-14">{{ booking_product.total_price}}</h6>
                                 {% endfor %} {% endcomment %}
                                 {% if booking.bookingproduct_set.exists %}
-                                    {{ booking.bookingproduct_set.first.total_price }}
+                                    Rs {{ booking.bookingproduct_set.first.total_price }}
                                 {% else %}
                                     N/A
                                 {% endif %} 
@@ -151,7 +159,7 @@
                                     
                                 </div>
                             </td>
-                            <td><a href="{% url 'invoice' booking.id %}">invoice</a></td>
+                            {% comment %} <td><a href="{% url 'invoice' booking.id %}">invoice</a></td> {% endcomment %}
                         </tr>
 
                         <div class="col">

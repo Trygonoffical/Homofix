@@ -64,6 +64,7 @@
                 <table id="example2" class="table table-striped">
                     <thead>
                         <tr>
+                            <th>#SI NO</th>
                             <th>Name</th>
 
                             <th>Date Created</th>
@@ -75,6 +76,7 @@
                     <tbody>
                         {% for i in category %}
                         <tr>
+                            <td>{{forloop.counter}}</td>
                             <td>{{i.category_name}}</td>
                             <td>{{i.created_at}}</td>
                             <td>{{i.last_updated}}</td>

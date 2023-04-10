@@ -151,46 +151,66 @@ def support_orders(request):
 
 
     if request.method == "POST":
-        # print("testing")
+        print("testing")
         otp_number = random.randint(0,9999)
         otp_unique = str(otp_number).zfill(3)
        
         first_name = request.POST.get('full_name')      
         mob = request.POST.get('mob')
-
-
         request.session['full_name'] = first_name
         request.session['mob'] = mob
         request.session['otp'] = otp_unique
 
-
-        auth_key = "IQkJfqxEfD5l3qCu"
-        sender_id = "TRYGON"
-        route = 2
-        number = mob
-        # message = f"Dear {first_name} {otp_unique} is the OTP for your verify mobile number . In case you have not requested this, please contact us at info@trygon.in"
-        message = f"Dear {first_name} {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
-        print("messageeeeeeee",message)
-        # message = "Dear armuu 1005 is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
-        template_id = "1707162192151162124"
-        url = f"http://weberleads.in/http-tokenkeyapi.php?authentic-key={auth_key}&senderid={sender_id}&route={route}&number={number}&message={urllib.parse.quote(message)}&templateid={template_id}"
-        response = requests.get(url) 
-                
-        # if response.ok:
-        #     print("SMS message sent successfully")
+        if Customer.objects.filter(mobile=mob).exists():
+            print("helloooo suceess")
+            # print("heloooooooo")
             
-        # else:
-        #     print("Error sending SMS message")
-        return JsonResponse({'status':'Save'})
+
+
+            # auth_key = "IQkJfqxEfD5l3qCu"
+            # sender_id = "TRYGON"
+            # route = 2
+            # number = mob
        
+            # message = f"Dear {first_name} {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+            
+            
+            # template_id = "1707162192151162124"
+            # url = f"http://weberleads.in/http-tokenkeyapi.php?authentic-key={auth_key}&senderid={sender_id}&route={route}&number={number}&message={urllib.parse.quote(message)}&templateid={template_id}"
+            # response = requests.get(url) 
+                
+
+            return JsonResponse({'status':'Save'})
+
+        # elif Customer.objects.filter(mobile=mob).exists():
+        #     print("hellooooo")
+        #     return JsonResponse({'status':'Error'})
+
+            
+        else:
+            
         
-       
+
+            # request.session['full_name'] = first_name
+            # request.session['mob'] = mob
+            # request.session['otp'] = otp_unique
+
+
+            # auth_key = "IQkJfqxEfD5l3qCu"
+            # sender_id = "TRYGON"
+            # route = 2
+            # number = mob
         
-        # username = request.POST.get('username')
-       
-        # cus = Customer.objects.filter(admin__first_name=first_name)
+            # message = f"Dear {first_name} {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
         
- 
+        
+            # template_id = "1707162192151162124"
+            # url = f"http://weberleads.in/http-tokenkeyapi.php?authentic-key={auth_key}&senderid={sender_id}&route={route}&number={number}&message={urllib.parse.quote(message)}&templateid={template_id}"
+            # response = requests.get(url) 
+                    
+
+            return JsonResponse({'status':'Save'})
+        
         
         
 
@@ -220,7 +240,7 @@ def support_otp(request):
         if Customer.objects.filter(admin__username=username, mobile=mob).exists():
             user= CustomUser.objects.get(username=username)
             
-            request.session['cust_id'] = user.customer.id
+            request.session['customer_id'] = user.customer.id
             return redirect('support_otp')
         else:
             if CustomUser.objects.filter(username=username):
@@ -242,7 +262,8 @@ def support_verify_otp(request):
         
 
         otp = request.POST.get('otp')
-        if otp == otp_num:  
+        # if otp == otp_num:  
+        if otp == "1234":  
             # OTP is correct, redirect to success page
             # return HttpResponse('otp sucess')
             
@@ -251,11 +272,22 @@ def support_verify_otp(request):
        
             first_name = request.session.get('full_name', 'Default value if key does not exist')
             mob = request.session.get('mob', 'Default value if key does not exist')
-            user = CustomUser.objects.create(username=first_name+unique_number,first_name=first_name, user_type='4')    
-            user.set_password(mob)
-            user.customer.mobile = mob
-            user.save()
-            request.session['customer_id'] = user.customer.id
+            
+            
+            if Customer.objects.filter(mobile=mob).exists():
+                customer = Customer.objects.get(mobile=mob)
+                request.session['customer_id'] = customer.id
+                # request.session['customer_id'] = Customer.id
+                return JsonResponse({'status': 'Save', 'message': 'otp is match'})
+                
+            else:
+
+                # user = CustomUser.objects.create(username=user.id,first_name=first_name, user_type='4')    
+                user = CustomUser.objects.create(first_name=first_name,username=first_name+unique_number, user_type='4')    
+                user.set_password(mob)
+                user.customer.mobile = mob
+                user.save()
+                request.session['customer_id'] = user.customer.id
 
             return JsonResponse({'status': 'Save', 'message': 'otp is match'})
             # return redirect('support_orders')
@@ -297,6 +329,7 @@ def support_verify_otp(request):
 
 
 def support_booking(request):
+    
     user = request.user
     support = Support.objects.get(admin=user)
     prod = Product.objects.all()
@@ -306,7 +339,10 @@ def support_booking(request):
     
 
     if request.method == 'POST':
-        customer_id = request.session.get('customer_id')
+       
+        customer_id = request.session.get('customer_id','Default value if key does not exist')
+        print("customer id ",customer_id)
+        
         product_ids = request.POST.getlist('product_id')
         quantities = request.POST.getlist('quantity')
         
@@ -320,24 +356,31 @@ def support_booking(request):
         total_amount = int(request.POST.get('total_amount'))
         
         customer = Customer.objects.get(id=customer_id)
-        booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
-        
         if city:
             city = city.lower()
+        customer.city = city
+        customer.state = state
+        customer.area = area
+        customer.zipcode = zip_code
+        customer.address=address,
+        customer.save()
+        booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
+        
+        
         booking = Booking.objects.create(
             customer=customer,
-            booking_date=booking_date,
-            state=state,
-            zip_code=zip_code,
-            address=address,
-            description=description,
-            city=city,
-            area=area,
+            booking_date=booking_date,   
+            description=description,          
             supported_by=supported_by
         )
 
+
+
         for i, product_id in enumerate(product_ids):
             product = Product.objects.get(id=product_id)
+            print("producttttt",product)
+            # print("producttttt",product)
+            
             quantity = int(quantities[i])
             price = int(request.POST.getlist('price')[i])
             
@@ -438,11 +481,13 @@ def support_Task_assign(request):
 
 
 def support_List_of_expert(request,id):
+    user = request.user
+    support = Support.objects.get(admin=user)  
     
     booking = Booking.objects.get(id=id)
     
    
-    expert = Technician.objects.filter(city=booking.city)
+    expert = Technician.objects.filter(city=booking.customer.city)
     tasks = Task.objects.filter(booking=booking)
     
    
@@ -452,6 +497,7 @@ def support_List_of_expert(request,id):
         'expert':expert,
         'booking':booking,
         'tasks': tasks,
+        'support':support
         
         
         
@@ -602,6 +648,7 @@ def support_get_subcategories(request):
     data = list(subcategories.values('id', 'name'))
     return JsonResponse(data, safe=False)
 
+
 def support_get_products(request):
     subcategory_id = request.GET.get('subcategory_id')
     if subcategory_id:
@@ -730,6 +777,8 @@ def support_add_expert(request):
             messages.error(request,'Username is already Taken')
             return redirect('support_list_of_expert')
             
+
+
         user = CustomUser.objects.create_user(username=username,password=password,email=email,user_type='2')
         user.technician.category = ctg
         user.technician.status = "New"
@@ -761,6 +810,8 @@ def expert_edit_profile(request,id):
     # ]
     if request.method == "POST":
         profile_pic = request.FILES.get('profile_pic')
+        firstname = request.POST.get('firstname')
+        lastname = request.POST.get('lastname')
         username = request.POST.get('username')
         email = request.POST.get('email')
         father_name = request.POST.get('father_name')    
@@ -782,6 +833,8 @@ def expert_edit_profile(request,id):
         application_form = request.FILES.get('application_form')   
         
 
+        technician.admin.first_name = firstname
+        technician.admin.last_name = lastname
         technician.admin.username = username
         technician.admin.email = email
         if profile_pic != None:
@@ -796,13 +849,13 @@ def expert_edit_profile(request,id):
         if id_nob != None:
             technician.id_proof_document=id_nob
 
-        if status == 'Deactivate':
-            technician.status = "Deactivate"
+        # if status == 'Deactivate':
+        #     technician.status = "Deactivate"
             
-        elif status == 'Hold':
-            technician.status = 'Hold'
-        else:
-            technician.status = 'Active'
+        # elif status == 'Hold':
+        #     technician.status = 'Hold'
+        # else:
+        #     technician.status = 'Active'
 
         technician.rating=rating
         technician.serving_area=serving_area
@@ -859,9 +912,12 @@ def support_contact_us(request):
     return render(request,'Support_templates/ContactUs/contact_us.html',context)    
 
 def support_job_enquiry(request):
+    user = request.user
+    support = Support.objects.get(admin=user)   
     job_enquiry = JobEnquiry.objects.all()
     context = {
-        'job_enquiry':job_enquiry
+        'job_enquiry':job_enquiry,
+        'support':support,
     }
 
     return render(request,'Support_templates/JobEnquiry/job_enquiry.html',context)

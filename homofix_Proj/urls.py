@@ -13,7 +13,8 @@ router.register('Booking', API_Views.BookingViewSet,basename="Booking")
 router.register('Kyc', API_Views.KycViewSet,basename="Kyc")
 router.register('SpareParts', API_Views.SparePartsViewSet,basename="SpareParts")
 router.register('Addons', API_Views.AddonsViewSet,basename="Addons")
-
+router.register('Addons-GET', API_Views.AddonsGetViewSet,basename="Addons-GET")
+router.register('Location', API_Views.TechnicianLocationViewSet,basename="Location")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

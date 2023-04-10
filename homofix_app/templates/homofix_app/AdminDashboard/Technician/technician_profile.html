@@ -142,9 +142,9 @@
                                         {% endfor %}
                                     </select> {% endcomment %}
                                     <select class="form-control btn-light" name="category_id" id="select1">
-                                        <option class="text-black" value="" selected disabled> --Select--</option>
-                                        {% for i in category %}
-                                            <option class="text-black" value="{{i.id}}">{{i.category_name}}</option>
+                                        <option class="text-black" value="" selected disabled> --Select--</option> 
+                                        {% for cat in category %}
+                                            <option class="text-black" value="{{cat.id}}" {% if i.subcategories.Category_id_id == cat.id %}selected{% endif %}>{{cat.category_name}}</option>
                                         {% endfor %}
                                     </select>
 

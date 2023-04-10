@@ -46,6 +46,8 @@
                             
                             
                             <th>Status</th>
+                            {% comment %} <th>Login</th> {% endcomment %}
+                            <th>Last Login</th>
                             <th>Action</th>
                             
                         </tr>
@@ -77,6 +79,8 @@
                             
                             
                             <td><span class="badge bg-success">{{i.status}}</span></td>
+                            {% comment %} <td>{{i.admin.login}}</td> {% endcomment %}
+                            <td>{{i.admin.last_login}}</td>
                             
                             
                             <td>

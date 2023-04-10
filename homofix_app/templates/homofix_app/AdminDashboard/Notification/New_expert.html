@@ -1,5 +1,5 @@
 {% extends 'homofix_app/Base/base.html' %}
-{% block title %}Expert{% endblock title %}
+{% block title %}Technician{% endblock title %}
 {% block main-content %}
 
 <div class="page-content">
@@ -11,7 +11,7 @@
                 <ol class="breadcrumb mb-0 p-0">
                     <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">New Expert List</li>
+                    <li class="breadcrumb-item active" aria-current="page">Expert List</li>
                 </ol>
             </nav>
         </div>
@@ -19,10 +19,11 @@
     </div>
     <!--end breadcrumb-->
   
-    <h6 class="mb-0 text-uppercase">List of New Expert</h6>
+    <h6 class="mb-0 text-uppercase">List of Expert</h6>
     <hr>
 	{% include 'homofix_app/Base/messages.html' %}
 	{% comment %} <div class="ms-auto mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal"><a href="javascript:;" class="btn btn-light  mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>New Technician</a></div> {% endcomment %}
+	<div class="ms-auto mt-2 mb-2" ><a href="{% url 'add_technician' %}" class="btn btn-light  mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>New Expert</a></div>
     <div class="card">
         
         <div class="card-body">
@@ -35,7 +36,9 @@
                             <th>#SR No.</th>
                             <th>Expert ID</th>
                             <th>Name</th>
+                            <th>Username</th>
                             <th>Category</th>
+                            <th>Subcategory</th>
                             <th>Mobile</th>
                             <th>Email</th>
                             <th>City</th>
@@ -52,8 +55,20 @@
                         <tr>
                             <td>{{forloop.counter}}</td>
                             <td>{{i.expert_id}}</td>
+                            <td>{{i.admin.first_name}}</td>
                             <td>{{i.admin.username}}</td>
-                            <td>{{i.category.category_name}}</td>
+                            {% comment %} <td>{{i.subcategory.Category_id.category_name}}</td> {% endcomment %}
+                            <td>
+                                {% if i.subcategories.exists %}
+                                {{ i.subcategories.last.Category_id.category_name }}
+                                {% endif %}
+                            </td>
+                            {% comment %} <td>{{i.subcategory.name}}</td> {% endcomment %}
+                            <td>
+                                {% for subcategory in i.subcategories.all %}
+                                {{ subcategory.name }}
+                                {% endfor %}
+                            </td>
                             <td>{{i.mobile}}</td>
                             <td>{{i.admin.email}}</td>
                             <td>{{i.city}}</td>
@@ -64,14 +79,15 @@
                             <td><span class="badge bg-success">{{i.status}}</span></td>
                             
                             
-                             <td>
+                            <td>
                                 <div class="d-flex order-actions">
-                                   
+                                    {% comment %} <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a> {% endcomment %}
+                                    {% comment %} <a href="javascript:;" class="ms-3"><i class='bx bxs-trash'></i></a> {% endcomment %}
                                     <a href="{% url 'technician_edit_profile' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
                                     <a data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" href=""
                                         class="ms-3"><i class='bx bxs-trash'></i></a>
                                 </div>
-                            </td> 
+                            </td>
                            
                             
                         </tr>

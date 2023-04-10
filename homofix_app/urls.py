@@ -11,6 +11,8 @@ urlpatterns = [
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
     path("Accounts/Admin/Dashboard/",HodViews.admin_dashboard,name="admin_dashboard"),
+    path('Accounts/Admin/Add',HodViews.add_admin,name="add_admin"),
+    path('Accounts/Admin/List',HodViews.admin_list,name="admin_list"),
     path('Accounts/Admin/Profile',HodViews.admin_profile,name="admin_profile"),
     path('Accounts/Admin/Updata/Profile',HodViews.admin_update_profile,name="admin_update_profile"),
     path('Accounts/Admin/Category/',HodViews.category,name="category"),
@@ -42,6 +44,7 @@ urlpatterns = [
 
 
     ########################## Addons ##################################
+    
     path('Accounts/Admin/Addons',HodViews.addons,name="addons"),
     path('Accounts/Admin/Addons/Edit',HodViews.update_addons,name="update_addons"),
     path('Accounts/Admin/Addons/Delete/<int:id>',HodViews.delete_addons,name="delete_addons"),
@@ -100,6 +103,12 @@ urlpatterns = [
 
     ########################## Customer Payment Details ##################################
     path('Accounts/Admin/Customer/Payment/Details', HodViews.admin_customer_payment, name='admin_customer_payment'),
+
+
+
+
+    # ------------------------------------- table amount total show dummy --------------- 
+    # path('Accounts/Admin/Customer/Payment/Details', HodViews.admin_customer_payment, name='admin_customer_payment'),
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

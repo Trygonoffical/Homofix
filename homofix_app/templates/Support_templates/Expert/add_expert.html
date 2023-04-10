@@ -27,22 +27,7 @@
                <div class="row">
                   <div class="col-lg-12">
                      <div class="border border-3 p-4 rounded">
-                         <div class="mb-3">
-                           <label for="inputProductTitle" class="form-label">Category</label>
-                           <select class="form-control btn-light" name="category_id" id="select1">
-                              <option class="text-black" value="" selected disabled> --Select--</option>
-                              {% for i in category %}
-                                  <option class="text-black" value="{{i.id}}">{{i.category_name}}</option>
-                              {% endfor %}
-                          </select>
-                        </div> 
-
-                         <div class="mb-3">
-                           <label for="inputProductTitle" class="form-label">Subcategory</label>
-                           <select class="single-select" name="sub_category_id" id="product-select" multiple >
-                              <option class="text-black" value="" selected disabled> --Select--</option>
-                          </select>
-                        </div> 
+                        
                         
                       
                         
@@ -55,9 +40,10 @@
                            <label for="inputDateTime" class="form-label">Last Name</label>
                            <input class="form-control" type="text" name="last_name" placeholder="optional">
                         </div>
+                        
                         <div class="mb-3">
                            <label for="inputemail" class="form-label">Email</label>
-                           <input class="form-control"id="inputemail" type="email" name="email" required>
+                           <input class="form-control"id="inputemail" type="email" name="email" placeholder="optional">
                         </div>
                         <div class="mb-3">
                            <label for="inputpassword" class="form-label">Password</label>

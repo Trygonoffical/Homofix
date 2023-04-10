@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -28,18 +28,28 @@ class ExpertSerliazer(serializers.ModelSerializer):
 
 
 
-
 # ------------------ Task ------------------------ 
+
+
+class BookingprdSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField(source='product.id')
+    
+    class Meta:
+        model = BookingProduct
+        fields = ('id', 'product_id')
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username']
+        fields = ['username',"first_name"]
 
 class CustomerSerializer(serializers.ModelSerializer):
     admin = UserSerializer()
     class Meta:
         model = Customer
         fields = "__all__"
+
 
 class ProductSerializer(serializers.ModelSerializer):
     
@@ -59,9 +69,19 @@ class techSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+
+class BookingProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookingProduct
+        fields = ['id','product']
+
+
+
 class BookingSerializer(serializers.ModelSerializer):
+    bookingproduct_set = BookingProductSerializer(many=True)
     customer = CustomerSerializer()
     products = ProductSerializer(many=True)
+    # total_amount = serializers.DecimalField(max_digits=8, decimal_places=2, read_only=True)
     
     
 
@@ -70,12 +90,13 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+
+
 class TaskSerializer(serializers.ModelSerializer):
     booking = BookingSerializer()
     technician = techSerializer()
-   
-    
- 
+    # booking_product = BookingprdSerializer(source='booking.bookingproduct_set', many=True)
+  
 
     class Meta:
         model = Task
@@ -259,7 +280,7 @@ class SparePartsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = SpareParts
-        fields = ['product','spare_part','price','description']
+        fields = ['id','product','spare_part','price','description']
 
 # --------------------------------------- SparePARTS ----------------------         
 
@@ -276,10 +297,59 @@ class BookingProdSerializer(serializers.ModelSerializer):
         fields = ['id','booking', 'product', 'quantity', 'total_price', 'total_price_with_tax']
 
 
-class AddonsSerializer(serializers.ModelSerializer):
-    # booking_prod_id = BookingProdSerializer()
+# class AddonsSerializer(serializers.ModelSerializer):
+#     # booking_prod_id = BookingProdSerializer()
+    
+#     class Meta:
+#         model = Addon
+#         # fields = ['id', 'booking_product', 'addon_products', 'quantity', 'date', 'description']
+#         fields = "__all__"
+
+
+
+
+class SparPartsSerializer(serializers.ModelSerializer):
     
     class Meta:
+        model = SpareParts
+        fields = ['id','product','spare_part','price','description']
+
+
+class BookingProductAddonSerializer(serializers.ModelSerializer):
+    # booking = serializers.IntegerField(source='booking.id')
+    booking= BookingSerializer()
+    # technician_id = serializers.IntegerField(source='booking.technician.id')
+    
+    class Meta:
+        model = BookingProduct
+        fields = ['id','booking', 'product', 'quantity', 'total_price', 'total_price_with_tax']
+
+
+
+class AddonsSerializer(serializers.ModelSerializer):
+    # booking_prod_id = BookingProductAddonSerializer()
+    # addon_products = SparPartsSerializer()
+
+    class Meta:
         model = Addon
-        # fields = ['id', 'booking_product', 'addon_products', 'quantity', 'date', 'description']
-        fields = "__all__"
+        fields = ['id', 'booking_prod_id', 'addon_products', 'quantity', 'date', 'description']
+
+
+class AddonsGetSerializer(serializers.ModelSerializer):
+    # booking_prod_id = BookingProductAddonSerializer()
+    addon_products = SparePartsSerializer()
+
+    class Meta:
+        model = Addon
+        fields = ['id', 'booking_prod_id', 'addon_products', 'quantity', 'date', 'description']
+
+
+# ---------------------------------------- Technician Location ------------- 
+
+class TechnicianLocationSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model=TechnicianLocation
+        fields = ['technician_id','booking_id','location']
+
+        

@@ -213,16 +213,16 @@
             <a class="has-arrow" href="javascript:;">
                 <div class="parent-icon"><i class='bx bx-store'></i>
                 </div>
-                <div class="menu-title">Share Percentage</div>
+                <div class="menu-title">Settlement</div>
             </a>
             <ul class="">
                
                 <li> 
-                    <a href="{% url 'admin_share_percentage' %}"></span><i class="bx bx-right-arrow-alt"></i> Percentage History</a>
+                    <a href="{% url 'admin_share_percentage' %}"></span><i class="bx bx-right-arrow-alt"></i> Settlement History</a>
                 </li> 
                 
                 <li> 
-                    <a href="{% url 'admin_share_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Share</a>
+                    <a href="{% url 'admin_share_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Settlement</a>
                 </li> 
                 
               
@@ -240,6 +240,27 @@
                
                 <li> 
                     <a href="{% url 'admin_customer_payment' %}"></span><i class="bx bx-right-arrow-alt"></i> List Of Payment</a>
+                </li> 
+                
+                {% comment %} <li> 
+                    <a href="{% url 'admin_share_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Share</a>
+                </li>  {% endcomment %}
+                
+              
+               
+            </ul>
+        </li>
+
+        <li class="">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Admin Details</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href="{% url 'admin_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List Of Admin</a>
                 </li> 
                 
                 {% comment %} <li> 

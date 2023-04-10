@@ -30,19 +30,19 @@
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class='bx bx-store'></i>
                 </div>
-                <div class="menu-title">Orders</div>
+                <div class="menu-title">Booking</div>
             </a>
             <ul>
                 
                 
-                <li> <a href="{% url 'support_orders' %}"><span class="alert-count">{% if order_count != null %}{{order_count}} {% else %} 0 {% endif %}</span><i class="bx bx-right-arrow-alt"></i>New Order</a>
+                <li> <a href="{% url 'support_orders' %}"><span class="alert-count">{% if order_count != null %}{{order_count}} {% else %} 0 {% endif %}</span><i class="bx bx-right-arrow-alt"></i>New Booking</a>
                 </li>
                 
-                <li> <a href="{% url 'support_list_of_task' %}"><i class="bx bx-right-arrow-alt"></i>Assign Order</a>
+                <li> <a href="{% url 'support_list_of_task' %}"><i class="bx bx-right-arrow-alt"></i>Assign Booking</a>
                 </li>
                 
                 
-                <li> <a href="{% url 'order_cancel' %}"><i class="bx bx-right-arrow-alt"></i>Cancel Order</a>
+                <li> <a href="{% url 'order_cancel' %}"><i class="bx bx-right-arrow-alt"></i>Cancel Booking</a>
                 </li>
                 
             </ul>

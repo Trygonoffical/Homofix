@@ -2,6 +2,7 @@
 from django.urls import path
 from homofix_app import views,SupportViews
 
+
 urlpatterns = [
     path('', SupportViews.dashboard,name="support_dashboard"),
     path('Support/Profile', SupportViews.support_profile,name="support_profile"),

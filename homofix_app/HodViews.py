@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count
 import random
 from django.contrib.auth.models import Permission
+from django.db.models import Q
+from django.utils import timezone
 
 
 
@@ -35,7 +37,55 @@ def admin_profile(request):
     }
     return render(request,'homofix_app/AdminDashboard/profile.html',context)
 
+def add_admin(request):
+    if request.method == "POST":
+        random_number = random.randint(0, 999)
+        unique_number = str(random_number).zfill(3)
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        print("email",email)
+        mobile = request.POST.get('mobile')
+        password = request.POST.get('password')
+        print(first_name,last_name,email,mobile,password)
+        # if AdminHOD.objects.filter(mobile = mobile,admin__email=email).exists():
+        #     return JsonResponse({'status': 'error', 'message': 'Mobile Number is already Taken'})
+          
+        # if AdminHOD.objects.filter(Q(mobile=mobile) | Q(admin__email=email)).exists():
+        #     if AdminHOD.objects.filter(mobile=mobile).exists():
+        #         return JsonResponse({'status': 'error', 'message': 'Mobile Number is already taken'})
+        #     else:
+        #         return JsonResponse({'status': 'error', 'message': 'Email is already taken'})
+        if AdminHOD.objects.filter(Q(mobile=mobile) | Q(admin__email=email)).exists():
+            if AdminHOD.objects.filter(mobile=mobile, admin__email=email).exists():
+                return JsonResponse({'status': 'error', 'message': 'Mobile Number and Email are already taken'})
+            elif AdminHOD.objects.filter(mobile=mobile).exists():
+                return JsonResponse({'status': 'error', 'message': 'Mobile Number is already taken'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Email is already taken'})
 
+        user = CustomUser.objects.create(first_name=first_name,last_name=last_name,username=first_name+unique_number,email=email,password=password,user_type='1')
+        user.adminhod.mobile = mobile
+        user.save()
+        return JsonResponse({'status':'Save'})
+    # else:
+    #     return JsonResponse({'status':'error'})
+
+        
+    return render(request,'homofix_app/AdminDashboard/Admin/create_admin.html')
+
+def admin_list(request):
+    hod = AdminHOD.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    context = {
+        'hod':hod,
+        'new_expert_count':new_expert_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+    }
+    return render(request,'homofix_app/AdminDashboard/Admin/list_of_admin.html',context)
 def admin_update_profile(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -150,6 +200,16 @@ def delete_subcategory(request,id):
 def technician(request):
     category = Category.objects.all()
     technician = Technician.objects.filter(status="Active")
+    # user_status = {}
+    # for user in technician:
+    #     # check if user is logged in by looking at their last login time
+    #     if user.admin.last_login is not None and timezone.now() - user.admin.last_login < timezone.timedelta(seconds=1):
+    #         # user is online
+    #         user_status[user.id] = 'online'
+    #     else:
+    #         # user is offline
+    #         user_status[user.id] = 'offline'
+    # print("user status",user_status)
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
     rebooking_count = Rebooking.objects.all().count()
@@ -368,6 +428,8 @@ def delete_technician(request,id):
 def technician_history(request,id):
     task = Task.objects.filter(technician=id)
     rebooking = Rebooking.objects.filter(technician=id)
+    technician = Technician.objects.get(id=id)
+    tecnician_location = TechnicianLocation.objects.filter(technician_id=technician)
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
     rebooking_count = Rebooking.objects.all().count()
@@ -379,6 +441,7 @@ def technician_history(request,id):
         'booking_count':booking_count,
         'rebooking_count':rebooking_count,
         'customer_count':customer_count,
+        'tecnician_location':tecnician_location
     }
    
     return render(request,'homofix_app/AdminDashboard/History/task_history.html',context)
@@ -501,6 +564,7 @@ def technician_payment_history(request,id):
 def product(request):
     product = Product.objects.all()
     category = Category.objects.all()
+    categories = Category.objects.all()
     subcategory = SubCategory.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status="New").count()
@@ -551,7 +615,8 @@ def product(request):
         "booking_count": booking_count,
         "subcategory": subcategory,
         'rebooking_count':rebooking_count,
-        'customer_count':customer_count
+        'customer_count':customer_count,
+        'categories':categories
     }
     return render(request, "homofix_app/AdminDashboard/Product/product.html", context)
 
@@ -625,6 +690,7 @@ def update_product(request):
         price = request.POST.get('price')
         discount_price = request.POST.get('discount_price')
         warranty = request.POST.get('warranty')
+        warranty_description = request.POST.get('warranty_description')
         description = request.POST.get('description')
 
         print("description",description)
@@ -641,6 +707,7 @@ def update_product(request):
         product.price = price
         product.dis_amt = discount_price
         product.warranty = warranty
+        product.warranty_desc = warranty_description
         product.description = description
 
         product.save()
@@ -668,6 +735,7 @@ def addons(request):
     category = Category.objects.all()
     addons = SpareParts.objects.all()
     product = Product.objects.all()
+    subcategory = SubCategory.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
     rebooking_count = Rebooking.objects.all().count()
@@ -684,7 +752,7 @@ def addons(request):
         return redirect('addons')
         
 
-    return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count,'customer_count':customer_count,'category':category})
+    return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count,'customer_count':customer_count,'category':category,'subcategory':subcategory})
 
 
 
@@ -724,7 +792,7 @@ def addons_details(request):
     context = {
         'addon':addon
     }
-    return render(request,'homofix_app/AdminDashboard/Addons/addons_detail.html')
+    return render(request,'homofix_app/AdminDashboard/Addons/addons_detail.html',context)
 
 
 # --------------------- SUPPORT CREATION --------------------- 
@@ -908,6 +976,7 @@ def support_history(request,id):
 def add_faq(request):
     product = Product.objects.all()
     category = Category.objects.all()
+    subcategory =SubCategory.objects.all()
     faqs = FAQ.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
@@ -929,7 +998,8 @@ def add_faq(request):
         'booking_count':booking_count,
         'rebooking_count':rebooking_count,
         'category':category,
-        'customer_count':customer_count
+        'customer_count':customer_count,
+        'subcategory':subcategory
     }
 
     return render(request,'homofix_app/AdminDashboard/Faqs/faqs.html',context)

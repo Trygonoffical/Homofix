@@ -39,7 +39,8 @@
                 <table id="example2" class=" table  mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Order#</th>
+                            <th>#SI No</th>
+                            <th>#Order</th>
                             <th>Expert</th>
                             <th>Category</th>
                             <th>Product</th>
@@ -60,6 +61,7 @@
                     <tbody>
                         {% for i in task %}
                         <tr>
+                            <td>{{forloop.counter}}</td>
                             <td>
                                 #{{i.booking.order_id}}
                             </td>

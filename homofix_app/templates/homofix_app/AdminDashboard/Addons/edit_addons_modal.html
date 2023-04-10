@@ -1,173 +1,146 @@
 
-<div class="modal modal-lg fade" id="exampleVerticallycenteredModal{{i.id}}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog  modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Addons</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <P class="text-center mt-2" id="msg"></P>
-            
-            <form action="{% url 'update_addons' %}" method = "POST" enctype="multipart/form-data" id="productform">
-                {% csrf_token %}
-            <div class="row">
-                <div class="col-xl-9 mx-auto">
+<div class="modal fade" id="exampleVerticallycenteredModal{{i.id}}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Edit Addons Product</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <P class="text-center mt-2" id="msg"></P>
+          
+          <form action="{% url 'update_product' %}" method = "POST" enctype="multipart/form-data" id="productform">
+              {% csrf_token %}
+          <div class="row">
+              <div class="col-xl-9 mx-auto">
 
-                    <div class="mb-3">
-                        <label for="inputProductTitle" class="form-label">Category</label>
-                        <select class="form-select" name="category_name" id="select_category_edit"  required>
-                           <option value="" disabled selected>---SELECT---</option>
-                           {% for cat in category %}
-                           <option value="{{cat.id}}" {% if cat.id == i.product.subcategory.Category_id.id %}selected{% endif %}>{{cat.category_name}}</option>
-                           {% endfor %}
-                        </select>
-                    </div> 
-                    <input type="text" value={{i.id}} name="addon_id" hidden>
+                  <div class="row mb-3">
+                             
+                      <label for="product_pic" class="col-sm-12 col-form-label">Product Image</label>
+                      <div class="col-sm-12">
+                          <input type="file" class="form-control" value="{{i.product_pic}}" name="product_pic"  id="product_pic">
+                          {% if i.product_pic.url != ""  %}
+                                  <a href="{{i.product_pic.url}}">{{i.product_pic}}</a>
+                          {% endif %}
+                          <input type="text" value="{{i.id}}" name="product_id" hidden>
+                               
+                      </div>
+                  </div>
 
-                    <div class="mb-3">
-                        <label for="inputProductTitle" class="form-label">Subcategory</label>
-                        <select class="form-select" name="subcategory_name" id="select_subcategory_edit" required>
-                           
-                           <option  value="" selected disabled> --Select--</option>
-                        </select>
-                    </div> 
-
-                    <div class="mb-3">
-                        <label for="inputProductTitle" class="form-label">Product Name</label>
-                        <select class="form-select" name="product_id" id="product-select_edit"  required>
-                           
-                           <option class="text-black" value="" selected disabled> --Select--</option>
-                        </select>
-                    </div>
-
-
-                 
-
-
-                 <div class="mb-3">
-                    <label for="inputspare" class="form-label">Spare Part Name</label>
-                    <input class="form-control" type="text" value="{{i.spare_part}}" name="spare_part">
-                    
-             </div>
+                   <div class="row mb-3">
+                                  
+                      <label for="product_pic" class="col-sm-12 col-form-label">Category</label>
+                      <div class="col-sm-12">
+                          <select class="form-select"  name="category_id" id="edit_category">
+                              {% for cat in category %}
+                               {% comment %} <option class="text-black" value="{{i.id}}">{{i.category_name}}</option> {% endcomment %}
+                               {% comment %} {% if i.subcategory.Category_id_id == cat.id %} {% endcomment %}
+                               <option class="bg-dark" value="{{ cat.id }}" {% if i.product.subcategory.Category_id_id == cat.id %}selected{% endif %}>
+                                  {{ cat.category_name }}
+                              </option>
+                              {% comment %} {% endif %} {% endcomment %}
+                              {% endfor %}
+                          </select>
+                               
+                      </div>
+                  </div> 
 
 
-             <div class="mb-3">
-                <label for="inputspare" class="form-label">Price</label>
-                <input class="form-control" type="text" value="{{i.price}}" name="price">
-                
-         </div>
+                 <div class="row mb-3">
+                                  
+                      <label for="product_pic" class="col-sm-12 col-form-label">Subcategory</label>
+                      <div class="col-sm-12">
+                          <select class="form-select"  name="subcategory_id" id="edit_subcategory">
+                              {% for sub in subcategory %}
+                               {% if i.product.subcategory.Category_id_id == sub.Category_id.id %}
+                               <option class="bg-dark" value="{{ sub.id }}" {% if sub.id == i.product.subcategory.id %}selected{% endif %}>
+                                  {{ sub.name }}
+                              </option>
+                              {% endif %}
+                              {% endfor %}
+                          </select>
+                               
+                      </div>
+                  </div> 
 
+                  
 
-
-                    
-                   
-                   
-                    
-                    <div class="row mb-3">
-                        <label for="inputEnterYourName" class="col-sm-12 col-form-label">Description</label>
-                        <div class="col-sm-12">
-                            {% comment %} <textarea name="description">{{i.description|safe}}</textarea> {% endcomment %}
-                            <textarea class="form-control" id="inputProductDescription" rows="3" name="desc" >{{i.description}}</textarea>
-                            
-                        </div>
-                    </div>
-                    
-                    
-                    
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save</button>
-                
-                {% comment %} <button type="submit" class="btn btn-primary">Save </button> {% endcomment %}
-            </div>
-            </form>
-        </div>
-    </div>
+                  <div class="row mb-3">
+                      <label for="inputEnterYourName" class="col-sm-12 col-form-label">Product Title</label>
+                      <div class="col-sm-12">
+                          <input type="text" class="form-control"  placeholder="Enter Your Product Title" id ="product_title" value="{{i.product_title}}" name="product_title" required>
+                      </div>
+                  </div>
+                  <div class="row mb-3">
+                      <label for="inputEnterYourName" class="col-sm-12 col-form-label">Product Name</label>
+                      <div class="col-sm-12">
+                          <input type="text" class="form-control"  placeholder="Enter Your Product" id ="product_name" value="{{i.name}}" name="product_name" required>
+                      </div>
+                  </div>
+                  <div class="row mb-3">
+                      <label for="inputEnterYourName" class="col-sm-12 col-form-label">Price</label>
+                      <div class="col-sm-12">
+                          <input type="number" class="form-control"  placeholder="Price" id ="price" value="{{i.price}}" name="price" required>
+                      </div>
+                  </div>
+                  <div class="row mb-3">
+                      <label for="inputEnterYourName" class="col-sm-12 col-form-label">Discount Amount</label>
+                      <div class="col-sm-12">
+                          <input type="number" class="form-control"  placeholder="Discount Amount" id ="discount_price" value="{{i.dis_amt}}" name="discount_price" required>
+                      </div>
+                  </div>
+                  
+                  
+                  {% comment %} <h6 class="mb-0 text-uppercase">Category Form</h6> {% endcomment %}
+                  
+                  
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Update</button>
+              
+              {% comment %} <button type="submit" class="btn btn-primary">Save </button> {% endcomment %}
+          </div>
+          </form>
+      </div>
+  </div>
 </div>
-
-{% comment %} <script>
-    // select all textarea elements on the page
-    var textareas = document.getElementsByTagName('textarea');
-    
-    // loop through all textarea elements and replace them with CKEditor instances
-    for (var i = 0; i < textareas.length; i++) {
-        CKEDITOR.replace(textareas[i]);
-    }
-</script> {% endcomment %}
-
-{% comment %} <script>
-    CKEDITOR.replace('description');
-</script> {% endcomment %}
-
-
-
-
 
 
 <script>
-    $(document).ready(function() {
-       // When the category dropdown changes, send an AJAX request to retrieve the corresponding subcategories
-       $("#select_category_edit").change(function() {
-         var category_id = $(this).val();
-         if (category_id) {
-           $.ajax({
-             url: "{% url 'get_subcategories' %}",
-             type: "GET",
-             data: {
-               category_id: category_id
-             },
-             dataType: "json",
-             success: function(data) {
-               // Clear the current options in the subcategory dropdown
-               $("#select_subcategory_edit").html("");
-               // Add the retrieved subcategories as options to the subcategory dropdown
-               $("#select_subcategory_edit").append('<option value="" selected disabled> --Select--</option>');
-               $.each(data, function(key, value) {
-                 $("#select_subcategory_edit").append('<option  value="' + value.id + '">' + value.name + '</option>');
-               });
-               // Enable the subcategory dropdown
-               $("#select_subcategory_edit").prop("disabled", false);
-             }
-           });
-         } else {
-           // If no category is selected, disable the subcategory dropdown and clear its options
-           $("#select_subcategory_edit").prop("disabled", true);
-           $("#select_subcategory_edit").html('<option value="" selected disabled> --Select--</option>');
-         }
-       });
-       
-       // When the subcategory dropdown changes, send an AJAX request to retrieve the corresponding products
-       $("#select_subcategory_edit").change(function() {
-          var subcategory_id = $(this).val();
-        
-          if (subcategory_id) {
-            $.ajax({
-              url: "{% url 'get_products' %}",
-              type: "GET",
-              data: {
-                subcategory_id: subcategory_id
-              },
-              dataType: "json",
-              success: function(data) {
-                // Clear the current options in the product selection dropdown
-                $("#product-select_edit").html("");
-                // Add the retrieved products as options to the product selection dropdown
-                $.each(data, function(key, value) {
-                  $("#product-select_edit").append(
-                    '<option value="' + value.id + '" data-rate="'  + '">' + value.name +   '</option>'
-                  );
-                });
-              }
-            });
+  $(document).ready(function() {
+      // When the category dropdown changes, send an AJAX request to retrieve the corresponding subcategories
+      $("#edit_category").change(function() {
+          var category_id = $(this).val();
+          if (category_id) {
+              $.ajax({
+                  url: "{% url 'get_subcategories' %}",
+                  type: "GET",
+                  data: {
+                      category_id: category_id
+                  },
+                  dataType: "json",
+                  success: function(data) {
+                      // Clear the current options in the subcategory dropdown
+                      $("#edit_subcategory").html("");
+                      // Add the retrieved subcategories as options to the subcategory dropdown
+                      $("#edit_subcategory").append(
+                          '<option  value="" selected disabled> --Select--</option>'
+                      );
+                      $.each(data, function(key, value) {
+                          $("#edit_subcategory").append(
+                              '<option class="text-black" value="' + value.id + '">' + value.name + '</option>'
+                          );
+                      });
+                      // Enable the subcategory dropdown
+                      $("#edit_subcategory").prop("disabled", false);
+                  }
+              });
           } else {
-            // If no subcategory is selected, disable the product selection dropdown and clear its options
-            $("#product-select_edit").prop("disabled", true);
-            $("#product-select_edit").html('<option value="" selected disabled> --Select--</option>');
+              // If no category is selected, disable the subcategory dropdown and clear its options
+              $("#edit_subcategory").prop("disabled", true);
+              $("#edit_subcategory").html('<option value="" selected disabled> --Select--</option>');
           }
-        });
-        
-     });
-     
- </script> 
+      });
+  });
+</script>
