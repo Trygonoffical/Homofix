@@ -15,6 +15,8 @@ router.register('SpareParts', API_Views.SparePartsViewSet,basename="SpareParts")
 router.register('Addons', API_Views.AddonsViewSet,basename="Addons")
 router.register('Addons-GET', API_Views.AddonsGetViewSet,basename="Addons-GET")
 router.register('Location', API_Views.TechnicianLocationViewSet,basename="Location")
+router.register('OnlineOffline', API_Views.TechnicianOnlineViewSet, basename='OnlineOffline')
+# router.register('update_online', API_Views.update_online, basename='update_online')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +25,12 @@ urlpatterns = [
     path("Technician/",include('homofix_app.technician_urls')),
     path('api/Login/',API_Views.LoginViewSet.as_view(),name="api_login"),
     path('api/',include(router.urls),name="api"),
+    path('api/RechargeHistory/Post/',API_Views.post_rechargeHistory,name="recharge_history"),
+    path('api/RechargeHistory/GET/',API_Views.get_RechargeHistory,name="recharge_history_get"),
+    path('api/Wallet/GET/',API_Views.get_Wallet,name="get_Wallet"),
+    path('api/Wallet/History/GET/',API_Views.get_Wallet_History,name="get_Wallet_History"),
+    path('api/Withdraw/Request/Post/',API_Views.post_withdraw_req,name="post_withdraw_req"),
+    path('api/Withdraw/Request/Get/',API_Views.get_Withdraw_Req,name="get_Withdraw_Req")
+    
    
 ]

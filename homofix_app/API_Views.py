@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer
+from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,9 +8,9 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet,ModelViewSet
 from rest_framework.views import APIView
-
-from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation
-
+from rest_framework import viewsets
+from rest_framework.decorators import api_view
+from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest
 
 
 
@@ -107,9 +107,30 @@ class RebookingViewSet(ModelViewSet):
     #     instance = self.get_object()
     #     serializer = self.get_serializer(instance)
     #     return Response(serializer.data) 
+    
+
     queryset = Rebooking.objects.all()     
     serializer_class  = RebookingSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        technician_id = self.request.query_params.get('technician_id')
+       
+        if technician_id:
+            queryset = queryset.filter(technician_id=technician_id)
+        return queryset
     
+    def update(self, request, pk=None):
+        try:
+            rebooking = self.get_object()
+            serializer = self.get_serializer(rebooking, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Rebooking.DoesNotExist:
+            return Response({"error": "Rebooking not found."}, status=status.HTTP_404_NOT_FOUND)
 
 # ---------------- Booking --------------------- 
 
@@ -183,3 +204,203 @@ class TechnicianLocationViewSet(ModelViewSet):
 
         
         
+# ------------------------------------- show offline online -----------------------
+
+
+
+class TechnicianOnlineViewSet(viewsets.ViewSet):
+    
+    def list(self, request):
+        showonline_objs = showonline.objects.all()
+        serializer=TechnicianOnlineSerializer(showonline_objs,many=True)
+        return Response({
+            'status':True,
+            'message':'Show Online Offline fetched',
+            'data':serializer.data
+        })
+
+    def update(self, request, pk=None):
+        try:
+            instance = showonline.objects.get(pk=pk)
+            serializer = TechnicianOnlineSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': True,
+                    'message': f'Show Online Offline with id {pk} updated',
+                    'data': serializer.data
+                })
+            else:
+                return Response({
+                    'status': False,
+                    'message': 'Invalid data',
+                    'data': serializer.errors
+                })
+        except showonline.DoesNotExist:
+            return Response({
+                'status': False,
+                'message': f'Show Online Offline with id {pk} does not exist',
+            })
+    
+    # def create(self, request):
+    #     serializer = TechnicianOnlineSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response({
+    #             'status': True,
+    #             'message': 'New Show Online Offline created',
+    #             'data': serializer.data
+    #         })
+    #     else:
+    #         return Response({
+    #             'status': False,
+    #             'message': 'Invalid data',
+    #             'data': serializer.errors
+    #         })
+    
+
+
+# ----------------------------- RechargeHistory ----------------------
+# @api_view(['GET'])
+# def get_RechargeHistory(request):
+#     todo_objs = RechargeHistory.objects.all()
+#     serializer=TechnicianRechargeHistorySerializer(todo_objs,many=True)
+#     return Response({
+#         'status':True,
+#         'message':'Recharge History fetched',
+#         'data':serializer.data
+#     })
+
+@api_view(['GET'])
+def get_RechargeHistory(request):
+    technician_id = request.GET.get('technician_id') # retrieve the technician_id query parameter
+    queryset = RechargeHistory.objects.all()
+    if technician_id is not None:
+        queryset = queryset.filter(technician_id=technician_id) # filter queryset by technician_id if it is not None
+    serializer = TechnicianRechargeHistorySerializer(queryset, many=True)
+    return Response({
+        'status': True,
+        'message': 'Recharge History fetched',
+        'data': serializer.data
+    })
+
+
+@api_view(['POST'])
+def post_rechargeHistory(request):
+    try:
+        data = request.data
+        serializer = TechnicianRechargeHistorySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            # Get the technician ID from the serializer data
+            technician_id = serializer.data['technician_id']
+            # Get the Wallet object for the technician
+            technician_wallet = Wallet.objects.get(technician_id=technician_id)
+            # Update the technician's total_share field with the amount from the serializer data
+            technician_wallet.total_share += serializer.data['amount']
+            technician_wallet.save()
+            return Response({
+                'status': True,
+                'message': "success data",
+                'data': serializer.data      
+            })
+        return Response({
+            'status': False,
+            'message': "invalid data",
+            'data': serializer.errors  
+        })
+    except Exception as e:
+        print(e)
+        return Response({
+            'status': False,
+            'message': "Something went wrong",  
+        })
+
+
+
+# ------------------------ wallet --------------------------- 
+
+@api_view(['GET'])
+def get_Wallet(request):
+    technician_id = request.GET.get('technician_id') # retrieve the technician_id query parameter
+    print("hellooo",technician_id)
+    queryset = Wallet.objects.all()
+    if technician_id is not None:
+        queryset = queryset.filter(technician_id=technician_id) 
+    serializer=TechnicianWalletSerializer(queryset,many=True)
+    return Response({
+        'status':True,
+        'message':'Wallet  fetched',
+        'data':serializer.data
+    })
+
+
+# ----------------------------------- Wallet History ----------------------------- 
+
+
+@api_view(['GET'])
+def get_Wallet_History(request):
+    technician_id = request.GET.get('technician_id') # retrieve the technician_id query parameter
+    
+    queryset = WalletHistory.objects.all()
+    if technician_id is not None:
+        queryset = queryset.filter(wallet__technician_id=technician_id) 
+    serializer=TechnicianWalletHistorySerializer(queryset,many=True)
+    return Response({
+        'status':True,
+        'message':'Wallet History fetched',
+        'data':serializer.data
+    })
+
+
+
+# ----------------------------------- Withdraw Request ----------------------------- 
+
+
+@api_view(['POST'])
+def post_withdraw_req(request):
+    try:
+        data = request.data
+        serializer = TechnicianWithdrawRequestSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            # Get the technician ID from the serializer data
+            # technician_id = serializer.data['technician_id']
+            # # Get the Wallet object for the technician
+            # technician_wallet = Wallet.objects.get(technician_id=technician_id)
+            # # Update the technician's total_share field with the amount from the serializer data
+            # technician_wallet.total_share += serializer.data['amount']
+            # technician_wallet.save()
+            return Response({
+                'status': True,
+                'message': "success data",
+                'data': serializer.data      
+            })
+        return Response({
+            'status': False,
+            'message': "invalid data",
+            'data': serializer.errors  
+        })
+    except Exception as e:
+        print(e)
+        return Response({
+            'status': False,
+            'message': "Something went wrong",  
+        })
+
+
+
+
+@api_view(['GET'])
+def get_Withdraw_Req(request):
+    technician_id = request.GET.get('technician_id') # retrieve the technician_id query parameter
+    
+    queryset = WithdrawRequest.objects.all()
+    if technician_id is not None:
+        queryset = queryset.filter(technician_id=technician_id) 
+    serializer=TechnicianWithdrawRequestSerializer(queryset,many=True)
+    return Response({
+        'status':True,
+        'message':'Withdraw Request Send',
+        'data':serializer.data
+    })

@@ -44,6 +44,9 @@ class Category(models.Model):
     def __str__(self):
         return self.category_name
     
+
+    
+    
 class SubCategory(models.Model):
     Category_id = models.ForeignKey(to=Category,on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -120,7 +123,6 @@ class Support(models.Model):
     can_contact_us_enquiry = models.BooleanField(default=False)
     can_job_enquiry = models.BooleanField(default=False)
 
-   
 
     def save(self, *args, **kwargs):
         if not self.support_id:
@@ -202,7 +204,7 @@ class Technician(models.Model):
         super().delete(*args, **kwargs)
 
     def __str__(self):
-        return str(self.expert_id)
+        return str(self.id)
  
 
 
@@ -240,12 +242,19 @@ class Product(models.Model):
     subcategory = models.ForeignKey(SubCategory,on_delete=models.CASCADE)
     price = models.IntegerField()
     dis_amt = models.IntegerField(null=True,blank=True)
+    selling_price = models.IntegerField(null=True,blank=True)
     warranty = models.CharField(max_length=50,null=True,blank=True)
     warranty_desc = RichTextField(null=True,blank=True)
     description = RichTextField()
     created_at=models.DateField(auto_now_add=True)
     quantity = models.IntegerField(default=1)
     
+    def save(self, *args, **kwargs):
+        if not self.selling_price:
+            self.selling_price=self.price - self.dis_amt
+           
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
     
@@ -373,7 +382,7 @@ class SpareParts(models.Model):
 
 class Addon(models.Model):
     booking_prod_id = models.ForeignKey(BookingProduct,on_delete=models.CASCADE)
-    addon_products = models.ForeignKey(SpareParts,on_delete=models.CASCADE)
+    spare_parts_id = models.ForeignKey(SpareParts,on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     date = models.DateField(auto_now_add=True)
     description = models.TextField(null=True,blank=True)
@@ -454,7 +463,7 @@ class Share(models.Model):
 
 
 class Wallet(models.Model):
-    technician = models.ForeignKey(Technician, on_delete=models.CASCADE)
+    technician_id = models.ForeignKey(Technician, on_delete=models.CASCADE)
     total_share = models.IntegerField(default=0)
 
     def add_bonus(self, bonus_amount):
@@ -464,9 +473,24 @@ class Wallet(models.Model):
     def deduct_amount(self, amount):
         self.total_share -= amount
         self.save()
+    
+    # def recharge_technician_wallet(self, technician_id, amount):
+    #     technician = Technician.objects.get(id=technician_id)
+    #     if technician == self.technician:
+    #         self.total_share += amount
+    #         self.save()
+    def update_total_share(self):
+        # Get the recharge history for the technician
+        recharge_history = RechargeHistory.objects.filter(technician_id=self.technician.id)
+        
+        # Sum the amounts from all entries in the recharge history and update the total_share field
+        total_amount = sum([entry.amount for entry in recharge_history])
+        self.total_share = total_amount
+        self.save()
+
 
     def __str__(self):
-        return self.technician.admin.username
+        return self.technician_id.admin.username
     
 
 class WalletHistory(models.Model):
@@ -562,8 +586,36 @@ class Kyc(models.Model):
     branch = models.CharField(max_length=50)
     bank_holder_name = models.CharField(max_length=100)
     def __str__(self):
-        return self.technician_id
+        return str(self.technician_id)
     
+
+class showonline(models.Model):
+    technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)    
+    online = models.BooleanField(default=False)
+    date = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.technician_id.admin.username
+
+        
+    
+
+class RechargeHistory(models.Model):
+    payment_id = models.CharField(max_length=50,null=True,blank=True)
+    technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    date = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=10,null=True,blank=True)
+
+    def __str__(self):
+        return str(self.technician_id) + ' - ' + str(self.amount)
+
+
+class WithdrawRequest(models.Model):
+    technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    date = models.DateField(auto_now_add=True)
+
+
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):
     if created:
@@ -571,6 +623,11 @@ def create_user_profile(sender,instance,created,**kwargs):
             AdminHOD.objects.create(admin=instance)
         if instance.user_type=='2':
             technician = Technician.objects.create(admin=instance, present_address="")
+            showonlin = showonline.objects.create(technician_id=technician)
+            showonlin.save()
+            wallet = Wallet.objects.create(technician_id=technician)
+            wallet.save()
+            
             technician.subcategories.set([SubCategory.objects.first()])
         if instance.user_type=='3':
             

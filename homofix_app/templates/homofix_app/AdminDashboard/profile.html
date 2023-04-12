@@ -64,7 +64,7 @@
                 </div>
                 <div class="col-lg-8">
                     <div class="card">
-                        <form action="" method="POST" id="adminprofileform">
+                        <form action="{% url 'admin_update_profile' %}" method="POST" id="adminprofileform">
                             {% csrf_token %}
                         <div class="card-body">
                             <div class="row mb-3">
@@ -72,9 +72,26 @@
                                     <h6 class="mb-0">Username</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{user.username}}" name="username" id="username">
+                                    <input type="text" class="form-control" value="{{user.username}}" name="username" id="username" readonly>
                                 </div>
                             </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">First Name</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{user.first_name}}" name="first_name" id="first_name">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Last Name</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{user.last_name}}" name="last_name" id="last_name">
+                                </div>
+                            </div>
+                           
                             <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Email</h6>
@@ -83,6 +100,9 @@
                                     <input type="text" class="form-control" value="{{user.email}}" name="email" id="email">
                                 </div>
                             </div>
+                            <hr>
+                            
+                             
                             {% comment %} <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Phone</h6>
@@ -131,6 +151,8 @@
 	$(document).on('submit', '#adminprofileform',function(e){
 		e.preventDefault();
 		let username = $('#username').val()
+		let first_name = $('#first_name').val()
+		let last_name = $('#last_name').val()
 		let email = $('#email').val()
 		
         
@@ -141,6 +163,8 @@
 			url:"{% url 'admin_update_profile' %}",
 			data:{
 				username:username,
+				first_name:first_name,
+				last_name:last_name,
 				email:email,
 				csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val()
 			},
@@ -167,6 +191,6 @@
 		
 	})
 
-</script>
+</script> 
   
 {% endblock main-content %}

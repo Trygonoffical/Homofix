@@ -37,6 +37,7 @@ def admin_profile(request):
     }
     return render(request,'homofix_app/AdminDashboard/profile.html',context)
 
+
 def add_admin(request):
     if request.method == "POST":
         random_number = random.randint(0, 999)
@@ -64,7 +65,8 @@ def add_admin(request):
             else:
                 return JsonResponse({'status': 'error', 'message': 'Email is already taken'})
 
-        user = CustomUser.objects.create(first_name=first_name,last_name=last_name,username=first_name+unique_number,email=email,password=password,user_type='1')
+        user = CustomUser.objects.create(first_name=first_name,last_name=last_name,username=first_name+unique_number,email=email,user_type='1')
+        user.set_password(password)
         user.adminhod.mobile = mobile
         user.save()
         return JsonResponse({'status':'Save'})
@@ -73,6 +75,31 @@ def add_admin(request):
 
         
     return render(request,'homofix_app/AdminDashboard/Admin/create_admin.html')
+
+def edit_admin(request,id):
+    hod = AdminHOD.objects.get(id=id)
+    if request.method == "POST":
+        
+        # hod = AdminHOD.objects.get(id=id)
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        mobile = request.POST.get('mobile')
+        hod.admin.first_name = first_name
+        hod.admin.last_name = last_name
+        hod.admin.email = email
+        hod.admin.mobile = mobile
+        hod.save()
+        print(first_name,last_name,email,mobile)
+        messages.success(request,'Admin updated successfully')
+        return redirect('admin_list')
+        
+        # first_name = request.POST.get('first_name')
+    context = {
+        'hod':hod
+    }
+
+    return render(request,'homofix_app/AdminDashboard/Admin/edit_admin.html',context)
 
 def admin_list(request):
     hod = AdminHOD.objects.all()
@@ -89,14 +116,18 @@ def admin_list(request):
 def admin_update_profile(request):
     if request.method == "POST":
         username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         email = request.POST.get('email')
 
-        if CustomUser.objects.filter(username = username).exists():
-            return JsonResponse({'status': 'error', 'message': 'Username is already Taken'})
+        # if CustomUser.objects.filter(username = username).exists():
+        #     return JsonResponse({'status': 'error', 'message': 'Username is already Taken'})
           
         id = request.user.id
         user = CustomUser.objects.get(id=id)
-        user.username = username
+        # user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
         user.email = email
         user.save()
         print("success")
@@ -105,7 +136,6 @@ def admin_update_profile(request):
         print("erorrrrr")
         
     return render(request,'homofix_app/AdminDashboard/profile.html')
-
 
 def category(request):
     category = Category.objects.all()
@@ -305,9 +335,12 @@ def technician_edit_profile(request,id):
     booking_count = Booking.objects.filter(status = "New").count()
     technician = Technician.objects.get(id=id)
     state_choices = STATE_CHOICES
+    sub_cat = SubCategory.objects.all()
+
    
     category = Category.objects.all()
     subcategories = technician.subcategories.all()
+    print("subcategory",subcategories)
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
    
@@ -335,7 +368,6 @@ def technician_edit_profile(request,id):
         status = request.POST.get('status')   
         date_of_joining = request.POST.get('date_of_joining')   
         application_form = request.FILES.get('application_form')   
-        
 
         technician.admin.username = username
         technician.admin.first_name = first_name
@@ -499,9 +531,8 @@ def technician_history(request,id):
 def technician_payment_history(request,id):
 
     technician = Technician.objects.get(id=id)
-    wallet_history = WalletHistory.objects.filter(wallet__technician=technician)
-    
-    
+    wallet_history = WalletHistory.objects.filter(wallet__technician_id=technician)
+   
     share = Share.objects.filter(task__technician=technician)
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
@@ -509,7 +540,7 @@ def technician_payment_history(request,id):
     customer_count = Customer.objects.all().count() 
     
     try:
-        wallet = Wallet.objects.get(technician=technician)
+        wallet = Wallet.objects.get(technician_id=technician)
     except Wallet.DoesNotExist:
         wallet = None
         messages.warning(request, 'No wallet found for this technician.')
@@ -574,8 +605,8 @@ def product(request):
         product_pic = request.FILES.get("product_pic")
         product_name = request.POST.get("product_name")
         product_title = request.POST.get("product_title")
-        price = request.POST.get("price")
-        discount_amt = request.POST.get("discount_amt")
+        price = int(request.POST.get("price"))
+        discount_amt = int(request.POST.get("discount_amt"))
         warranty = request.POST.get("warranty")
         description = request.POST.get("desc")
         warranty_desc = request.POST.get("warranty_desc")
@@ -1346,3 +1377,54 @@ def admin_customer_payment(request):
     }
 
     return render(request,'homofix_app/AdminDashboard/CustomerPayment/list_of_payment.html',context)
+
+
+
+def admin_reset_psw(request):
+   
+    id = request.user.id
+    print("iddd",id)
+    if request.method == "POST":
+        old_psw = request.POST.get('old_psw')
+        new_psw = request.POST.get('new_psw')
+        confirm_psw = request.POST.get('confirm_psw')
+        # id = request.user.id
+        user = CustomUser.objects.get(id=id)
+        
+        if old_psw and new_psw:
+            if user.check_password(old_psw):
+                if new_psw == confirm_psw:
+                    if old_psw == new_psw:
+                        messages.error(request, 'New password must be different from the old password')
+                        return redirect('admin_reset_psw')
+                    else:
+                        user.set_password(new_psw)
+                        user.save()
+                        messages.success(request,'Password successfully changed')
+                        return redirect('admin_reset_psw')
+                else:
+                    messages.error(request, 'Passwords do not match')
+                    return redirect('admin_reset_psw')
+            else:
+                messages.error(request, 'Old password is incorrect')
+                return redirect('admin_reset_psw')
+    return render(request, 'homofix_app/Authentication/reset_psw.html')
+        
+
+        # if old_psw and new_psw:
+        #     if user.check_password(old_psw):
+        #         if new_psw == confirm_psw:
+
+        #             user.set_password(new_psw)
+        #             messages.success(request,'success: password changed')
+        #             return redirect('admin_reset_psw')
+        #             # print("success: password changed")
+        #         else:
+        #             messages.error(request,'password not match')
+        #             return redirect('admin_reset_psw')
+        #             # print("password not match")
+        #     else:
+        #         messages.error(request,'old password does not match')
+        #         return redirect('admin_reset_psw')
+                # print("error: old password does not match")
+    # return render(request,'homofix_app/Authentication/reset_psw.html')

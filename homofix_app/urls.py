@@ -10,8 +10,10 @@ urlpatterns = [
 
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
+    path("Accounts/Admin/Change/Password",HodViews.admin_reset_psw,name="admin_reset_psw"),
     path("Accounts/Admin/Dashboard/",HodViews.admin_dashboard,name="admin_dashboard"),
     path('Accounts/Admin/Add',HodViews.add_admin,name="add_admin"),
+    path('Accounts/Admin/Edit/<int:id>',HodViews.edit_admin,name="edit_admin"),
     path('Accounts/Admin/List',HodViews.admin_list,name="admin_list"),
     path('Accounts/Admin/Profile',HodViews.admin_profile,name="admin_profile"),
     path('Accounts/Admin/Updata/Profile',HodViews.admin_update_profile,name="admin_update_profile"),
@@ -103,7 +105,7 @@ urlpatterns = [
 
     ########################## Customer Payment Details ##################################
     path('Accounts/Admin/Customer/Payment/Details', HodViews.admin_customer_payment, name='admin_customer_payment'),
-
+    
 
 
 

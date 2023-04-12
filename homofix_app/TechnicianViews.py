@@ -133,7 +133,7 @@ def expert_task_addon(request, booking_id):
         # create addon object
         addon = Addon.objects.create(
             booking_prod_id=booking,
-            addon_products=spare_part_id,
+            spare_parts_id=spare_part_id,
             description=addon_description,           
             quantity=quantity
         )

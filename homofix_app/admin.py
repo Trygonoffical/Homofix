@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation
+from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory
 
 # Register your models here.
 
@@ -20,8 +20,11 @@ admin.site.register(ContactUs)
 admin.site.register(HodSharePercentage)
 admin.site.register(Payment)
 # admin.site.register(Addon)
-admin.site.register(Wallet)
+# admin.site.register(Wallet)
 admin.site.register(TechnicianLocation)
+admin.site.register(Kyc)
+admin.site.register(showonline)
+admin.site.register(RechargeHistory)
 
 
 
@@ -29,6 +32,10 @@ admin.site.register(TechnicianLocation)
 @admin.register(Technician)
 class TechnicianAdmin(admin.ModelAdmin):
     list_display=['id','admin']
+
+@admin.register(Wallet)
+class TechnicianAdmin(admin.ModelAdmin):
+    list_display=['id','technician_id','total_share','add_bonus','deduct_amount','update_total_share']
 
 @admin.register(SpareParts)
 class TechnicianAdmin(admin.ModelAdmin):
@@ -48,7 +55,7 @@ class SupportAdmin(admin.ModelAdmin):
 
 @admin.register(Addon)
 class SupportAdmin(admin.ModelAdmin):
-    list_display=['id','booking_prod_id','addon_products','quantity','description','date']
+    list_display=['id','booking_prod_id','spare_parts_id','quantity','description','date']
 
     
 

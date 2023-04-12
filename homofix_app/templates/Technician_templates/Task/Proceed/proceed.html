@@ -50,8 +50,8 @@
 												{% comment %} <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#exampleDarkModal">Dark Modal</button> {% endcomment %}
 											</h3>
 											{% for i in adon %}
-											{% if i.addon_products.product.id ==  bookingProd.product.id %}
-											{{i.addon_products.spare_part}} <br>
+											{% if i.spare_parts_id.product.id ==  bookingProd.product.id %}
+											{{i.spare_parts_id.spare_part}} <br>
 											{% endif %}
 
 											{% endfor %}
@@ -63,15 +63,15 @@
 										</td>
 										<td class="unit">{{ bookingProd.product.price }}.00 <br>
 											{% for i in adon %}
-											{% if i.addon_products.product.id ==  bookingProd.product.id %}
-											{{i.addon_products.price}}.00 <br>
+											{% if i.spare_parts_id.product.id ==  bookingProd.product.id %}
+											{{i.spare_parts_id.price}}.00 <br>
 											{% endif %}
 
 											{% endfor %}
 										</td>
 										<td class="qty">{{ bookingProd.quantity }} <br>
 											{% for i in adon %}
-											{% if i.addon_products.product.id ==  bookingProd.product.id %}
+											{% if i.spare_parts_id.product.id ==  bookingProd.product.id %}
 											{{i.quantity}} <br>
 											{% endif %}
 
@@ -80,8 +80,8 @@
 										</td>
 										<td class="total">{% call_sellprice bookingProd.product.price bookingProd.quantity %}.00 <br>
 											{% for i in adon %}
-											{% if i.addon_products.product.id ==  bookingProd.product.id %}
-											{% call_sellprice i.addon_products.price i.quantity %}.00 <br>
+											{% if i.spare_parts_id.product.id ==  bookingProd.product.id %}
+											{% call_sellprice i.spare_parts_id.price i.quantity %}.00 <br>
 											{% endif %}
 
 

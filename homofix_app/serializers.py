@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -15,7 +15,7 @@ class LoginSerliazer(serializers.Serializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username']
+        fields = ['username','email','first_name']
 
  
 class ExpertSerliazer(serializers.ModelSerializer):
@@ -332,16 +332,17 @@ class AddonsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Addon
-        fields = ['id', 'booking_prod_id', 'addon_products', 'quantity', 'date', 'description']
+        fields = ['id', 'booking_prod_id', 'spare_parts_id', 'quantity', 'date', 'description']
 
 
 class AddonsGetSerializer(serializers.ModelSerializer):
     # booking_prod_id = BookingProductAddonSerializer()
-    addon_products = SparePartsSerializer()
+    spare_parts_id = SparePartsSerializer()
+    booking_id = serializers.ReadOnlyField(source='booking_prod_id.booking.id')
 
     class Meta:
         model = Addon
-        fields = ['id', 'booking_prod_id', 'addon_products', 'quantity', 'date', 'description']
+        fields = ['id','booking_id', 'booking_prod_id', 'spare_parts_id', 'quantity', 'date', 'description']
 
 
 # ---------------------------------------- Technician Location ------------- 
@@ -352,4 +353,57 @@ class TechnicianLocationSerializer(serializers.ModelSerializer):
         model=TechnicianLocation
         fields = ['technician_id','booking_id','location']
 
-        
+
+
+# --------------------------- Online Offline -------------------------- 
+class TechnicianOnlineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = showonline
+        # fields = '__all__'
+        exclude = ['date']
+
+
+
+
+# ----------------------------------- RechargeHistory ------------------
+class TechnicianRechargeHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RechargeHistory
+        fields = '__all__'
+        # exclude = ['date']
+
+
+# ------------------------- wallet -------------------- 
+
+class TechnicianWalletSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wallet
+        fields = '__all__'
+        # exclude = ['date']
+
+# --------------------- Wallet History --------------------- 
+class TechnicianWalletHistorySerializer(serializers.ModelSerializer):
+    # technician_id = serializers.IntegerField(source='wallet.technician_id')
+    technician_id = serializers.PrimaryKeyRelatedField(source='wallet.technician_id', read_only=True)
+    class Meta:
+        model = WalletHistory
+        # fields = '__all__'
+        fields = ('id', 'technician_id', 'type', 'amount', 'description', 'date')
+
+
+
+# ------------------------- WithdrawRequest ------------------------- 
+
+class TechnicianWithdrawRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WithdrawRequest
+        fields = '__all__'
+
+
+
+# ------------------------- Reebooking -------------------------         
+
+# class TechnicianRebookingSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model=Rebooking
+#         fields = '__all__'

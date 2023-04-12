@@ -354,6 +354,7 @@ def support_booking(request):
         area = request.POST.get('area')
         description = request.POST.get('description')
         total_amount = int(request.POST.get('total_amount'))
+        print("sss",total_amount)
         
         customer = Customer.objects.get(id=customer_id)
         if city:
@@ -648,13 +649,18 @@ def support_get_subcategories(request):
     data = list(subcategories.values('id', 'name'))
     return JsonResponse(data, safe=False)
 
-
 def support_get_products(request):
     subcategory_id = request.GET.get('subcategory_id')
     if subcategory_id:
         subcategory_id = int(subcategory_id)
         products = Product.objects.filter(subcategory_id=subcategory_id)
-        data = [{'id': product.id,'price': product.price, 'name': product.name} for product in products]
+        data = []
+        for product in products:
+            if product.selling_price is not None:
+                price = product.selling_price
+            else:
+                price = product.price
+            data.append({'id': product.id, 'price': price, 'name': product.name})
         return JsonResponse(data, safe=False)
     else:
         return JsonResponse([], safe=False)
