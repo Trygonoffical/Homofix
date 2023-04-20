@@ -7,7 +7,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     
-
+    path('All/Location',HodViews.all_location,name="all_location"),
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
     path("Accounts/Admin/Change/Password",HodViews.admin_reset_psw,name="admin_reset_psw"),
@@ -27,6 +27,7 @@ urlpatterns = [
     path('Accounts/Admin/SubCategory/Delete/<int:id>',HodViews.delete_subcategory,name="delete_subcategory"),
     path('get-subcategories/', HodViews.get_subcategories, name='get_subcategories'),
     path('get-products/', HodViews.get_products, name='get_products'),
+    path('get-products/Price', HodViews.get_products_price, name='get_products_price'),
 
 
 # ----------------------------------------- Technician ------------------------- 
@@ -48,7 +49,8 @@ urlpatterns = [
     ########################## Addons ##################################
     
     path('Accounts/Admin/Addons',HodViews.addons,name="addons"),
-    path('Accounts/Admin/Addons/Edit',HodViews.update_addons,name="update_addons"),
+    path('Accounts/Admin/Addons/Edit/<int:id>',HodViews.edit_addons,name="edit_addons"),
+    path('Accounts/Admin/Addons/Update',HodViews.update_addons,name="update_addons"),
     path('Accounts/Admin/Addons/Delete/<int:id>',HodViews.delete_addons,name="delete_addons"),
     path('Accounts/Admin/Addons/Details/',HodViews.addons_details,name="addons_details"),
 
@@ -71,6 +73,10 @@ urlpatterns = [
 
     ########################## Booking List ##################################
      path('Accounts/Admin/BookingList', HodViews.booking_list, name='booking_list'),
+     path('Accounts/Admin/Verify/Otp', HodViews.admin_verify_otp,name="admin_verify_otp"),
+     path('Accounts/Admin/Booking', HodViews.admin_booking, name='admin_booking'),
+     path('Accounts/Booking/List_of_expert/<int:id>', HodViews.admin_List_of_expert, name='admin_List_of_expert'),
+    #  path('Accounts/Task/Assign', HodViews.ad_Task_assign, name='support_Task_assign'),
      path('Accounts/Admin/Reschudule', HodViews.admin_reschedule, name='admin_reschedule'),
      path('Accounts/Admin/cancel_booking/<int:booking_id>', HodViews.cancel_booking_byadmin, name='cancel_booking_byadmin'),
      path('Accounts/Admin/taskAssign/', HodViews.task_assign, name='task_assign'),
@@ -85,6 +91,9 @@ urlpatterns = [
     ########################## Rebooking ##################################
 
     path('Accounts/Admin/Rebooking/', HodViews.Listofrebooking, name='Listofrebooking'),
+    path('Accounts/Admin/Booking-Complete/', HodViews.admin_booking_complete, name='admin_booking_complete'),
+    path('Accounts/Admin/Rebooking/<int:task_id>', HodViews.admin_rebooking, name='admin_rebooking'),
+    path('Accounts/Admin/Rebooking/Update/', HodViews.admin_rebooking_update, name='admin_rebooking_update'),
 
     ########################## Contact Us ##################################
     path('Accounts/Admin/ContactUs/', HodViews.contactus, name='contact_us'),
@@ -112,6 +121,19 @@ urlpatterns = [
     # ------------------------------------- table amount total show dummy --------------- 
     # path('Accounts/Admin/Customer/Payment/Details', HodViews.admin_customer_payment, name='admin_customer_payment'),
 
+
+
+    ########################## Withdraw Request ##################################
+    path('Accounts/Admin/Withdraw/Request/', HodViews.admin_withdraw_request, name='admin_withdraw_request'),
+    path('Accounts/Admin/Withdraw/Cancel/<str:withdraw_id>/', HodViews.expert_cancel_withraw_request, name='expert_cancel_withraw_request'),
+    path('Accounts/Admin/Withdraw/Accept/<str:withdraw_id>/', HodViews.expert_accept_withraw_request, name='expert_accept_withraw_request'),
+
+    ########################## Recharge ##################################
+    path('Accounts/Admin/Recharge/', HodViews.recharge, name='recharge'),
+    
+    ########################## Attendence #######################################
+
+    path('Accounts/Admin/Support/Attendence/<int:id>', HodViews.attendence, name='attendence'),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

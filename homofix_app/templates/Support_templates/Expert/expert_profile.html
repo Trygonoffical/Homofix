@@ -122,17 +122,12 @@
                                     <input type="text" class="form-control" value="{{technician.Father_name}}" name="father_name">
                                 </div>
                             </div>
-                            <div class="row mb-3">
+                            {% comment %} <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Category</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    {% comment %} <select class="single-select" name="category_id" id="select1">
-                                        
-                                        {% for i in category %}
-                                        <option value="{{i.id}}" >{{i.category_name}}</option>
-                                        {% endfor %}
-                                    </select> {% endcomment %}
+                                   
                                     <select class="form-control btn-light" name="category_id" id="select1">
                                         <option class="text-black" value="" selected disabled> --Select--</option>
                                         {% for i in category %}
@@ -141,7 +136,7 @@
                                     </select>
                                     
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
 
                             <div class="row mb-3">
                                 <div class="col-sm-3">
@@ -151,10 +146,18 @@
                                     {% comment %} <select class="single-select" name="sub_category_id" id="product-select" multiple >
                                         <option class="text-black" value="" selected disabled> --Select--</option>
                                     </select> {% endcomment %}
-                                    <select class="single-select" name="sub_category_id" id="product-select" multiple >
+                                    {% comment %} <select class="single-select" name="sub_category_id" id="product-select" multiple >
                                         
-                                        {% comment %} <option class="text-black" value="" selected disabled> --Select--</option> {% endcomment %}
+                                        
                                         <option class="bg-dark" value="Unmarried" {% if support.marital_status == "Unmarried" %}selected{% endif %}>Unmarried</option>
+                                    </select> {% endcomment %}
+                                    
+                                    <select class="single-select" name="sub_category_id" id="product-select" multiple>
+                                        {% for sub in subcategories %}
+                                        <option value="{{ sub.id }}" {% if sub in technician.subcategories.all %}selected{% endif %}>
+                                            {{ sub.name }} 
+                                        </option>
+                                        {% endfor %}
                                     </select>
                                     
                                 </div>

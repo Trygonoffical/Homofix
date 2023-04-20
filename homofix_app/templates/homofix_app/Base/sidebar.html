@@ -179,6 +179,9 @@
             <ul>
                
                 <li> 
+                    <a href="{% url 'admin_booking_complete' %}"><i class="bx bx-right-arrow-alt"></i> Complete-Booking</a>
+                </li>
+                <li> 
                     <a href="{% url 'Listofrebooking' %}"><span class="alert-count">{% if rebooking_count != null %}{{rebooking_count}} {% else %} 0 {% endif %}</span><i class="bx bx-right-arrow-alt"></i> Rebooking List</a>
                 </li>
                 
@@ -271,6 +274,64 @@
                
             </ul>
         </li>
+
+        <li class="">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Withdraw</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href="{% url 'admin_withdraw_request' %}"></span><i class="bx bx-right-arrow-alt"></i> Withdraw Request</a>
+                </li> 
+                
+                {% comment %} <li> 
+                    <a href="{% url 'admin_share_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Share</a>
+                </li>  {% endcomment %}
+                
+              
+               
+            </ul>
+        </li>
+        <li class="">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Recharge</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href="{% url 'recharge' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Recharge</a>
+                </li> 
+                
+                {% comment %} <li> 
+                    <a href="{% url 'admin_share_list' %}"></span><i class="bx bx-right-arrow-alt"></i> List of Share</a>
+                </li>  {% endcomment %}
+                
+              
+               
+            </ul>
+        </li>
+        {% comment %} <li class="">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Attendence</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href=""></span><i class="bx bx-right-arrow-alt"></i> Attendence List</a>
+                </li> 
+                
+                
+              
+               
+            </ul>
+        </li> {% endcomment %}
 
 
          

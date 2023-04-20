@@ -59,6 +59,7 @@
                             <th>Task</th>
                             {% endif %}
                             <th>Actions</th>
+                            <th>Invoice</th>
                             {% comment %} <th>Print</th> {% endcomment %}
                         </tr>
                     </thead>
@@ -159,7 +160,8 @@
                                     
                                 </div>
                             </td>
-                            {% comment %} <td><a href="{% url 'invoice' booking.id %}">invoice</a></td> {% endcomment %}
+                             <td><a href="{% url 'pdf_view' booking.id %}">invoice</a></td>
+                             {% comment %} <td><a href="{% url 'index' booking.id %}">invoice</a></td> {% endcomment %}
                         </tr>
 
                         <div class="col">

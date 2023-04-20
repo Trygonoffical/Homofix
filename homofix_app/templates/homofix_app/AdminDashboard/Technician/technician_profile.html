@@ -88,6 +88,14 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-sm-3">
+                                    <h6 class="mb-0">Username</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" value="{{technician.admin.username}}" name="username" readonly>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
                                     <h6 class="mb-0">First Name</h6>
                                 </div>
                                 <div class="col-sm-9">
@@ -102,14 +110,7 @@
                                     <input type="text" class="form-control" value="{{technician.admin.last_name}}" name="last_name" >
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3">
-                                    <h6 class="mb-0">Username</h6>
-                                </div>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{technician.admin.username}}" name="username" readonly>
-                                </div>
-                            </div>
+                            
                             <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Email</h6>
@@ -158,15 +159,16 @@
                                         
                                     </select> {% endcomment %}
                                     <div class="mb-3">
-                                        <label for="inputProductTitle" class="form-label">Subcategory</label>
-                                        <select class="single-select" name="" id="product-select" multiple >
+                                       
+                                        <select class="single-select" name="sub_category_id" id="product-select" multiple>
                                             {% for sub in subcategories %}
-                                        <option value="{{cat.id}}" {% if sub.id == i.subcategories.Category_id.id %}selected{% endif %}>{{sub.name}}</option>
-                                        {% endfor %}
-                                           {% comment %} <option class="text-black" value="" selected disabled> --Select--</option> {% endcomment %}
-                                       </select>
-                                     </div> 
-                                     
+                                            <option value="{{ sub.id }}" {% if sub in technician.subcategories.all %}selected{% endif %}>
+                                                {{ sub.name }} 
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
                                    
                                    
 

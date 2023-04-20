@@ -55,6 +55,12 @@ urlpatterns = [
 # --------------------------- Job Enquiry ---------------------     
 
     path('Support/Job/Enquiry', SupportViews.support_job_enquiry, name='support_job_enquiry'),
+    path('Support/Invoice/<int:id>', SupportViews.index, name='index'),
+    path('pdf_view/<int:booking_id>', SupportViews.ViewPDF, name="pdf_view"),
+    # path('pdf_view/<int:booking_id>', SupportViews.ViewPDF.as_view(), name="pdf_view"),
+    path('pdf_download/', SupportViews.DownloadPDF.as_view(), name="pdf_download"),
+    path('show/Product', SupportViews.showproduct, name="showproduct"),
+    path('createPdf',SupportViews.pdf_report_create,name="pdf_report_create")
 
 
 

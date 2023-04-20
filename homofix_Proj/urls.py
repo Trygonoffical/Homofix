@@ -16,6 +16,8 @@ router.register('Addons', API_Views.AddonsViewSet,basename="Addons")
 router.register('Addons-GET', API_Views.AddonsGetViewSet,basename="Addons-GET")
 router.register('Location', API_Views.TechnicianLocationViewSet,basename="Location")
 router.register('OnlineOffline', API_Views.TechnicianOnlineViewSet, basename='OnlineOffline')
+router.register('ExpertAllLocation', API_Views.TechnicianAllLocationViewSet, basename='ExpertAllLocation')
+# router.register('ExpertTaskCounting', API_Views.ExpertTaskCountViewSet, basename='ExpertTaskCounting')
 # router.register('update_online', API_Views.update_online, basename='update_online')
 
 urlpatterns = [
@@ -30,7 +32,12 @@ urlpatterns = [
     path('api/Wallet/GET/',API_Views.get_Wallet,name="get_Wallet"),
     path('api/Wallet/History/GET/',API_Views.get_Wallet_History,name="get_Wallet_History"),
     path('api/Withdraw/Request/Post/',API_Views.post_withdraw_req,name="post_withdraw_req"),
-    path('api/Withdraw/Request/Get/',API_Views.get_Withdraw_Req,name="get_Withdraw_Req")
+    path('api/Withdraw/Request/Get/',API_Views.get_Withdraw_Req,name="get_Withdraw_Req"),
+    path('api/Task/Counting/Get/',API_Views.ExpertTaskCountViewSet,name="get_task_counting"),
+    # path('api/Expert/AllLocation',API_Views.create_or_update_all_technician_location,name="create_or_update_all_technician_location")
+
+
+    
     
    
 ]

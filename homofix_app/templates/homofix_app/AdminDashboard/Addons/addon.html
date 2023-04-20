@@ -58,7 +58,8 @@
                             {% comment %} <td>{{i.updated_at}}</td> {% endcomment %}
                             <td>
                                 <div class="d-flex order-actions">
-                                    <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a>
+                                    <a href="{% url 'edit_addons' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
+                                    {% comment %} <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a> {% endcomment %}
                                     <a href="javascript:;" class="ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" ><i class='bx bxs-trash'></i></a>
                                 </div>
                             </td>

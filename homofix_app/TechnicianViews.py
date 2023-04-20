@@ -14,11 +14,13 @@ def dashboard(request):
 
 
 def expert_task_assign(request):
+
     user = request.user
     
 
     technician=Technician.objects.get(admin=user)
     task = Task.objects.filter(technician=technician)
+    
     context = {
         'task':task
 
@@ -51,19 +53,19 @@ def update_booking_status(request,booking_id):
         #     technician_share = booking_amount - hod_share
             
             
-        #     share = Share.objects.create(
-        #         task=task,
+            # share = Share.objects.create(
+            #     task=task,
                
-        #         hod_share_percentage=hod_share_percentage,
-        #         technician_share=technician_share,
-        #         hod_share=hod_share
-        #     )
-        #     share.save()
-        #     # Update the technician's wallet with their share
-        #     technician = task.technician
-        #     wallet, created = Wallet.objects.get_or_create(technician=technician)
-        #     wallet.total_share += technician_share
-        #     wallet.save()
+            #     hod_share_percentage=hod_share_percentage,
+            #     technician_share=technician_share,
+            #     hod_share=hod_share
+            # )
+            # share.save()
+            # # Update the technician's wallet with their share
+            # technician = task.technician
+            # wallet, created = Wallet.objects.get_or_create(technician=technician)
+            # wallet.total_share += technician_share
+            # wallet.save()
         #     messages.success(request, f"Booking status updated to {status}. Share data created.")
         #     return redirect('expert_task_assign')
         # else:

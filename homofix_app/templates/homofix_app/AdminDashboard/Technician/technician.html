@@ -1,6 +1,11 @@
 {% extends 'homofix_app/Base/base.html' %}
 {% block title %}Technician{% endblock title %}
 {% block main-content %}
+<style>
+    .nowrap {
+        white-space: nowrap;
+      }
+</style>
 
 <div class="page-content">
     <!--breadcrumb-->
@@ -43,11 +48,12 @@
                             <th>Email</th>
                             <th>City</th>
                             <th>State</th>
-                            
+                            <th>Area</th>
                             
                             <th>Status</th>
+                            {% comment %} <th>Last Login</th> {% endcomment %}
                             {% comment %} <th>Login</th> {% endcomment %}
-                            <th>Last Logout</th>
+                            {% comment %} <th>Last Logout</th>  {% endcomment %}
                             <th>Action</th>
                             
                         </tr>
@@ -75,12 +81,12 @@
                             <td>{{i.admin.email}}</td>
                             <td>{{i.city}}</td>
                             <td>{{i.state}}</td>
-                            
-                            
-                            
+                            <td>{{i.serving_area}}</td>
+                     
                             <td><span class="badge bg-success">{{i.status}}</span></td>
                             {% comment %} <td>{{i.admin.login}}</td> {% endcomment %}
-                            <td>{{i.admin.last_login}}</td>
+                            {% comment %} <td class="nowrap">{{i.admin.last_login}}</td>  {% endcomment %}
+                             
                             
                             
                             <td>

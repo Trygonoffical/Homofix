@@ -275,8 +275,8 @@ class Booking(models.Model):
     STATUS_CHOICES = (
         ('New', 'New'),
         ('Inprocess', 'Inprocess'),
-        ('cancelled', 'Cancelled'),
-        ('completed', 'Completed'),
+        ('Cancelled', 'Cancelled'),
+        ('Completed', 'Completed'),
         ('Reached', 'Reached'),
         ('Assign', 'Assign'),
         ('Proceed', 'Proceed'),
@@ -286,9 +286,13 @@ class Booking(models.Model):
     products = models.ManyToManyField(Product, related_name='bookings', through='BookingProduct')
     booking_date = models.DateTimeField()
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
+    admin_by = models.ForeignKey(AdminHOD, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_admin_by')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
     description = models.TextField(null=True,blank=True) 
     order_id = models.CharField(max_length=9, unique=True, null=True, blank=True)
+    cash_on_service = models.BooleanField(default=False,null=True,blank=True)
+    online = models.BooleanField(default=True,null=True,blank=True)
+
 
 
     def save(self, *args, **kwargs):
@@ -297,23 +301,32 @@ class Booking(models.Model):
             year_month = today.strftime('%Y%m')
             last_order = Booking.objects.filter(order_id__startswith=year_month).order_by('-id').first()
             if last_order:
-                last_id = int(last_order.order_id.split('-')[-1])
+                last_id = int(last_order.order_id[-2:])
             else:
                 last_id = 0
             new_id = last_id + 1
-            self.order_id = f'{year_month}-{new_id:03}'
+            self.order_id = f'{year_month}{new_id:02}'
         super().save(*args, **kwargs)
+
+
+
 
     @property
     def total_amount(self):
         booking_products_prefetch = Prefetch('bookingproduct_set',
                                              queryset=BookingProduct.objects.select_related('product'))
+        # addons_prefetch = Prefetch('bookingproduct_set__addon_set',
+        #                            queryset=Addon.objects.select_related('addon_products'))
         addons_prefetch = Prefetch('bookingproduct_set__addon_set',
-                                   queryset=Addon.objects.select_related('addon_products'))
+                           queryset=Addon.objects.select_related('spare_parts_id'))
         booking = Booking.objects.prefetch_related(booking_products_prefetch, addons_prefetch)\
                                  .get(id=self.id)
-        total = sum(booking_product.quantity * booking_product.product.price for booking_product in booking.bookingproduct_set.all())
-        total += sum(addon.quantity * addon.addon_products.price for booking_product in booking.bookingproduct_set.all() for addon in booking_product.addon_set.all())
+        # total = sum(booking_product.quantity * booking_product.product.price for booking_product in booking.bookingproduct_set.all())
+        total = sum(booking_product.quantity * 
+            (booking_product.product.selling_price or booking_product.product.price) 
+            for booking_product in booking.bookingproduct_set.all())
+
+        total += sum(addon.quantity * addon.spare_parts_id.price for booking_product in booking.bookingproduct_set.all() for addon in booking_product.addon_set.all())
         # tax_rate = 0.18  # replace with your actual tax rate
         # total_with_tax = total + (total * tax_rate)
         # return round(total_with_tax, 2)
@@ -322,7 +335,7 @@ class Booking(models.Model):
     @property
     def tax_amount(self):
         tax_rate = 0.18  # replace with your actual tax rate
-        return round(self.total_amount * tax_rate, 2)   
+        return round(self.total_amount * tax_rate, 2)
 
     
 
@@ -404,6 +417,15 @@ class TechnicianLocation(models.Model):
     # latitude = models.DecimalField(max_digits=9, decimal_places=6)
     # longitude = models.DecimalField(max_digits=9, decimal_places=6)
     # timestamp = models.DateTimeField(auto_now_add=True)
+
+
+class AllTechnicianLocation(models.Model):
+    technician_id = models.ForeignKey(Technician, on_delete=models.CASCADE,null=True,blank=True)
+    location = models.CharField(max_length=100,null=True,blank=True)
+    date = models.DateField(auto_now_add=True)
+    
+
+    
 class feedback(models.Model):
     Customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
     Product = models.ForeignKey(Product,on_delete=models.CASCADE)
@@ -465,7 +487,7 @@ class Share(models.Model):
 class Wallet(models.Model):
     technician_id = models.ForeignKey(Technician, on_delete=models.CASCADE)
     total_share = models.IntegerField(default=0)
-
+    
     def add_bonus(self, bonus_amount):
         self.total_share += bonus_amount
         self.save()
@@ -489,8 +511,8 @@ class Wallet(models.Model):
         self.save()
 
 
-    def __str__(self):
-        return self.technician_id.admin.username
+    # def __str__(self):
+    #     return self.technician_id.admin.username
     
 
 class WalletHistory(models.Model):
@@ -505,7 +527,7 @@ class WalletHistory(models.Model):
     date = models.DateField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
-        return str(self.wallet.technician.admin.username)
+        return str(self.wallet.technician_id.admin.username)
     
 
 
@@ -513,7 +535,7 @@ class Rebooking(models.Model):
     STATUS_CHOICES = (
         ('Assign', 'Assign'),
         ('Inprocess', 'Inprocess'),
-        ('completed', 'Completed'),
+        ('Completed', 'Completed'),
     )
     
     booking_product = models.ForeignKey(BookingProduct, on_delete=models.CASCADE, related_name='rebookings')
@@ -581,10 +603,12 @@ class Payment(models.Model):
     
 class Kyc(models.Model):
     technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
+    bank_name = models.CharField(max_length=100,null=True,blank=True)
     Ac_no = models.CharField(max_length=50)
     ifsc_code = models.CharField(max_length=50)
     branch = models.CharField(max_length=50)
     bank_holder_name = models.CharField(max_length=100)
+    bank_active = models.BooleanField(default=False)
     def __str__(self):
         return str(self.technician_id)
     
@@ -611,10 +635,22 @@ class RechargeHistory(models.Model):
 
 
 class WithdrawRequest(models.Model):
+        
+    status = (
+        ('Process','Process'),
+        ('Cancel','Cancel'),
+        ('Accept','Accept'),
+    )
     technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
     amount = models.IntegerField()
     date = models.DateField(auto_now_add=True)
+    status = models.CharField(choices=status, max_length=50, default='Process')
+    
 
+class Attendance(models.Model):
+    support_id = models.ForeignKey(Support, on_delete=models.CASCADE)
+    login_time = models.DateTimeField()
+    logout_time = models.DateTimeField(null=True, blank=True)   
 
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):

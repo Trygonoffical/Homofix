@@ -134,7 +134,16 @@ DATE_INPUT_FORMATS = [
 ]
 
 
+GOOGLE_MAPS_API_KEY = 'https://armaan.pythonanywhere.com/api/ExpertAllLocation/'
+
+
+
 # STATICFILES_DIRS = [
 #     BASE_DIR / "homofixapp/static",
     
 # ]
+
+WKHTMLTOPDF_CMD_OPTIONS = {
+    'quiet': True,
+}
+WKHTMLTOPDF_PATH = 'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe'

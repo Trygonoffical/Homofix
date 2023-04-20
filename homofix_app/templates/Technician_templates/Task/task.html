@@ -174,14 +174,14 @@
                            {% csrf_token %}
                            <div class="d-flex align-items-center">
                               <select style="width:130px;" class="form-select me-1" name="status" id="status">
-                                 {% if task.booking.status == "completed" %}
-                                 <option value="completed">Completed</option>
+                                 {% if task.booking.status == "Completed" %}
+                                 <option value="Completed">Completed</option>
                                  {% elif task.booking.status == "Proceed" %}
                                  <option value="Proceed">Proceed</option>
                                  {% else %}
                                  <option value="Proceed">Proceed</option>
                                  <option value="Inprocess">InProcess</option>
-                                 <option value="completed">Completed</option>
+                                 <option value="Completed">Completed</option>
                                  {% endif %}
                                  
                                  

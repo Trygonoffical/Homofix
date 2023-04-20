@@ -33,6 +33,26 @@
                         
                        
                         <div class="mb-3">
+                           <label for="inputDateTime" class="form-label">Category</label>
+                           {% comment %} <input class="form-control" type="text" name="first_name" required> {% endcomment %}
+                           <select class="form-control btn-light" name="category_id" id="select1">
+                              <option class="text-black" value="" selected disabled> --Select--</option>
+                              {% for i in category %}
+                                  <option class="text-black" value="{{i.id}}">{{i.category_name}}</option>
+                              {% endfor %}
+                          </select>
+                        </div>
+                        <div class="mb-3">
+                           <label for="inputDateTime" class="form-label">Category</label>
+                           {% comment %} <input class="form-control" type="text" name="first_name" required> {% endcomment %}
+                           <select class="single-select" name="sub_category_id" id="product-select" multiple >
+                                        
+                              <option class="text-black" value="" selected disabled> --Select--</option>
+                              {% comment %} <option class="bg-dark" value="Unmarried" {% if support.marital_status == "Unmarried" %}selected{% endif %}>Unmarried</option> {% endcomment %}
+                          </select>
+                          
+                        </div>
+                        <div class="mb-3">
                            <label for="inputDateTime" class="form-label">First Name</label>
                            <input class="form-control" type="text" name="first_name" required>
                         </div>

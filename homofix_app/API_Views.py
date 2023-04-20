@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer
+from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet,ModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest
+from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation
 
 
 
@@ -54,6 +54,7 @@ class ExpertViewSet(ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data) 
     
+
     def put(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -82,13 +83,82 @@ class TaskViewSet(ModelViewSet):
 
     # @action(detail=False, methods=['PATCH'])
     def put(self, request):
+        
         booking_id = request.data.get('booking_id')
         status = request.data.get('status')
         if booking_id and status:
+            print(booking_id)
             try:
                 booking = Booking.objects.get(id=booking_id)
+                task = Task.objects.get(booking=booking)
                 booking.status = status
+                # booking.save()
                 booking.save()
+                # return Response({'success': True})
+                if booking.status == "Completed" and booking.online == True:
+                    
+                    tax_rate = 0.18
+                    booking_amount = booking.total_amount
+                    
+
+                    tax_amt =booking.tax_amount
+                    print("helloooo")
+                    hod_share_percentage = HodSharePercentage.objects.latest('id')
+                    hod_share_percentage_value = hod_share_percentage.percentage
+                    hod_share = booking_amount * (hod_share_percentage_value / 100) 
+                    print("new hod share0",hod_share)
+                    technician_share = booking_amount-hod_share
+                    print("technicia sare",technician_share)
+                    # print("testing",testing)
+                    # wallet_online = hod_share+tax_amt
+                    # print("Wallet online",wallet_online)
+                    # print("hod share",hod_share+tax_amt)
+                    hod_share_with_tax = hod_share + tax_amt
+                    print("hod_share_with_tax",hod_share_with_tax)
+                   
+                    # technician_share = booking_amount - hod_share
+                   
+                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,hod_share=hod_share_with_tax)
+                    share.save()
+                    technician = task.technician
+                    wallet, created = Wallet.objects.get_or_create(technician_id=technician)
+                    wallet.total_share += technician_share
+                   
+                    wallet.save()
+                   
+                    
+                if booking.status == "Completed" and booking.cash_on_service == True:
+                    
+                    tax_rate = 0.18
+                    booking_amount = booking.total_amount
+                    
+
+                    tax_amt =booking.tax_amount
+                    print("helloooo")
+                    hod_share_percentage = HodSharePercentage.objects.latest('id')
+                    hod_share_percentage_value = hod_share_percentage.percentage
+                    hod_share = booking_amount * (hod_share_percentage_value / 100) 
+                    print("new hod share0",hod_share)
+                    technician_share = booking_amount-hod_share
+                    print("technicia sare",technician_share)
+                    # print("testing",testing)
+                    # wallet_online = hod_share+tax_amt
+                    # print("Wallet online",wallet_online)
+                    # print("hod share",hod_share+tax_amt)
+                    hod_share_with_tax = hod_share + tax_amt
+                    print("hod_share_with_tax",hod_share_with_tax)
+                   
+                    # technician_share = booking_amount - hod_share
+                   
+                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,hod_share=hod_share_with_tax)
+                    share.save()
+                    technician = task.technician
+                    wallet, created = Wallet.objects.get_or_create(technician_id=technician)
+                    wallet.total_share -= hod_share_with_tax
+                   
+                    wallet.save()
+                   
+                    
                 return Response({'success': True})
             except Booking.DoesNotExist:
                 return Response({'success': False, 'message': 'Booking not found.'})
@@ -141,9 +211,110 @@ class BookingViewSet(ModelViewSet):
      
 
 class KycViewSet(ModelViewSet):
-    queryset = Kyc.objects.all()     
+    # queryset = Kyc.objects.all()     
     serializer_class  = KycSerializer
-     
+    def get_queryset(self):
+        technician_id = self.request.query_params.get('technician_id')
+        print("techincian id",technician_id)
+        if technician_id is not None:
+            queryset = Kyc.objects.filter(technician_id=technician_id)
+        else:
+            queryset = Kyc.objects.all()
+        return queryset
+    
+    # def put(self, request):
+        
+        
+    #     id = request.data.get('id')
+    #     # booking_id = request.data.get('booking_id')
+    #     technician_id = request.data.get('technician_id')
+    #     bank_active = request.data.get('bank_active')
+    #     # print("kyc id",id,"technician id",technician_id,'bank active',bank_active)
+    #     if id and technician_id:
+    #         print(id)
+    #         try:
+    #             kyc = Kyc.objects.get(id=id)
+    #             technician_id = Technician.objects.get(id=technician_id)
+    #             kyc.bank_active = bank_active
+    #             # booking.save()
+    #             kyc.save()
+    #             return Response({'success': True,'message':'Kyc updated Successfull'})
+    #         except (Booking.DoesNotExist, TechnicianLocation.DoesNotExist):
+    #             return Response({'success': False, 'message': 'Something Eror.'})
+    #     else:
+    #         return Response({'success': False, 'message': 'Kyc id technician_id and bank_active are required.'})
+    
+    def put(self, request):
+        id = request.data.get('id')
+        technician_id = request.data.get('technician_id')
+        bank_active = request.data.get('bank_active')
+
+        if id and technician_id:
+            try:
+                kyc = Kyc.objects.get(id=id)
+                technician = Technician.objects.get(id=technician_id)
+
+                # Set bank_active=False for all other Kyc instances of the same Technician
+                Kyc.objects.filter(technician_id=technician).exclude(id=id).update(bank_active=False)
+
+                kyc.bank_active = bank_active
+                kyc.save()
+
+                return Response({'success': True, 'message': 'Kyc updated successfully'})
+            except (Kyc.DoesNotExist, Technician.DoesNotExist):
+                return Response({'success': False, 'message': 'Something went wrong'})
+        else:
+            return Response({'success': False, 'message': 'Kyc id, technician_id and bank_active are required.'})
+
+
+# -------------------------- KYC COUNTING ------------------------------- 
+
+
+# @api_view(['GET'])
+# def ExpertTaskCountViewSet(request):
+#     technician_id = request.GET.get('technician') # retrieve the technician_id query parameter
+#     print("teccc id",technician_id)
+
+    
+#     queryset = Task.objects.filter(
+#         technician=technician_id,
+#         booking__status="Completed"
+#     )
+    
+#     count = queryset.count()
+#     print("couting",count)
+
+   
+    
+#     return Response({
+#         'status': True,
+#         'message': 'Task count retrieved successfully',
+#         'data': count
+#     })
+
+
+
+@api_view(['GET'])
+def ExpertTaskCountViewSet(request):
+    technician_id = request.GET.get('technician_id') # retrieve the technician_id query parameter
+    
+    queryset = Task.objects.all()
+    queryset2 = Task.objects.all()
+    rebooking = Rebooking.objects.all()
+    # if technician_id is not None:
+    queryset = queryset.filter(technician=technician_id,booking__status="Completed").count()
+    new_booking_count = queryset2.filter(technician=technician_id,booking__status="Assign").count()
+    print(queryset)
+    rebooking_count = rebooking.filter(technician=technician_id,status="Assign").count()
+    print("sss",rebooking_count)
+    # serializer=TaskSerializer(queryset,many=True)
+    return Response({
+        'status':True,
+        'message':'Wallet History fetched',
+        'data':queryset,
+        'rebooking_count':rebooking_count,
+        'new_booking_count':new_booking_count
+    })
 
 # ------------------------------- Job Enquiry --------------------------- 
 
@@ -203,7 +374,45 @@ class TechnicianLocationViewSet(ModelViewSet):
             return Response({'success': False, 'message': 'Booking id and location are required.'})
 
         
-        
+# ----------------------- Technician All Location -------------------         
+
+# class TechnicianAllLocationViewSet(ModelViewSet):
+#     serializer_class = AllTechnicianLocationSerializer
+#     queryset = AllTechnicianLocation.objects.all()
+
+class TechnicianAllLocationViewSet(ModelViewSet):
+    serializer_class = AllTechnicianLocationSerializer
+    queryset = AllTechnicianLocation.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        technician_id = request.data.get('technician_id')
+        location = request.data.get('location')
+
+        try:
+            all_technician_location = AllTechnicianLocation.objects.get(technician_id=technician_id, location=location)
+            serializer = AllTechnicianLocationSerializer(all_technician_location, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        except AllTechnicianLocation.DoesNotExist:
+            serializer = AllTechnicianLocationSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        technician_id = request.data.get('technician_id')
+        location = request.data.get('location')
+
+        try:
+            all_technician_location = AllTechnicianLocation.objects.get(technician_id=technician_id, location=location)
+            serializer = AllTechnicianLocationSerializer(all_technician_location, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except AllTechnicianLocation.DoesNotExist:
+            return self.create(request, *args, **kwargs)
+
 # ------------------------------------- show offline online -----------------------
 
 

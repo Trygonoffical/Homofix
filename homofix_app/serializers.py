@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -233,7 +233,7 @@ class BokingSerializer(serializers.ModelSerializer):
 
 class BookingProductSerializer(serializers.ModelSerializer):
     product = ProductSerializerr()
-    booking = BokingSerializer()
+    booking = BookingSerializer()
     
     # booking = serializers.PrimaryKeyRelatedField(queryset=Booking.objects.all())
 
@@ -353,6 +353,13 @@ class TechnicianLocationSerializer(serializers.ModelSerializer):
         model=TechnicianLocation
         fields = ['technician_id','booking_id','location']
 
+# ------------------------------ All Technician Location ---------------------- 
+
+class AllTechnicianLocationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=AllTechnicianLocation
+        fields = "__all__"
 
 
 # --------------------------- Online Offline -------------------------- 

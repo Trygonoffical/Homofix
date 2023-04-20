@@ -68,7 +68,7 @@
                                     <option value="{{i.id}}">{{i.name}}</option>
                                 {% endfor %}
                             </select> {% endcomment %}
-                            <select class="form-select" name="product_id" id="edit_faq_product-select"    required>
+                            <select class="form-select" name="product_id" id="edit_faq_product-select" required>
                                 {% for prod in product %}
                                  {% if i.product.subcategory.Category_id_id == prod.subcategory.Category_id.id %}
                                  <option class="bg-dark" value="{{ prod.id }}" {% if prod.id == i.product.subcategory.Category_id_id %}selected{% endif %}>

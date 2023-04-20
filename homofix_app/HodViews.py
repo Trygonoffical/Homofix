@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -10,9 +10,42 @@ import random
 from django.contrib.auth.models import Permission
 from django.db.models import Q
 from django.utils import timezone
+from urllib.parse import urlencode
+import datetime
+from django.http import Http404
+# def all_location(request):
+#     all_location = AllTechnicianLocation.objects.all()
+   
+#     context = {
+#         'technician':all_location
+#     }
+   
+   
+#     return render(request, 'all_loaction.html', context)
+
+def all_location(request):
+    all_locations = AllTechnicianLocation.objects.all()
+
+    # Create a list of markers for each technician location
+    markers = []
+    for location in all_locations:
+        marker = f"markers=color:red%7C{location.latitude},{location.longitude}"
+        markers.append(marker)
+
+    # Combine the markers into a single string
+    markers_str = '&'.join(markers)
+
+    # Generate the Google Map iframe URL with the markers
+    map_url = f"https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY_HERE&center={all_locations[0].latitude},{all_locations[0].longitude}&zoom=10&{markers_str}"
+
+    context = {
+        'map_url': map_url
+    }
+
+    return render(request, 'all_location.html', context)
 
 
-
+    # return render(request,'all_loaction.html')
 # @login_required
 def admin_dashboard(request):
    
@@ -339,8 +372,9 @@ def technician_edit_profile(request,id):
 
    
     category = Category.objects.all()
-    subcategories = technician.subcategories.all()
-    print("subcategory",subcategories)
+    # subcategories = SubCategory.objects.all()
+    subcategories = SubCategory.objects.filter(Category_id__id__in=technician.subcategories.values_list('Category_id__id', flat=True))
+    # print("subcategory",subcategories)
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
    
@@ -401,6 +435,8 @@ def technician_edit_profile(request,id):
         technician.serving_area=serving_area
         technician.highest_qualification=highest_qualification
         technician.state=state
+        technician.subcategories.set(subcategory_id)
+       
         if city:
             city = city.lower()
         technician.city=city
@@ -412,9 +448,9 @@ def technician_edit_profile(request,id):
         
 
         # cat = Category.objects.get(id=category_id)
-        if subcategory_id:
-            subcategories = SubCategory.objects.filter(id__in=subcategory_id)
-            technician.subcategories.set(subcategories)
+        # if subcategory_id:
+        #     subcategories = SubCategory.objects.filter(id__in=subcategory_id)
+        #     technician.subcategories.set(subcategories)
            
 
         technician.admin.save()
@@ -672,6 +708,23 @@ def get_products(request):
     else:
         return JsonResponse([], safe=False)
 
+
+
+def get_products_price(request):
+    subcategory_id = request.GET.get('subcategory_id')
+    if subcategory_id:
+        subcategory_id = int(subcategory_id)
+        products = Product.objects.filter(subcategory_id=subcategory_id)
+        data = []
+        for product in products:
+            if product.selling_price is not None:
+                price = product.selling_price
+            else:
+                price = product.price
+            data.append({'id': product.id, 'price': price, 'name': product.name})
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse([], safe=False)
 # def product(request):
     
 
@@ -786,11 +839,24 @@ def addons(request):
     return render(request,'homofix_app/AdminDashboard/Addons/addon.html',{'addons':addons,'product':product,'new_expert_count':new_expert_count,'booking_count':booking_count,'rebooking_count':rebooking_count,'customer_count':customer_count,'category':category,'subcategory':subcategory})
 
 
+def edit_addons(request,id):
+    
+    spare_parts = SpareParts.objects.get(id=id)
+    category = Category.objects.all()
+    subcategory = SubCategory.objects.all()
+    product = Product.objects.all()
+    context = {
+        'spare_parts':spare_parts,
+        'category':category,
+        'subcategory':subcategory,
+        'product':product
+    }
+    return render(request,'homofix_app/AdminDashboard/Addons/edit_addons.html',context)
 
 def update_addons(request):
 
     if request.method == "POST":
-        addon_id  = request.POST.get('addon_id')
+        addon_id  = request.POST.get('spare_parts_id')
         print("addon id",addon_id)
         product_id  = request.POST.get('product_id')
         spare_part  = request.POST.get('spare_part')
@@ -883,6 +949,7 @@ def support_profile(request,id):
 
 
 def support_update_profile(request):
+    
     if request.method == "POST":
         support_id = request.POST.get('support_id')
        
@@ -897,8 +964,9 @@ def support_update_profile(request):
         permanent_address = request.POST.get('permanent_address')
         date_of_joining = request.POST.get('date_of_joining')
         status = request.POST.get('status')
+        xyzzz = request.POST.get('xyzzz')
         firstname = request.POST.get('firstname')
-        lastname = request.POST.get('lastname')
+        print("last name",xyzzz)
         
         application_form = request.FILES.get('application_form')
         document_form = request.FILES.get('document_form')
@@ -915,6 +983,9 @@ def support_update_profile(request):
         can_job_enquiry = request.POST.get('can_job_enquiry')
 
         support = Support.objects.get(id=support_id)
+        print("suppor id ",support)
+        support.admin.last_name="dd"
+        support.save()
         
         
         if profile_pic:
@@ -930,10 +1001,12 @@ def support_update_profile(request):
         # if application_form:
         #     application_form_str = ','.join(str(file) for file in application_form)
         #     support.application_form = application_form_str
-        print("helooooo",support.admin.first_name) 
+        print("helooooo first",support.admin.first_name) 
+        print("helooooo last",support.admin.last_name) 
         # support.admin.last_name = lastname 
         # support.admin.username = username 
         # support.admin.email = email
+        # support.admin.last_name = last_name 
         support.admin.first_name = firstname 
         support.address = address 
         support.permanent_address = permanent_address 
@@ -1063,12 +1136,79 @@ def delete_faq(request,id):
 def booking_list(request):
     booking_count = Booking.objects.filter(status = "New").count()
     booking = Booking.objects.all()
+    bookings = Booking.objects.filter(status="New")
     
     technicians = Technician.objects.all()
     tasks = Task.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
+    if request.method == "POST":
+        
+        otp_number = random.randint(0,9999)
+        otp_unique = str(otp_number).zfill(3)
+       
+        first_name = request.POST.get('full_name')      
+        mob = request.POST.get('mob')
+        request.session['full_name'] = first_name
+        request.session['mob'] = mob
+        request.session['otp'] = otp_unique
+
+        if Customer.objects.filter(mobile=mob).exists():
+            print("helloooo suceess")
+            # print("heloooooooo")
+            
+
+
+            # auth_key = "IQkJfqxEfD5l3qCu"
+            # sender_id = "TRYGON"
+            # route = 2
+            # number = mob
+       
+            # message = f"Dear {first_name} {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+            
+            
+            # template_id = "1707162192151162124"
+            # url = f"http://weberleads.in/http-tokenkeyapi.php?authentic-key={auth_key}&senderid={sender_id}&route={route}&number={number}&message={urllib.parse.quote(message)}&templateid={template_id}"
+            # response = requests.get(url) 
+                
+
+            return JsonResponse({'status':'Save'})
+
+        # elif Customer.objects.filter(mobile=mob).exists():
+        #     print("hellooooo")
+        #     return JsonResponse({'status':'Error'})
+
+            
+        else:
+            
+        
+
+            # request.session['full_name'] = first_name
+            # request.session['mob'] = mob
+            # request.session['otp'] = otp_unique
+
+
+            # auth_key = "IQkJfqxEfD5l3qCu"
+            # sender_id = "TRYGON"
+            # route = 2
+            # number = mob
+        
+            # message = f"Dear {first_name} {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+        
+        
+            # template_id = "1707162192151162124"
+            # url = f"http://weberleads.in/http-tokenkeyapi.php?authentic-key={auth_key}&senderid={sender_id}&route={route}&number={number}&message={urllib.parse.quote(message)}&templateid={template_id}"
+            # response = requests.get(url) 
+                    
+
+            return JsonResponse({'status':'Save'})
+        
+        
+        
+  
+    # return render(request, 'Support_templates/Orders/order.html',context)
+
     context = {
     'booking':booking,
     'technicians':technicians,
@@ -1076,7 +1216,9 @@ def booking_list(request):
     'new_expert_count':new_expert_count,
     'booking_count':booking_count,
     'rebooking_count':rebooking_count,
-    'customer_count':customer_count
+    'customer_count':customer_count,
+    'bookings':bookings,
+    
     
     
     
@@ -1088,16 +1230,175 @@ def booking_list(request):
 
 
 
+def admin_verify_otp(request):
+    if request.method == "POST":
+        
+        otp_num = request.session.get('otp', 'Default value if key does not exist')
+        
+        
+
+        otp = request.POST.get('otp')
+        # if otp == otp_num:  
+        if otp == "1234":  
+            # OTP is correct, redirect to success page
+            # return HttpResponse('otp sucess')
+            
+            random_number = random.randint(0, 999)
+            unique_number = str(random_number).zfill(3)
+       
+            first_name = request.session.get('full_name', 'Default value if key does not exist')
+            mob = request.session.get('mob', 'Default value if key does not exist')
+            
+            
+            if Customer.objects.filter(mobile=mob).exists():
+                customer = Customer.objects.get(mobile=mob)
+                request.session['customer_id'] = customer.id
+                # request.session['customer_id'] = Customer.id
+                return JsonResponse({'status': 'Save', 'message': 'otp is match'})
+                
+            else:
+
+                # user = CustomUser.objects.create(username=user.id,first_name=first_name, user_type='4')    
+                user = CustomUser.objects.create(first_name=first_name,username=first_name+unique_number, user_type='4')    
+                user.set_password(mob)
+                user.customer.mobile = mob
+                user.save()
+                request.session['customer_id'] = user.customer.id
+
+            return JsonResponse({'status': 'Save', 'message': 'otp is match'})
+            # return redirect('support_orders')
+        else:
+            print("show error msg here")
+            return JsonResponse({'status': 'Error', 'message': 'otp is match'})
+            # OTP is incorrect, show error message and reload the page
+            # messages.error(request, 'Invalid OTP. Please try again.')
+            
+            # return JsonResponse({'status': 'Error', 'message': 'otp is not  valid'})
+    
+
+
+def admin_booking(request):
+    
+    user = request.user
+    adminhod = AdminHOD.objects.get(admin=user)
+    admin_by = request.user.adminhod
+    
+    prod = Product.objects.all()
+    category = Category.objects.all()
+    state_choices = STATE_CHOICES
+    
+    
+
+    if request.method == 'POST':
+       
+        customer_id = request.session.get('customer_id','Default value if key does not exist')
+        print("customer id ",customer_id)
+        
+        product_ids = request.POST.getlist('product_id')
+        quantities = request.POST.getlist('quantity')
+        
+        booking_date_str = request.POST.get('booking_date')
+        state = request.POST.get('state')
+        zip_code = request.POST.get('zip_code')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        area = request.POST.get('area')
+        description = request.POST.get('description')
+        total_amount = int(request.POST.get('total_amount'))
+        print("sss",total_amount)
+        
+        customer = Customer.objects.get(id=customer_id)
+        if city:
+            city = city.lower()
+        customer.city = city
+        customer.state = state
+        customer.area = area
+        customer.zipcode = zip_code
+        customer.address=address,
+        customer.save()
+        booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
+        
+        
+        booking = Booking.objects.create(
+            customer=customer,
+            booking_date=booking_date,   
+            description=description,          
+            admin_by=admin_by
+           
+        )
+
+
+
+        for i, product_id in enumerate(product_ids):
+            product = Product.objects.get(id=product_id)
+            print("producttttt",product)
+            # print("producttttt",product)
+            
+            quantity = int(quantities[i])
+            price = int(request.POST.getlist('price')[i])
+            
+            BookingProduct.objects.create(
+                booking=booking,
+                product=product,
+                quantity=quantity,
+                total_price=total_amount
+                # price=price
+            )
+            # total_price = sum(price_list)
+            # booking.total_price = total_price
+            booking.save()
+
+        messages.success(request, 'Booking created successfully.')
+        return redirect('booking_list')
+
+    context = {
+        'prod': prod,
+        'state_choices':state_choices,
+        'category':category,
+        'support':support
+    }
+    return render(request, 'homofix_app/AdminDashboard/Booking_list/create_booking.html', context)
+
+
+
+def admin_List_of_expert(request,id):
+    # user = request.user
+    # support = Support.objects.get(admin=user)  
+    
+    booking = Booking.objects.get(id=id)
+    
+   
+    expert = Technician.objects.filter(city=booking.customer.city)
+    tasks = Task.objects.filter(booking=booking)
+    
+   
+    
+    # expert = Technician.objects.filter(city=booking.city, serving_area__icontains=booking.area)
+    context = {
+        'expert':expert,
+        'booking':booking,
+        'tasks': tasks,
+        'support':support
+        
+        
+        
+    }
+    
+    return render(request,'homofix_app/AdminDashboard/Booking_list/list_of_expert.html',context)    
 
 def admin_reschedule(request):
     if request.method == "POST":
 
         booking_id=request.POST.get('booking_id')
-        booking_date=request.POST.get('booking_date')
+        booking_date_str = request.POST.get('booking_date')
+        booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
+        print("booking date",booking_date)
         booking = Booking.objects.get(id=booking_id)
         booking.booking_date = booking_date
         booking.save()
         messages.success(request,"Your order reschedule success")
+
+       
 
         return redirect('booking_list')
 
@@ -1124,6 +1425,9 @@ def task_assign(request):
         print("technician_id",technician_id)
         task = Task.objects.create(booking=booking,technician=technician)
         task.save()
+        booking.status = "Assign"
+        booking.save()
+
         messages.success(request,'Assign Task Successfully')
         return redirect('booking_list')
     # 
@@ -1204,6 +1508,77 @@ def Listofrebooking(request):
 
     return render(request,'homofix_app/AdminDashboard/Rebooking/list_of_rebooking.html',context)
 
+
+
+def admin_booking_complete(request):
+    
+   
+    task = Task.objects.filter(booking__status = "Completed")
+    context = {
+        'task':task,
+        
+        
+    }
+    return render(request,'homofix_app/AdminDashboard/Rebooking/booking_complete.html',context)    
+
+
+def admin_rebooking(request, task_id):
+    
+    task = get_object_or_404(Task, id=task_id)
+    booking_id = task.booking.id
+    
+    
+    
+    # user = request.user
+    # support = Support.objects.get(admin=user)
+    
+    booking_products = BookingProduct.objects.filter(booking_id=booking_id).select_related('booking', 'product')
+    
+    for booking_product in booking_products:
+        rebookings = Rebooking.objects.filter(booking_product_id=booking_product.id).order_by('-id')
+        booking_product.rebookings.set(rebookings)
+
+    context = {
+        'booking_prod': booking_products,
+        'support':support,
+        'task':task
+        
+    }
+    return render(request, 'homofix_app/AdminDashboard/Rebooking/rebooking.html', context)
+
+
+def admin_rebooking_update(request):
+    if request.method == 'POST':
+        booking_product_id = request.POST.get('booking_prod_id')
+        
+        booking_date = request.POST.get('booking_date')
+        
+        try:
+            # booking_product = BookingProduct.objects.get(booking_id=booking_product_id)
+            booking_product = BookingProduct.objects.filter(booking=booking_product_id).first()
+            booking = booking_product.booking
+            task = Task.objects.get(booking=booking)
+        except (BookingProduct.DoesNotExist, Task.DoesNotExist):
+            raise Http404('BookingProduct or Task matching query does not exist.')
+        
+        # create a new rebooking object with the same booking and assign it to the same technician
+        rebooking = Rebooking.objects.create(
+            booking_product=booking_product,
+            technician=task.technician,
+            booking_date=booking_date
+        )
+        
+        # update the status of the original booking to "completed"
+        # task.booking.status = "completed"
+        # task.booking.save()
+        
+        rebooking.save()
+        print("successsss",rebooking)
+        messages.success(request, 'Rebooking successfully created.')
+        return redirect('admin_booking_complete')
+
+    context = {}
+    return render(request, 'homofix_app/AdminDashboard/Rebooking/booking_complete.html', context)
 
 
 def contactus(request):
@@ -1428,3 +1803,52 @@ def admin_reset_psw(request):
         #         return redirect('admin_reset_psw')
                 # print("error: old password does not match")
     # return render(request,'homofix_app/Authentication/reset_psw.html')
+
+
+# ------------------------------- Withdraw Request ----------------------     
+
+def admin_withdraw_request(request):
+    withdraw_req = WithdrawRequest.objects.all()
+    context = {
+        'withdraw_req':withdraw_req
+    }
+    return render(request,'homofix_app/AdminDashboard/Withdraw/withdraw_request.html',context)
+
+
+
+    
+def expert_cancel_withraw_request(request,withdraw_id):
+    withdraw_req=WithdrawRequest.objects.get(id=withdraw_id)
+    withdraw_req.status="Cancel"
+    withdraw_req.save()
+    return HttpResponseRedirect(reverse("admin_withdraw_request"))
+
+    
+def expert_accept_withraw_request(request,withdraw_id):
+    withdraw_req=WithdrawRequest.objects.get(id=withdraw_id)
+    withdraw_req.status="Accept"
+    withdraw_req.save()
+    return HttpResponseRedirect(reverse("admin_withdraw_request"))
+
+
+
+# ------------------------------------------- Recharge ---------------- 
+
+def recharge(request):
+    
+    
+    recharge = RechargeHistory.objects.all()
+    context = {
+        'recharge':recharge
+    }
+    return render(request,'homofix_app/AdminDashboard/Recharge/list_of_recharge.html',context)
+
+
+
+def attendence(request,id):
+
+    attendence = Attendance.objects.filter(support_id=id)
+    context = {
+        'attendence':attendence
+    }
+    return render(request,'homofix_app/AdminDashboard/Attendence/list_of_attendence.html',context)
