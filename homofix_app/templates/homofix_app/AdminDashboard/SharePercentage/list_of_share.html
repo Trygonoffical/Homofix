@@ -3,6 +3,12 @@
 {% block main-content %}
 
 <div class="page-content">
+    <style>
+        .nowrap {
+            white-space: nowrap;
+          }
+          
+    </style>
     <!--breadcrumb-->
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="breadcrumb-title pe-3">Share Percentage</div>
@@ -40,10 +46,12 @@
                             <th>Username</th>
                             <th>Mobile</th>
                             <th>Subtotal</th>
+                            <th>GST</th>
+                            <th>GST Amount</th>
                             <th>total</th>
-                            <th>Share Homofix Percentage</th>
-                            <th>Share Expert</th>
-                            <th>Share Homofix</th>
+                            <th class="nowrap">Homofix Share  Percentage</th>
+                            <th>Homofix Share</th>
+                            <th>Expert Share</th>
                             {% comment %} <th>Total Amt</th> {% endcomment %}
                             <th>Date</th>
                            
@@ -84,6 +92,8 @@
                                     N/A
                                 {% endif %} 
                             </td>
+                            <td>18%</td>
+                            <td>{{i.task.booking.tax_amount}}</td>
                             <td>
                                 {% if i.task.booking.bookingproduct_set.exists %}
                                 {{ i.task.booking.bookingproduct_set.first.total_price_with_tax }}
@@ -94,8 +104,8 @@
                             <td>{{i.hod_share_percentage.percentage}} %</td>
                             
                             
-                            <td>Rs {{i.technician_share}}</td>
                             <td>Rs {{i.hod_share}}</td>
+                            <td>Rs {{i.technician_share}}</td>
                             {% comment %} <td>Rs {{i.task.booking.}}</td> {% endcomment %}
                             {% comment %} <td>Rs {{ i.task.booking.bookingproduct_set.total_price }}</td> {% endcomment %}
 

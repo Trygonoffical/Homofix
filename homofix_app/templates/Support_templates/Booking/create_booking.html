@@ -51,8 +51,9 @@
                               <option class="text-black" value="" selected disabled> --Select--</option>
                            </select>
                         </div>
+                        
                         {% for i in prod %}
-                        <div class="row" id="{{i.id}}-quantity" style="display: none;">
+                        <div class="row" id="quantity{{i.id}}" style="display: none;">
                            
                               <div class="col-12 col-lg-9 mx-auto">
                                  <div class="">
@@ -82,20 +83,16 @@
                                                        <div class="col">
                                                           <label class="form-label">Quantity</label>
                                                           <div class="input-group input-spinner">
-                                                            {% comment %} <button class="btn btn-light" type="button" id="button-plus" onclick="increaseValue('{{i.id}}')"> + </button>
-                                                            <input type="text" class="form-control" value="1" name="quantity" id="{{i.id}}-quantity-input">
-                                                            <button class="btn btn-light" type="button" id="button-minus" onclick="decreaseValue('{{i.id}}')"> − </button> {% endcomment %}
+                                                            
                                                             <button class="btn btn-light" onclick="increaseValue(this)">+</button>
-                                                            <input class="form-control" type="text" name="quantity" value="1">
+                                                            <input class="form-control quantity" type="text"   name="quantity" value="1" disabled>
                                                             <button class="btn btn-light" onclick="decreaseValue(this)">-</button>
 
                                                           </div>
                                                        </div>
                                                     </div>
                                                  </div>
-                                                   {% comment %} <p>Morbo can't understand his teleprompter because he forgot how you say that letter that's shaped like a man wearing a hat. Also Zoidberg. Can we have Bender Burgers again? Goodbye, cruel world. Goodbye, cruel lamp. Goodbye, cruel velvet drapes, lined with what would appear to be some sort of cruel muslin and the cute little pom-pom curtain pull cords.</p>
-                                                   <p><strong>Example: </strong>Cruel though they may be...</p>
-                                                   <input type="text" class="form-control" value="1" name="quantity"> {% endcomment %}
+                                                   
                                                 </div>
                                              </div>
                                           </div>
@@ -171,49 +168,55 @@
 </div>
 
 <script>
-  function increaseValue(element) {
-    var input = element.parentNode.querySelector('input[name="quantity"]');
-    var value = parseInt(input.value, 10);
-    value = isNaN(value) ? 0 : value;
-    value++;
-    input.value = value;
-    showQuantity(); // Call showQuantity function to update total amount
-  }
-
+   function increaseValue(element) {
+     var input = element.parentNode.querySelector('input[name="quantity"]');
+     var value = parseInt(input.value, 10);
+     value = isNaN(value) ? 0 : value;
+     value++;
+     input.value = value;
+     showQuantity(); // Call showQuantity function to update total amount
+   }
+ 
   function decreaseValue(element) {
-    var input = element.parentNode.querySelector('input[name="quantity"]');
-    var value = parseInt(input.value, 10);
-    value = isNaN(value) ? 0 : value;
-    value--;
-    if (value < 1) {
-      value = 1;
-    }
-    input.value = value;
-    showQuantity();
-  }
-
-  function showQuantity() {
-    var select = document.getElementById("product-select");
-    var options = select.options;
-    var totalAmount = 0;
-    for (var i = 0; i < options.length; i++) {
-      var id = options[i].value + "-quantity";
-      var div = document.getElementById(id);
-      if (options[i].selected) {
-        div.style.display = "block";
-        var rate = options[i].getAttribute("data-rate");
-        var quantity = div.querySelector("input[name='quantity']").value;
-        var amount = rate * quantity;
-        totalAmount += amount;
-      } else {
-        div.style.display = "none";
-      }
-    }
-    document.getElementById("total-amount").innerHTML = "Total Amount: " + totalAmount;
-    document.getElementById("total-amount2").value = totalAmount;
-  }
-  
-</script>
+     var input = element.parentNode.querySelector('input[name="quantity"]');
+     var value = parseInt(input.value, 10);
+     value = isNaN(value) ? 0 : value;
+     value--;
+     if (value < 1) {
+       value = 1;
+     }
+     input.value = value;
+     showQuantity();
+   } 
+ 
+   function showQuantity() {
+     var select = document.getElementById("product-select");
+     var options = select.options;
+     var totalAmount = 0;
+     for (var i = 0; i < options.length; i++) {
+       var id =  "quantity"+options[i].value;
+       var div = document.getElementById(id);
+       if (options[i].selected) {
+         div.style.display = "block";
+        // div.append('<h2>'+div+'</h2>')
+         var rate = options[i].getAttribute("data-rate");
+         $('#'+id+' .quantity').prop('disabled', false);
+         var quantity = div.querySelector('#'+id+' .quantity').value;
+         console.log("ddd",quantity);
+         var amount = rate * quantity;
+         totalAmount += amount;
+       } else {
+         div.style.display = "none";
+       }
+     }
+     document.getElementById("total-amount").innerHTML = "Total Amount: " + totalAmount;
+     document.getElementById("total-amount2").value = totalAmount;
+   }
+ 
+   
+   
+ </script>
+ 
 
 
 <script>

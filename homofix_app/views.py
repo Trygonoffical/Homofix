@@ -5,6 +5,9 @@ from homofix_app import views
 from django.utils import timezone
 from .models import Attendance
 from datetime import datetime
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView    
+from django.urls import reverse_lazy
+# from django.views.generic import ListView
 # Create your views here.
 
 
@@ -188,3 +191,25 @@ def logout_user(request):
 
     logout(request)
     return redirect("login")
+
+
+
+class CustomPasswordResetView(PasswordResetView):
+    email_template_name = 'password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
+    template_name = 'password_reset_form.html'
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'password_reset_done.html'
+
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    success_url = reverse_lazy('password_reset_complete')
+    template_name = 'password_reset_confirm.html'
+
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'password_reset_complete.html'

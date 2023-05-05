@@ -270,6 +270,13 @@ class FAQ(models.Model):
 
 
 
+class Coupon(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    validity_period = models.DateTimeField()
+
+    def __str__(self):
+        return self.code
 
 class Booking(models.Model):
     STATUS_CHOICES = (
@@ -292,6 +299,7 @@ class Booking(models.Model):
     order_id = models.CharField(max_length=9, unique=True, null=True, blank=True)
     cash_on_service = models.BooleanField(default=False,null=True,blank=True)
     online = models.BooleanField(default=True,null=True,blank=True)
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_used_coupon')
 
 
 
@@ -344,7 +352,7 @@ class BookingProduct(models.Model):
     
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)  
+    quantity = models.IntegerField(default=0)  
     total_price = models.IntegerField()
     total_price_with_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
@@ -478,15 +486,19 @@ class Share(models.Model):
     # booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     hod_share_percentage = models.ForeignKey(HodSharePercentage, on_delete=models.CASCADE)
-    technician_share = models.IntegerField(default=0)
-    hod_share = models.IntegerField(default=0)
+    technician_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    # technician_share = models.IntegerField(default=0)
+    # hod_share = models.IntegerField(default=0)
+    hod_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     date = models.DateField(auto_now_add=True,null=True,blank=True)
 
 
 
 class Wallet(models.Model):
     technician_id = models.ForeignKey(Technician, on_delete=models.CASCADE)
-    total_share = models.IntegerField(default=0)
+    total_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    
+    # total_share = models.IntegerField(default=0)
     
     def add_bonus(self, bonus_amount):
         self.total_share += bonus_amount
@@ -522,7 +534,8 @@ class WalletHistory(models.Model):
         ('deduction', 'Deduction'),
     )
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    amount = models.IntegerField()
+    # amount = models.IntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     description = models.CharField(max_length=100)
     date = models.DateField(auto_now_add=True, null=True, blank=True)
 
@@ -651,6 +664,21 @@ class Attendance(models.Model):
     support_id = models.ForeignKey(Support, on_delete=models.CASCADE)
     login_time = models.DateTimeField()
     logout_time = models.DateTimeField(null=True, blank=True)   
+
+
+class Blog(models.Model):
+    title = models.CharField(max_length=100)
+    feature_img = models.ImageField(upload_to='Blog/Feature Image')
+    content = RichTextField()
+
+class feedback(models.Model):
+
+    customer_id = models.ForeignKey(Customer,on_delete=models.CASCADE)    
+    technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
+    rating = models.CharField(max_length=50)
+    feedback = models.CharField(max_length=100)
+
+
 
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):

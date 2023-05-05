@@ -12,9 +12,7 @@
                 <form id="mobile-no-form" method="POST">
                     {% csrf_token %}
 
-                    {% comment %} <div class="input-group mb-2">
-                        <input type="text" class="form-control" placeholder="Enter Username" name="username" required>
-                    </div> {% endcomment %}
+                   
                     <div class="input-group mb-2">
                         <input type="text" class="form-control" placeholder="Enter a Name" name="full_name" >
                     </div>
@@ -35,21 +33,7 @@
 </div>
 
 {% include 'Support_templates/Orders/otp_modal.html' %}
-{% comment %} 
-<script>
-    const mobileNoForm = document.getElementById('mobile-no-form');
-    mobileNoForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        if (mobileNoForm.checkValidity()) {
-            const usernameInput = mobileNoForm.querySelector('input[name="username"]').value;
-            console.log("heloooooooo",usernameInput)
-            $('#exampleDangerModal').modal('hide');
-            $('#tech_category_add_modal').modal('show');
-        } else {
-            // Form is invalid, show error messages or handle it in some way
-        }
-    });
-</script> {% endcomment %}
+
 <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function() {

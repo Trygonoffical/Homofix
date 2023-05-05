@@ -35,7 +35,7 @@
                             <th>Percentage</th>
                             <th>Date</th>
                            
-                            {% comment %} <th>Action</th> {% endcomment %}
+                            <th>Action</th>
                             
                         </tr>
                     </thead>
@@ -47,21 +47,21 @@
                            
                             
 
-                            {% comment %} <td>
+                            <td>
                                 <div class="d-flex order-actions">
                                     <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a>
                                     <a href="javascript:;" class="ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" ><i class='bx bxs-trash'></i></a>
                                 </div>
-                            </td> {% endcomment %}
+                            </td> 
                            
                             
                         </tr>
 
-                        {% comment %} <div class="col">
+                         <div class="col">
                            
-                            {% include 'homofix_app/AdminDashboard/Product/edit_product_modal.html' %}
-                            {% include 'homofix_app/AdminDashboard/Product/delete_product_modal.html' %}
-                        </div> {% endcomment %}
+                            {% include 'homofix_app/AdminDashboard/SharePercentage/edit_modal.html' %}
+                             {% include 'homofix_app/AdminDashboard/SharePercentage/delete_share_modal.html' %}
+                        </div> 
                         {% endfor %}
                        
                     </tbody>

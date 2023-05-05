@@ -75,7 +75,287 @@ data = {
 #         return HttpResponse(pdf, content_type='application/pdf')
 
 
+# def ViewPDF(request,booking_id):
+#     import os
+        
+#     if os.path.exists('last_invoice_number.txt'):
+#         with open('last_invoice_number.txt', 'r') as f:
+#             last_invoice_number = int(f.read().strip())
+#     else:
+#         last_invoice_number = 0
+
+# # Increment the last invoice number
+#     new_invoice_number = f'INV-{last_invoice_number+1:03d}'
+
+# # Save the new invoice number to the file
+#     with open('last_invoice_number.txt', 'w') as f:
+#         f.write(str(last_invoice_number+1))
+
+# # Print the new invoice number
+#     print("newwwwww",new_invoice_number)
+#     # print("ggggg")
+#     book_id = Booking.objects.get(id=booking_id)
+
+#     my_path = f"F:\\Homofix\\v73\\invoice_{book_id.order_id}.pdf"
+#     print("my path",my_path)
+#     # filename = f"invoice_{instance.order_id}.pdf"
+#     doc = SimpleDocTemplate(my_path, pagesize=letter,topMargin=0)
+
+    
+#     # Add the title to the document
+#     para_style2 = ParagraphStyle(
+#     'title',
+#     fontSize=18,
+#     leading=20,
+#     alignment=TA_CENTER,  # align text to the left
+#     textColor=colors.black,
+#     spaceBefore=0,  # no space before the paragraph
+#     spaceAfter=12,
+# )
+
+    
+#     title = Paragraph('LIST OF ITEM', para_style2)
+#     addon_title = Paragraph('LIST OF Addon', para_style2)
+#     inv = Paragraph('Invoice',para_style2)
+#     title.spaceBefore = 0  # set spaceBefore to zero
+#     addon_title.spaceBefore = 0  # set spaceBefore to zero
+#      # Create the table for bill to information
+#     bookingid=Booking.objects.get(id=booking_id)
+   
+#     bill_to_data = [    ['Bill To:', bookingid.customer.admin.first_name],
+#         ['Address:', bookingid.customer.address],     
+#         ['Mobile:', f'+91{bookingid.customer.mobile}' ],
+#         ['Email:', bookingid.customer.admin.email],
+#     ]
+#     bill_to_table = Table(bill_to_data, colWidths=[150, None], hAlign='LEFT')
+    
+
+
+# # Apply the bill to table style
+#     # bill_to_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),])
+
+#     bill_to_style = TableStyle([
+#     ('FONTNAME', (0, 0), (-1, -1), 'Times-Roman'),
+#     ('FONTSIZE', (0, 0), (-1, -1), 11),
+#     # ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    
+#     ('LINEAFTER', (1, 0), (1, -1), 0.5, colors.black),
+# ])
+
+#     bill_to_table.setStyle(bill_to_style)
+
+#     # Get the last invoice number from a file
+    
+# # Create the table for invoice details
+#     invoice_data = [    ['Invoice No:', 'INV-001'],
+#         ['Invoice Date:', '18-Apr-2023'],
+#         # ['Due Date:', '30-Apr-2023'],
+#     ]
+
+#     invoice_table = Table(invoice_data, colWidths=[150, None], hAlign='LEFT')
+
+
+
+#     # Apply the invoice table style
+#     # invoice_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),])
+#     invoice_style = TableStyle([
+#     ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+#     ('FONTSIZE', (0, 0), (-1, -1), 11),
+#     ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+#     ('LEFTPADDING', (0, 0), (-1, -1), 6),
+# ])
+
+#     invoice_table.setStyle(invoice_style)
+    
+#     nested_table_style = TableStyle([
+#     ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+#     ('FONTSIZE', (0, 0), (-1, -1), 11),
+#     ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+#     ('BOX', (0, 0), (-1, -1), 1, colors.black),
+# ])
+
+#     # Create the nested table with two columns and one row
+#     nested_table_data = [[bill_to_table, invoice_table]]
+#     nested_table = Table(nested_table_data, colWidths=[250, 250])
+#     nested_table.setStyle(nested_table_style)
+
+
+#     # Define the table data
+    
+#     data = [['Product Name', 'Qty','RATE','TAX','AMOUNT'],]
+#     addon = [['Addon Name', 'Qty','RATE','TAX','AMOUNT'],]
+#     bookingProd=BookingProduct.objects.filter(booking=booking_id)
+#     adon = Addon.objects.filter(booking_prod_id__booking=booking_id)
+#     # stu = Booking.objects.all()
+#     for bookingprod in bookingProd:
+
+#         price = 0
+#         if bookingprod.product.selling_price != None:
+#             price = bookingprod.product.selling_price
+#         else:
+#             price = bookingprod.product.price
+        
+#         data.append([bookingprod.product.name, bookingprod.quantity,price,'18%',f'{bookingprod.quantity*price*1.18:.2f}'])
+#         # data.append([bookingprod.product.name, bookingprod.quantity,price,'18%',bookingprod.quantity*price*1.18])
+#         for i in adon:
+#             if i.spare_parts_id.product == bookingprod.product:
+#                 # addon.append([i.spare_parts_id.spare_part,i.quantity,i.spare_parts_id.price,'18%',i.quantity*i.spare_parts_id.price*1.18])
+#                 addon.append([i.spare_parts_id.spare_part, i.quantity, i.spare_parts_id.price, '18%', f'{i.quantity * i.spare_parts_id.price * 1.18:.2f}'])
+
+
+#         # if i.spare_parts_id.product ==  bookingprod.product:
+#         #     addon.append([i.spare_parts_id.spare_part])
+            
+        
+# #     data.append(['Ac Repairing', '2','100','18%','200'])
+        
+
+#     # Create the table
+#     # col_widths = [100, 100]
+#     col_widths = [270, 30, 75, 50, 70]
+#     table = Table(data,colWidths=col_widths)
+#     addon_col_widths = [270, 30, 75, 50, 70]
+#     addontable = Table(addon,colWidths=addon_col_widths)
+
+#     # Apply the table style
+#     style = TableStyle([
+#         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+#         # ('LINEBELOW', (0, 0), (-1, -1), 0.25, colors.black),
+#         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+#         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+#         ('FONTSIZE', (0, 0), (-1, 0), 14),
+#         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+#         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+#         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+#         # ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+#         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+#         ('FONTSIZE', (0, 1), (-1, -1), 12),
+#         ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+#         ('GRID', (0, 0), (-1, -1), 0.25, colors.black),
+#     ])
+#     table.setStyle(style)
+    
+#     addonstyle = TableStyle([
+#         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+#         # ('LINEBELOW', (0, 0), (-1, -1), 0.25, colors.black),
+#         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+#         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+#         ('FONTSIZE', (0, 0), (-1, 0), 14),
+#         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+#         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+#         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+#         # ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+#         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+#         ('FONTSIZE', (0, 1), (-1, -1), 12),
+#         ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+#         ('GRID', (0, 0), (-1, -1), 0.25, colors.black),
+#     ])
+#     addontable.setStyle(addonstyle)
+    
+
+#     # Define the paragraph style
+#     para_style = ParagraphStyle(
+#         'title',
+#         fontSize=18,
+#         leading=24,
+#         alignment=TA_CENTER,
+#         textColor=colors.black,
+#         spaceBefore=12,
+#         spaceAfter=12,
+#     )
+    
+    
+#     logo_path = "F:\pdf genera django\LOGO2.jpeg"
+    
+#     logo = Image(logo_path, width=1.5*inch, height=1.5*inch)
+#     logo.hAlign = 'LEFT'
+
+
+
+    
+    
+#     # Create the table for invoice totals
+#     booking = Booking.objects.get(id=booking_id)
+#     tax_rate = 0.18
+#     total_price = total_price = booking.total_amount
+#     print("ttoaalll",total_price)
+#     gst = int(total_price * 18)/100
+#     total = total_price+gst
+#     # print("gsstttt",gst)
+
+#     invoice_totals_data = [    ['Subtotal:', f'{total_price:.2f}'],
+#         ['CGST @9%:', f'{gst/2:.2f}'],
+#         ['SGST @9%:', f'{gst/2:.2f}'],
+#         ['Total:', f'{total:.2f}'],
+#     ]
+
+#     invoice_totals_table = Table(invoice_totals_data, colWidths=[90, None], hAlign='RIGHT')
+
+# # Apply the invoice totals table style
+#     # invoice_totals_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),])
+#     invoice_totals_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),    ('LINEABOVE', (0, 3), (-1, 3), 1, colors.black),('LINEBELOW', (0, -1), (-1, -1), 1, colors.black),])
+#     invoice_totals_table.setStyle(invoice_totals_style)
+
+
+#     # Create the table for company information
+#     company_data = [        [''],  # Add an empty row before the company information
+#         [f'{"Homofix Technologies PVT Ltd":^65}'],
+#         # [''],
+#         [f'{"Corporate Office: 2nd Floor, WP-501-D, Unit 209, Shiv Market, Wazirpur Village ,":^50}'],
+#         [f'{"Ashok Vihar, New Delhi, Central Delhi, Delhi, 110052":^90}'],
+#         [f'{"Regd Office: 5139, Awas Vikas 3, Kalyanpur,Kanpur,Uttar Pradesh, India,208017":^50}'],
+#         [f'{"GSTIN:07AAGCH4863F1Z1":^110}'],
+
+#         # ['Ashok Vihar Delhi,New Delhi 110052'],
+#         # [ '+1 (555) 987-6543'],
+#         # ['info@abccorp.com'],
+#     ]
+    
+
+#     # company_table = Table(company_data, colWidths=[90, None])
+#     company_table = Table(company_data, colWidths=[doc.width, 0])
+
+#     # Apply the company table style
+ 
+#     # Apply the company table style
+#     company_style = TableStyle([
+#     ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+#     ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.black),  # Add line below style to the first row
+#     ('FONTSIZE', (0, 1), (-1, -1), 20),
+#     ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
+#     ('TOPPADDING', (0, 0), (0, 0), 6),  # Add top padding to the first cell of the first row
+#     ('LEFTPADDING', (0, 0), (0, 0), 50),  # Add left padding to the first cell of the first row
+#     ('ALIGN', (0, 0), (0, 0), 'CENTER'),  # Align the first cell of the first row to the center
+#     # ('TEXTCOLOR', (0, 0), (-1, -1), colors.blue),
+#     # ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid style to all cells
+#     ('FONTSIZE', (0, 2), (-1, 2), 12),
+#     ('FONTSIZE', (0, 3), (-1, 3), 12),
+#     ('TOPPADDING', (0, 3), (-1, 3), -8),
+#     ('FONTSIZE', (0, 4), (-1, 4), 12),
+#     ('FONTSIZE', (0, 5), (-1, 5), 12),
+#     ('TOPPADDING', (0, 5), (-1, 5), -6),
+#     # ('LINEBELOW', (-1, -1), (-1, -1), 1, colors.black)  # Add line below style to the last row
+# ])
+#     company_table.setStyle(company_style)
+
+   
+#     # doc = SimpleDocTemplate(f'invoice{}.pdf', topMargin=0)
+
+#     doc.build([inv,logo, nested_table, Spacer(1, 0.*inch),title, table,Spacer(1, 0.1*inch),addon_title,addontable, Spacer(1, 0.5*inch), invoice_totals_table, Spacer(1, 0.5*inch), company_table])
+#     import os
+#     if os.path.exists(my_path):
+#         with open(my_path, 'rb') as pdf:
+#             response = HttpResponse(pdf.read(), content_type='application/pdf')
+#             response['Content-Disposition'] = 'inline; filename="invoice.pdf"'
+#             return response
+#     # else:
+#     #     return HttpResponse("The requested file does not exist.")
+
+#     return HttpResponse("Invoice generated successfully")    
+
+
 def ViewPDF(request,booking_id):
+    
     import os
         
     if os.path.exists('last_invoice_number.txt'):
@@ -94,9 +374,14 @@ def ViewPDF(request,booking_id):
 # Print the new invoice number
     print("newwwwww",new_invoice_number)
     # print("ggggg")
-    my_path = "F:\\Homofix\\v72\\invoice.pdf"
-    
-    doc = SimpleDocTemplate(my_path, pagesize=letter)
+    book_id = Booking.objects.get(id=booking_id)
+
+    filename  = f"invoice_{book_id.order_id}.pdf"
+    my_path = os.path.join(settings.MEDIA_ROOT, filename)
+    # my_path = f"F:\\Homofix\\v75\\invoice_{book_id.order_id}.pdf"
+    print("my path",my_path)
+    # filename = f"invoice_{instance.order_id}.pdf"
+    doc = SimpleDocTemplate(my_path, pagesize=letter,topMargin=0)
 
     
     # Add the title to the document
@@ -262,7 +547,9 @@ def ViewPDF(request,booking_id):
     )
     
     
-    logo_path = "F:\pdf genera django\LOGO2.jpeg"
+    logo_path = os.path.join(settings.MEDIA_ROOT, 'LOGO2.jpeg')
+
+    
     
     logo = Image(logo_path, width=1.5*inch, height=1.5*inch)
     logo.hAlign = 'LEFT'
@@ -336,7 +623,7 @@ def ViewPDF(request,booking_id):
     company_table.setStyle(company_style)
 
    
-    doc = SimpleDocTemplate('invoice.pdf', topMargin=0)
+    # doc = SimpleDocTemplate(f'invoice{}.pdf', topMargin=0)
 
     doc.build([inv,logo, nested_table, Spacer(1, 0.*inch),title, table,Spacer(1, 0.1*inch),addon_title,addontable, Spacer(1, 0.5*inch), invoice_totals_table, Spacer(1, 0.5*inch), company_table])
     import os
@@ -348,7 +635,7 @@ def ViewPDF(request,booking_id):
     # else:
     #     return HttpResponse("The requested file does not exist.")
 
-    return HttpResponse("Invoice generated successfully")    
+    return HttpResponse("Invoice generated successfully")        
 #Automaticly downloads to PDF file
 class DownloadPDF(View):
 	def get(self, request, *args, **kwargs):
@@ -505,6 +792,8 @@ def support_orders(request):
         request.session['otp'] = otp_unique
 
         if Customer.objects.filter(mobile=mob).exists():
+
+            
             print("helloooo suceess")
             # print("heloooooooo")
             
@@ -522,7 +811,9 @@ def support_orders(request):
             # url = f"http://weberleads.in/http-tokenkeyapi.php?authentic-key={auth_key}&senderid={sender_id}&route={route}&number={number}&message={urllib.parse.quote(message)}&templateid={template_id}"
             # response = requests.get(url) 
                 
-
+            customer = Customer.objects.get(mobile=mob)
+            customer.first_name = first_name
+            customer.save()
             return JsonResponse({'status':'Save'})
 
         # elif Customer.objects.filter(mobile=mob).exists():
@@ -672,7 +963,7 @@ def support_verify_otp(request):
 
 
 def support_booking(request):
-    
+    order_count = Booking.objects.filter(status="New").count()
     user = request.user
     support = Support.objects.get(admin=user)
     prod = Product.objects.all()
@@ -746,7 +1037,8 @@ def support_booking(request):
         'prod': prod,
         'state_choices':state_choices,
         'category':category,
-        'support':support
+        'support':support,
+        'order_count':order_count
     }
     return render(request, 'Support_templates/Booking/create_booking.html', context)
 

@@ -39,11 +39,13 @@
                         <tr>
                             <th>SI NO</th>
                             <th>ID</th>
-                            <th>Name</th>                         
+                             
+                            <th>First Name</th>                       
+                            <th>Last Name</th>
                             <th>Username</th>                         
                             <th>Email</th>                        
                             <th>Status</th>
-                            <th>Last Login</th>
+                            {% comment %} <th>Last Login</th> {% endcomment %}
                             <th>New Booking</th>
                             <th>Cancel Booking</th>
                             <th>Rebooking</th>
@@ -62,6 +64,7 @@
                             <td>#{{forloop.counter}}</td>
                             <td>{{i.support_id}}</td>
                             <td>{{i.admin.first_name}}</td>
+                            <td>{{i.admin.last_name}}</td>
                             <td>{{i.admin.username}}</td>
                            
                             
@@ -69,7 +72,7 @@
                             
                            
                             <td><span class="badge bg-success">{{i.status}}</span></td>
-                            <td class="nowrap">{{i.admin.last_login}}</td>
+                            {% comment %} <td class="nowrap">{{i.admin.last_login}}</td> {% endcomment %}
                             
                             <td>
                                 {% if i.can_new_booking %}
@@ -127,7 +130,7 @@
                             <td>
                                 <div class="d-flex order-actions">
                                     
-                                    <a href="{% url 'support_profile' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
+                                    <a href="{% url 'admin_support_profile' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
                                     <a data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" href=""
                                         class="ms-3"><i class='bx bxs-trash'></i></a>
                                         <a href="{% url 'attendence' i.id %}" class="ms-3" ><i class='bx bxs-user-circle'></i></a>

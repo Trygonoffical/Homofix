@@ -34,7 +34,7 @@
                                 {% for cat in category %}
                                  {% comment %} <option class="text-black" value="{{i.id}}">{{i.category_name}}</option> {% endcomment %}
                                  {% comment %} {% if i.subcategory.Category_id_id == cat.id %} {% endcomment %}
-                                 <option class="bg-dark" value="{{ cat.id }}" {% if i.subcategory.Category_id_id == cat.id %}selected{% endif %}>
+                                 <option  value="{{ cat.id }}" {% if i.subcategory.Category_id_id == cat.id %}selected{% endif %}>
                                     {{ cat.category_name }}
                                 </option>
                                 {% comment %} {% endif %} {% endcomment %}

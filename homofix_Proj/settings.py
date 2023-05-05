@@ -143,7 +143,14 @@ GOOGLE_MAPS_API_KEY = 'https://armaan.pythonanywhere.com/api/ExpertAllLocation/'
     
 # ]
 
-WKHTMLTOPDF_CMD_OPTIONS = {
-    'quiet': True,
-}
-WKHTMLTOPDF_PATH = 'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe'
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'armaanalamf65@gmail.com'
+EMAIL_HOST_PASSWORD = 'wqdg kuki aovn cnkb'
+
+PASSWORD_RESET_URL = 'password_reset/'

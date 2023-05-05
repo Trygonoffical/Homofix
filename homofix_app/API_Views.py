@@ -100,12 +100,13 @@ class TaskViewSet(ModelViewSet):
                     tax_rate = 0.18
                     booking_amount = booking.total_amount
                     
-
                     tax_amt =booking.tax_amount
-                    print("helloooo")
+                    print("helloooo booking amt",booking_amount)
                     hod_share_percentage = HodSharePercentage.objects.latest('id')
                     hod_share_percentage_value = hod_share_percentage.percentage
+                    
                     hod_share = booking_amount * (hod_share_percentage_value / 100) 
+                    print("hellooo ggg")
                     print("new hod share0",hod_share)
                     technician_share = booking_amount-hod_share
                     print("technicia sare",technician_share)
@@ -118,7 +119,7 @@ class TaskViewSet(ModelViewSet):
                    
                     # technician_share = booking_amount - hod_share
                    
-                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,hod_share=hod_share_with_tax)
+                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,hod_share=hod_share)
                     share.save()
                     technician = task.technician
                     wallet, created = Wallet.objects.get_or_create(technician_id=technician)

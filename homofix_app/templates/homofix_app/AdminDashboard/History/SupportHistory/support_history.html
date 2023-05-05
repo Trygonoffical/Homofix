@@ -47,6 +47,7 @@
                             <th>City</th>
                             <th>State</th>
                             <th>Area</th>
+                            <th>ZipCode</th>
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
@@ -81,9 +82,11 @@
                             </td>
                             <td>{{booking.customer.admin.username}}</td>
                             <td>{{booking.customer.mobile}}</td>
-                            <td>{{booking.city}}</td>
-                            <td>{{booking.state}}</td>
-                            <td>{{booking.area}}</td>
+                            <td>{{booking.customer.city}}</td>
+                            <td>{{booking.customer.state}}</td>
+                            <td>{{booking.customer.area}}</td>
+                            <td>{{booking.customer.zipcode}}</td>
+                            
                             <td>
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{booking.status}}</div>
@@ -215,11 +218,11 @@
                                             {% comment %} <h6 class="mt-2">Customer Details</h6> {% endcomment %}
                                             <hr>
                                             <p class="mb-0 text-white">Name: {{task.booking.customer.admin.username}}</p>
-                                            <p class="mb-0 text-white">City: {{task.booking.city}}</p>
-                                            <p class="mb-0 text-white">State: {{task.booking.state}}</p>
+                                            <p class="mb-0 text-white">City: {{task.booking.customer.city}}</p>
+                                            <p class="mb-0 text-white">State: {{task.booking.customer.state}}</p>
                                             <p class="mb-0 text-white">Mobile: {{task.booking.customer.mobile}}</p>
-                                            <p class="mb-0 text-white">ZipCode: {{task.booking.zip_code}}</p>
-                                            <p class="mb-0 text-white">Address: {{task.booking.city}}, {{task.booking.state}}</p>
+                                            <p class="mb-0 text-white">ZipCode: {{task.booking.customer.zipcode}}</p>
+                                            <p class="mb-0 text-white">Address: {{task.booking.customer.city}}, {{task.booking.state}}</p>
                                             
                                             {% comment %} <div class="list-inline contacts-social mt-3 mb-3"> <a href="javascript:;" class="list-inline-item border-0"><i class="bx bxl-facebook"></i></a>
                                             <a href="javascript:;" class="list-inline-item border-0"><i class="bx bxl-twitter"></i></a>
@@ -302,7 +305,7 @@
                             
                             
                             <th>Status</th>
-                            <th>Action</th>
+                            {% comment %} <th>Action</th> {% endcomment %}
                             
                         </tr>
                     </thead>
@@ -335,15 +338,14 @@
                             <td><span class="badge bg-success">{{i.status}}</span></td>
                             
                             
-                            <td>
+                            {% comment %} <td>
                                 <div class="d-flex order-actions">
-                                    {% comment %} <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a> {% endcomment %}
-                                    {% comment %} <a href="javascript:;" class="ms-3"><i class='bx bxs-trash'></i></a> {% endcomment %}
+                                   
                                     <a href="{% url 'technician_edit_profile' i.id %}" class="" ><i class='bx bxs-edit'></i></a>
                                     <a data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" href=""
                                         class="ms-3"><i class='bx bxs-trash'></i></a>
                                 </div>
-                            </td>
+                            </td> {% endcomment %}
                            
                             
                         </tr>

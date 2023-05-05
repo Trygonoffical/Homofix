@@ -71,7 +71,7 @@
                 </div>
                 
                 <div class="col-lg-8">
-                    <form action="{% url 'support_update_profile'  %}" method="POST" enctype="multipart/form-data">
+                    <form action="{% url 'admin_support_update_profile'  %}" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                     <div class="card">
                         <div class="card-body">
@@ -87,7 +87,9 @@
                                     {% comment %} <a href="{{technician.profile_pic.url}}">/media/{{technician.profile_pic}}</a> {% endcomment %}
                                 </div>
                             </div>
-                            <input type="text" value="{{support.id}}" name="support_id" hidden>
+                            {% comment %} <input type="text" value="{{support.id}}" name="support_id" hidden> {% endcomment %}
+                            <input type="text" value="{{support.admin_id}}" name="support_id" hidden>
+                            <input type="text" value="{{support.id}}" name="support_nw_id" hidden>
                             <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <h6 class="mb-0">Username</h6>
@@ -109,7 +111,7 @@
                                     <h6 class="mb-0">Last Name</h6>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{support.admin.last_name}}" name="xyzzz" >
+                                    <input type="text" class="form-control" value="{{support.admin.last_name}}" name="lastname" >
                                 </div>
                             </div>
                            

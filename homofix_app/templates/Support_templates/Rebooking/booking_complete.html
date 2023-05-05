@@ -45,12 +45,14 @@
                             <th>City</th>
                             <th>State</th> 
                             <th>Area</th> 
+                            <th>Zipcode</th>
                             <th>Status</th>
                             <th>Total</th>
                             <th>Date</th>
                             <th class="nowrap">Order By</th>
                             <th class="nowrap">Expert By</th>
                             <th>Actions</th>
+                            <th>Invoice</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -90,19 +92,36 @@
                             </td>
                             <td>{{task.booking.customer.admin.username}}</td>
                             <td>{{task.booking.customer.mobile}}</td>
-                            <td>{{task.booking.city}}</td>
-                            <td>{{task.booking.state}}</td>
-                            <td>{{task.booking.area}}</td>
+                            <td>{{task.booking.customer.city}}</td>
+                            <td>{{task.booking.customer.state}}</td>
+                            <td>{{task.booking.customer.area}}</td>
+                            <td>{{task.booking.customer.zipcode}}</td>
                             <td>
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{task.booking.status}}</div>
                             </td>
                             
-                            <td>Rs{{task.booking.product.price}}</td>
+                            {% comment %} <td>Rs{{task.booking.product.price}}</td> {% endcomment %}
+                            <td>
+                                {% if task.booking.bookingproduct_set.exists %}
+                                    Rs {{ task.booking.bookingproduct_set.first.total_price }}
+                                {% else %}
+                                    N/A
+                                {% endif %} 
+                            </td>
                             <td class="nowrap">{{task.booking.booking_date}}</td>
                             
                             </td>
-                            <td class="nowrap">{{task.booking.supported_by.admin.username}}</td>
+                            <td class="nowrap">
+                                {% if task.booking.supported_by %}
+                                {{task.booking.supported_by.admin.username}}
+                            {% elif task.booking.admin_by%}
+                            {{task.booking.admin_by.admin.username}}
+                            {% else %}
+                                Website
+                            {% endif %}
+                            </td>
+                            {% comment %} <td class="nowrap">{{task.booking.supported_by.admin.username}}</td> {% endcomment %}
                             <td>{{task.technician.admin.username}}</td>
                            
                             {% comment %} <td>
@@ -115,6 +134,7 @@
                             </td> {% endcomment %}
                             {% comment %} <td class="nowrap"><button type="button" class="btn btn-light btn-sm radius-30 px-4" data-bs-toggle="modal" data-bs-target="#exampleDarkModal4">View Details</button></td> {% endcomment %}
                             <td class="nowrap"><a href="{% url 'support_rebooking' task.id %}"><button type="button" class="btn btn-light btn-sm radius-30 px-4" data-bs-toggle="modal" data-bs-target="#exampleDarkModal4">View Details</button></a></td>
+                            <td class="nowrap"><a href="{% url 'pdf_view' task.booking.id %}"><button type="button" class="btn btn-light btn-sm radius-30 px-4" data-bs-toggle="modal" data-bs-target="#exampleDarkModal4">Invoice</button></a></td>
                         </tr>
 
                         <div class="col">
@@ -140,7 +160,7 @@
 <div class="col">
 
     <!-- Modal -->
-    {% include 'Support_templates/Orders/mobile_no_modal.html' %}
+    {% comment %} {% include 'Support_templates/Orders/mobile_no_modal.html' %} {% endcomment %}
 </div>
 
 

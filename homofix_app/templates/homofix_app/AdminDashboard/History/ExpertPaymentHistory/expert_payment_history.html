@@ -19,8 +19,7 @@
 
         <div class="ms-auto">
             <div class="btn-group">
-                {% comment %} <a class="px-2" href=""><button type="button" class="btn btn-light">Payment</button></a>
-                <a href=""><button type="button" class="btn btn-light">History</button></a> {% endcomment %}
+                
 
                 <div class="card radius-10">
 					<div >
@@ -28,7 +27,7 @@
 						<div class="col">
 							<div class="card-body">
 								<div class="d-flex align-items-center">
-									<h5 class="mb-0">Rs {{wallet.total_share}}</h5>
+									<h5 class="mb-0">₹ {{wallet.total_share}}</h5>
 									{% comment %} <div class="ms-auto">
                                         <i class="bx bx-dollar fs-3 text-white"></i>
 									</div> {% endcomment %}
@@ -67,19 +66,20 @@
                 <div class="card">
                     <div class="card-body">
                         
-                        {% comment %} <input class="form-control form-control-lg mb-3" type="text" placeholder="Type" aria-label=".form-control-lg example"> {% endcomment %}
+                        
                         <select class="form-select mb-3" id="inputVendor" name="type">
                             <option selected disabled ,"true"> ---Type--- </option>
-                            <option value="bonus">Bonus</option>
+                            <option value="bonus">Add</option>
                             <option value="deduction">Deduction</option>
                             
                         </select>
                       
-                        <input class="form-control form-control-sm mb-3" type="number" placeholder="Amount" aria-label=".form-control-sm example" name="amount">
+                        {% comment %} <input class="form-control form-control-sm mb-3" type="number" placeholder="Amount" aria-label=".form-control-sm example" name="amount"> {% endcomment %}
+                        <input type="number" step="0.01" name="amount" placeholder="Amount" aria-label=".form-control-sm example" class="form-control form-control-sm mb-3">
+
                         
                         <input class="form-control mb-3" type="text" placeholder="Description" aria-label="Disabled input example" name="description">
-                        {% comment %} <input class="form-control mb-3" type="text" placeholder="Disabled readonly input" aria-label="Disabled input example" disabled="" readonly=""> {% endcomment %}
-                        {% comment %} <input class="form-control" type="text" placeholder="Readonly input here..." aria-label="readonly input example" readonly=""> {% endcomment %}
+                        
                         <input class="btn btn-primary" type="submit" value="Send">
                     </div>
                 </div> 
@@ -162,11 +162,10 @@
                             <th>total</th>
                             <th class="nowrap">Homofix Percentage</th>
                             <th>Share Expert</th>
-                            <th>Share Homofix</th>
-                            {% comment %} <th>Total Amt</th> {% endcomment %}
+                            <th>Share Homofix</th>                            
                             <th>Date</th>
                            
-                            {% comment %} <th>Action</th> {% endcomment %}
+                            
                             
                         </tr>
                     </thead>
@@ -215,19 +214,10 @@
                             
                             <td>Rs {{i.technician_share}}</td>
                             <td>Rs {{i.hod_share}}</td>
-                            {% comment %} <td>Rs {{i.task.booking.}}</td> {% endcomment %}
-                            {% comment %} <td>Rs {{ i.task.booking.bookingproduct_set.total_price }}</td> {% endcomment %}
-
+                            
                             <td>{{i.date}}</td>
                            
                             
-
-                            {% comment %} <td>
-                                <div class="d-flex order-actions">
-                                    <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a>
-                                    <a href="javascript:;" class="ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" ><i class='bx bxs-trash'></i></a>
-                                </div>
-                            </td> {% endcomment %}
                            
                             
                         </tr>
@@ -241,6 +231,69 @@
             </div>
         </div>
     </div>
+
+    <h6 class="mb-0 text-uppercase">Bank Details</h6>
+    <hr>
+
+   
+    
+    <div class="card">
+        
+        <div class="card-body">
+            
+            <div class="table-responsive">
+                <table id="example" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Bank Name</th>
+                            <th>A/C No</th>
+                            <th>IFSC COde</th>
+                            <th>Branch</th>
+                            
+                            
+                            <th>Holder Name</th>
+                            <th>Active</th>
+                            
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for kyc in kyc %}
+                        <tr>
+                            <td>{{kyc.bank_name}}</td>
+                            
+                            
+                            
+                           
+                           
+                            <td>{{kyc.Ac_no}}</td>
+                            <td>
+                               {{kyc.ifsc_code}}
+                            </td>
+                            
+                            <td>{{kyc.branch}}</td>
+                            
+                            
+                            <td>{{kyc.bank_holder_name}}</td>
+                            <td>{{kyc.bank_active}}</td>
+                             
+                        </tr>
+
+                       
+                        {% endfor %}
+                       
+                    </tbody>
+                    
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
 </div>
 
 

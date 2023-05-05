@@ -51,7 +51,6 @@
                             <th>Area</th>
                             <th>Zip Code</th>
                             <th>Status</th>
-                            <th>Discounted Price</th>
                             <th>Total</th>
                             <th>Date</th>
                             <th class="nowrap">Order By</th>
@@ -100,11 +99,7 @@
                                 <div class="badge rounded-pill bg-light p-2 text-uppercase px-3"><i
                                         class='bx bxs-circle me-1'></i>{{i.booking.status}}</div>
                             </td>
-                            <td>{% if i.booking.bookingproduct_set.exists %}
-                                Rs {{ i.booking.bookingproduct_set.first.product.price }}
-                            {% else %}
-                                N/A
-                            {% endif %}</td>
+                           
                             <td>{% if i.booking.bookingproduct_set.exists %}
                                 Rs {{ i.booking.bookingproduct_set.first.total_price }}
                             {% else %}

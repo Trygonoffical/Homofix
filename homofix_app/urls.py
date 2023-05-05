@@ -10,10 +10,13 @@ urlpatterns = [
     path('All/Location',HodViews.all_location,name="all_location"),
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
+
+    
     path("Accounts/Admin/Change/Password",HodViews.admin_reset_psw,name="admin_reset_psw"),
     path("Accounts/Admin/Dashboard/",HodViews.admin_dashboard,name="admin_dashboard"),
     path('Accounts/Admin/Add',HodViews.add_admin,name="add_admin"),
     path('Accounts/Admin/Edit/<int:id>',HodViews.edit_admin,name="edit_admin"),
+    path('Accounts/Admin/Update/',HodViews.update_admin,name="update_admin"),
     path('Accounts/Admin/List',HodViews.admin_list,name="admin_list"),
     path('Accounts/Admin/Profile',HodViews.admin_profile,name="admin_profile"),
     path('Accounts/Admin/Updata/Profile',HodViews.admin_update_profile,name="admin_update_profile"),
@@ -60,8 +63,8 @@ urlpatterns = [
 
     path('Accounts/Admin/Support',HodViews.support,name="admin_support"),
     path('Accounts/Admin/Add/Support',HodViews.add_support,name="add_support"),
-    path('Accounts/Admin/Support/Profile/<int:id>',HodViews.support_profile,name="support_profile"),
-    path('Accounts/Admin/Support/Profile/Update/',HodViews.support_update_profile,name="support_update_profile"),
+    path('Accounts/Admin/Support/Profile/<int:id>',HodViews.support_profile,name="admin_support_profile"),
+    path('Accounts/Admin/Support/Profile/Update/',HodViews.support_update_profile,name="admin_support_update_profile"),
     path('Accounts/Admin/Support/Delete/<int:id>/',HodViews.delete_support,name="delete_support"),
     path('Accounts/Admin/Support/History/<int:id>/',HodViews.support_history,name="support_history"),
     
@@ -103,6 +106,8 @@ urlpatterns = [
 
     ########################## Job Enquiry ##################################
     path('Accounts/Admin/Share/Percantage', HodViews.admin_share_percentage, name='admin_share_percentage'),
+    path('Accounts/Admin/Share/Percantage/update', HodViews.admin_share_percentage_update, name='admin_share_percentage_update'),
+    path('Accounts/Admin/Share/Percantage/Delete/<int:id>', HodViews.admin_share_percentage_delete, name='admin_share_percentage_delete'),
     path('Accounts/Admin/Share/List', HodViews.admin_share_list, name='admin_share_list'),
 
 
@@ -134,6 +139,35 @@ urlpatterns = [
     ########################## Attendence #######################################
 
     path('Accounts/Admin/Support/Attendence/<int:id>', HodViews.attendence, name='attendence'),
+    path('password_reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', views.CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', views.CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    
+    ########################## Coupon Code #######################################
+
+    path('Accounts/Admin/Coupon/', HodViews.coupon, name='coupon'),
+    path('Accounts/Admin/Coupon/Save', HodViews.coupon_save, name='coupon_save'),
+    path('Accounts/Admin/Coupon/Update', HodViews.coupon_update, name='coupon_update'),
+
+
+    ########################## Blog #######################################
+
+    path('Accounts/Admin/Blog/Add', HodViews.add_blog, name='add_blog'),
+    path('Accounts/Admin/Blog/Edit/<int:id>', HodViews.edit_blog, name='edit_blog'),
+    path('Accounts/Admin/Blog/Update', HodViews.blog_update, name='blog_update'),
+    path('Accounts/Admin/View/Blog/', HodViews.view_blog, name='view_blog'),
+    path('Accounts/Admin/Delete/<int:id>/', HodViews.delete_blog, name='delete_blog'),
+
+
+
+    # ------------------------------------ Invoice ------------------------------ 
+
+    path('Accounts/Admin/Booking/Invoice/<int:booking_id>', HodViews.ViewPDF, name="admin_pdf_view"),
+
+
+    
+
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

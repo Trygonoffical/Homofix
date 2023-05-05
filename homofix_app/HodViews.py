@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -13,6 +13,15 @@ from django.utils import timezone
 from urllib.parse import urlencode
 import datetime
 from django.http import Http404
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import letter,A4
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_CENTER,TA_LEFT,TA_RIGHT
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Paragraph,Image
+from django.conf import settings
+from decimal import Decimal
 # def all_location(request):
 #     all_location = AllTechnicianLocation.objects.all()
    
@@ -110,29 +119,40 @@ def add_admin(request):
     return render(request,'homofix_app/AdminDashboard/Admin/create_admin.html')
 
 def edit_admin(request,id):
-    hod = AdminHOD.objects.get(id=id)
-    if request.method == "POST":
+    hod = AdminHOD.objects.get(admin_id=id)
+    
+    
+    
+    context = {
+        'hod':hod
+    }
+       
         
-        # hod = AdminHOD.objects.get(id=id)
+        # first_name = request.POST.get('first_name')
+        
+
+    return render(request,'homofix_app/AdminDashboard/Admin/edit_admin.html',context)
+def update_admin(request):
+
+    if request.method == "POST":  
+        print("helloo posting")
+
+        hod_id = request.POST.get('hod_id')
+        print("hodddid",hod_id)
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
         mobile = request.POST.get('mobile')
-        hod.admin.first_name = first_name
-        hod.admin.last_name = last_name
-        hod.admin.email = email
-        hod.admin.mobile = mobile
+
+        hod = CustomUser.objects.get(id=hod_id)
+        hod.first_name = first_name
+        hod.last_name = last_name
+        hod.email = email
+        hod.adminhod.mobile = mobile
+        print("testinggg",first_name,last_name,email,mobile)
         hod.save()
-        print(first_name,last_name,email,mobile)
         messages.success(request,'Admin updated successfully')
         return redirect('admin_list')
-        
-        # first_name = request.POST.get('first_name')
-    context = {
-        'hod':hod
-    }
-
-    return render(request,'homofix_app/AdminDashboard/Admin/edit_admin.html',context)
 
 def admin_list(request):
     hod = AdminHOD.objects.all()
@@ -567,6 +587,8 @@ def technician_history(request,id):
 def technician_payment_history(request,id):
 
     technician = Technician.objects.get(id=id)
+    
+    
     wallet_history = WalletHistory.objects.filter(wallet__technician_id=technician)
    
     share = Share.objects.filter(task__technician=technician)
@@ -576,24 +598,30 @@ def technician_payment_history(request,id):
     customer_count = Customer.objects.all().count() 
     
     try:
+       
         wallet = Wallet.objects.get(technician_id=technician)
+        
     except Wallet.DoesNotExist:
         wallet = None
         messages.warning(request, 'No wallet found for this technician.')
-    
+    try:
+        kyc = Kyc.objects.filter(technician_id=technician)
+    except Kyc.DoesNotExist:
+        kyc = None
+        messages.warning(request, 'No KYC found for this technician.')
 
     if request.method == "POST":
         
         type = request.POST.get('type')
-        amount = int(request.POST.get('amount'))
+        amount = float(request.POST.get('amount'))
         description = request.POST.get('description')
 
         if wallet:
             history = WalletHistory(wallet=wallet,type=type,amount=amount,description=description)
             if history.type == 'bonus':
-                wallet.total_share += history.amount
+                wallet.total_share += Decimal(str(history.amount))
             else:
-                wallet.total_share -= history.amount
+                wallet.total_share -= Decimal(str(history.amount))
             wallet.save()
             history.save()
             messages.success(request, 'Wallet transaction successfully added.')
@@ -614,7 +642,8 @@ def technician_payment_history(request,id):
         'customer_count':customer_count,
         'share':share,
         'wallet_history':wallet_history,
-        'wallet':wallet
+        'wallet':wallet,
+        'kyc':kyc
     }
    
     return render(request,'homofix_app/AdminDashboard/History/ExpertPaymentHistory/expert_payment_history.html',context)
@@ -771,18 +800,22 @@ def update_product(request):
 
         product_title = request.POST.get('product_title')
         product_name = request.POST.get('product_name')
-        price = request.POST.get('price')
-        discount_price = request.POST.get('discount_price')
+        price = int(request.POST.get('price'))
+        discount_price = int(request.POST.get('discount_price'))
         warranty = request.POST.get('warranty')
         warranty_description = request.POST.get('warranty_description')
         description = request.POST.get('description')
 
-        print("description",description)
+        # print("description",description)
 
-        
+        print("disocunt price",discount_price)
         # cat = Category.objects.get(id=category_id)
         subcat = SubCategory.objects.get(id=subcategory_id)
         product = Product.objects.get(id=product_id)
+        
+        discountd_price = price - discount_price
+
+        # print("sellling price",discountd_price)
         if product_pic != None:
             product.product_pic = product_pic
         product.subcategory = subcat
@@ -790,6 +823,7 @@ def update_product(request):
         product.name = product_name
         product.price = price
         product.dis_amt = discount_price
+        product.selling_price = price - discount_price
         product.warranty = warranty
         product.warranty_desc = warranty_description
         product.description = description
@@ -948,10 +982,106 @@ def support_profile(request,id):
     return render(request,'homofix_app/AdminDashboard/Support/edit_profile.html',{'support':support,'new_expert_count':new_expert_count,'rebooking_count':rebooking_count,'customer_count':customer_count})
 
 
-def support_update_profile(request):
+# def support_update_profile(request):
     
+#     if request.method == "POST":
+#         support_id = request.POST.get('support_id')
+       
+#         profile_pic = request.FILES.get('profile_pic') 
+#         username = request.POST.get('username')
+#         father_name = request.POST.get('father_name')
+#         marital_status = request.POST.get('marital_status')
+#         dob = request.POST.get('dob')
+#         email = request.POST.get('email')
+#         mob_no = request.POST.get('mob_no')
+#         address = request.POST.get('address')
+#         permanent_address = request.POST.get('permanent_address')
+#         date_of_joining = request.POST.get('date_of_joining')
+#         status = request.POST.get('status')
+#         xyzzz = request.POST.get('xyzzz')
+#         firstname = request.POST.get('firstname')
+#         print("last name",xyzzz)
+        
+#         application_form = request.FILES.get('application_form')
+#         document_form = request.FILES.get('document_form')
+#         # print("application form", application_form)
+
+
+#         # Permission 
+#         can_new_booking = request.POST.get('new_booking')
+#         can_cancel_booking = request.POST.get('can_cancel_booking')
+#         can_rebooking = request.POST.get('can_rebooking')
+#         can_assign_task = request.POST.get('can_assign_task')
+#         can_new_expert = request.POST.get('can_new_expert')
+#         can_customer_enquiry = request.POST.get('can_customer_enquiry')
+#         can_job_enquiry = request.POST.get('can_job_enquiry')
+
+#         support = Support.objects.get(id=support_id)
+#         print("suppor id ",support)
+#         support.admin.last_name = xyzzz
+#         support.admin.last_name="dd"
+#         support.save()
+        
+        
+#         if profile_pic:
+#             support.profile_pic = profile_pic
+        
+#         if application_form:
+#             support.application_form=application_form
+
+#         if document_form:
+#             support.document_form=document_form
+
+        
+#         # if application_form:
+#         #     application_form_str = ','.join(str(file) for file in application_form)
+#         #     support.application_form = application_form_str
+#         print("helooooo first",support.admin.first_name) 
+#         print("helooooo last",support.admin.last_name) 
+#         # support.admin.last_name = lastname 
+#         # support.admin.username = username 
+#         # support.admin.email = email
+#         # support.admin.last_name = last_name 
+#         support.admin.first_name = firstname 
+#         support.address = address 
+#         support.permanent_address = permanent_address 
+#         support.father_name = father_name 
+#         support.marital_status = marital_status 
+#         support.d_o_b = dob 
+#         support.mobile = mob_no 
+
+
+#         support.can_new_booking = True if can_new_booking == 'on' else False
+#         support.can_cancel_booking = True if can_cancel_booking == 'on' else False
+#         support.can_rebooking = True if can_rebooking == 'on' else False
+#         support.can_assign_task = True if can_assign_task == 'on' else False
+#         support.can_expert_create = True if can_new_expert == 'on' else False
+#         support.can_contact_us_enquiry = True if can_customer_enquiry == 'on' else False
+#         support.can_job_enquiry = True if can_job_enquiry == 'on' else False
+
+
+#         if date_of_joining:
+#             support.joining_date = date_of_joining 
+
+#         if status == 'Deactivate':
+#             support.status = "Deactivate"
+#         elif status == 'Hold':
+#             support.status = 'Hold'
+#         else:
+#             support.status = 'Active'
+
+        
+#         support.save()
+#         messages.success(request, 'Support Updated Succesffully')
+#         return HttpResponseRedirect(reverse("support_profile",args=[support_id]))
+
+
+
+def support_update_profile(request):
     if request.method == "POST":
         support_id = request.POST.get('support_id')
+        support_nw_id = request.POST.get('support_nw_id')
+        print("fadsfadsfadsfads",support_nw_id)
        
         profile_pic = request.FILES.get('profile_pic') 
         username = request.POST.get('username')
@@ -964,9 +1094,8 @@ def support_update_profile(request):
         permanent_address = request.POST.get('permanent_address')
         date_of_joining = request.POST.get('date_of_joining')
         status = request.POST.get('status')
-        xyzzz = request.POST.get('xyzzz')
         firstname = request.POST.get('firstname')
-        print("last name",xyzzz)
+        lastname = request.POST.get('lastname')
         
         application_form = request.FILES.get('application_form')
         document_form = request.FILES.get('document_form')
@@ -982,63 +1111,60 @@ def support_update_profile(request):
         can_customer_enquiry = request.POST.get('can_customer_enquiry')
         can_job_enquiry = request.POST.get('can_job_enquiry')
 
-        support = Support.objects.get(id=support_id)
-        print("suppor id ",support)
-        support.admin.last_name="dd"
-        support.save()
+        # support = Support.objects.get(id=support_id)
+        hod = CustomUser.objects.get(id=support_id)
         
         
         if profile_pic:
-            support.profile_pic = profile_pic
+            hod.profile_pic = profile_pic
         
         if application_form:
-            support.application_form=application_form
+            hod.support.application_form=application_form
 
         if document_form:
-            support.document_form=document_form
+            hod.support.document_form=document_form
 
         
         # if application_form:
         #     application_form_str = ','.join(str(file) for file in application_form)
         #     support.application_form = application_form_str
-        print("helooooo first",support.admin.first_name) 
-        print("helooooo last",support.admin.last_name) 
+        # print("helooooo",support.admin.first_name) 
         # support.admin.last_name = lastname 
         # support.admin.username = username 
         # support.admin.email = email
-        # support.admin.last_name = last_name 
-        support.admin.first_name = firstname 
-        support.address = address 
-        support.permanent_address = permanent_address 
-        support.father_name = father_name 
-        support.marital_status = marital_status 
-        support.d_o_b = dob 
-        support.mobile = mob_no 
+        hod.first_name = firstname 
+        hod.last_name = lastname 
+        hod.support.address = address 
+        hod.support.permanent_address = permanent_address 
+        hod.support.father_name = father_name 
+        hod.support.marital_status = marital_status 
+        hod.support.d_o_b = dob 
+        hod.support.mobile = mob_no 
 
 
-        support.can_new_booking = True if can_new_booking == 'on' else False
-        support.can_cancel_booking = True if can_cancel_booking == 'on' else False
-        support.can_rebooking = True if can_rebooking == 'on' else False
-        support.can_assign_task = True if can_assign_task == 'on' else False
-        support.can_expert_create = True if can_new_expert == 'on' else False
-        support.can_contact_us_enquiry = True if can_customer_enquiry == 'on' else False
-        support.can_job_enquiry = True if can_job_enquiry == 'on' else False
+        hod.support.can_new_booking = True if can_new_booking == 'on' else False
+        hod.support.can_cancel_booking = True if can_cancel_booking == 'on' else False
+        hod.support.can_rebooking = True if can_rebooking == 'on' else False
+        hod.support.can_assign_task = True if can_assign_task == 'on' else False
+        hod.support.can_expert_create = True if can_new_expert == 'on' else False
+        hod.support.can_contact_us_enquiry = True if can_customer_enquiry == 'on' else False
+        hod.support.can_job_enquiry = True if can_job_enquiry == 'on' else False
 
 
         if date_of_joining:
-            support.joining_date = date_of_joining 
+            hod.support.joining_date = date_of_joining 
 
         if status == 'Deactivate':
-            support.status = "Deactivate"
+            hod.support.status = "Deactivate"
         elif status == 'Hold':
-            support.status = 'Hold'
+            hod.support.status = 'Hold'
         else:
-            support.status = 'Active'
+            hod.support.status = 'Active'
 
         
-        support.save()
+        hod.save()
         messages.success(request, 'Support Updated Succesffully')
-        return HttpResponseRedirect(reverse("support_profile",args=[support_id]))
+        return HttpResponseRedirect(reverse("admin_support_profile",args=[support_nw_id]))
 
 
 def delete_support(request,id):
@@ -1277,7 +1403,167 @@ def admin_verify_otp(request):
     
 
 
+# def admin_booking(request):
+   
+    
+#     user = request.user
+#     adminhod = AdminHOD.objects.get(admin=user)
+#     admin_by = request.user.adminhod
+    
+#     prod = Product.objects.all()
+#     category = Category.objects.all()
+#     state_choices = STATE_CHOICES
+    
+    
+
+#     if request.method == 'POST':
+       
+#         customer_id = request.session.get('customer_id','Default value if key does not exist')
+#         print("customer id ",customer_id)
+        
+#         product_ids = request.POST.getlist('product_id')
+#         quantities = request.POST.getlist('quantity')
+
+#         print("qunattttiyttt",quantities)
+        
+#         booking_date_str = request.POST.get('booking_date')
+#         state = request.POST.get('state')
+#         zip_code = request.POST.get('zip_code')
+#         address = request.POST.get('address')
+#         city = request.POST.get('city')
+#         area = request.POST.get('area')
+#         description = request.POST.get('description')
+#         total_amount = int(request.POST.get('total_amount'))
+#         print("sss",total_amount)
+        
+#         customer = Customer.objects.get(id=customer_id)
+#         if city:
+#             city = city.lower()
+#         customer.city = city
+#         customer.state = state
+#         customer.area = area
+#         customer.zipcode = zip_code
+#         customer.address=address,
+#         customer.save()
+#         booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
+        
+        
+#         booking = Booking.objects.create(
+#             customer=customer,
+#             booking_date=booking_date,   
+#             description=description,          
+#             admin_by=admin_by
+           
+#         )
+
+
+
+#         for i, product_id in enumerate(product_ids):
+#             product = Product.objects.get(id=product_id)
+#             print("producttttt",product)
+#             # print("producttttt",product)
+            
+#             quantity = int(quantities[i])
+#             print("quaaaaaa",quantity)
+#             price = int(request.POST.getlist('price')[i])
+            
+#             BookingProduct.objects.create(
+#                 booking=booking,
+#                 product=product,
+#                 quantity=quantity,
+#                 total_price=total_amount
+#                 # price=price
+#             )
+#             # total_price = sum(price_list)
+#             # booking.total_price = total_price
+#             booking.save()
+
+#         messages.success(request, 'Booking created successfully.')
+#         return redirect('booking_list')
+
+#     context = {
+#         'prod': prod,
+#         'state_choices':state_choices,
+#         'category':category,
+#         'support':support
+#     }
+#     return render(request, 'homofix_app/AdminDashboard/Booking_list/create_booking.html', context)
+
+
+# def admin_booking(request):
+#     user = request.user
+#     adminhod = AdminHOD.objects.get(admin=user)
+#     admin_by = request.user.adminhod
+    
+#     prod = Product.objects.all()
+#     category = Category.objects.all()
+#     state_choices = STATE_CHOICES
+    
+#     if request.method == 'POST':
+#         customer_id = request.session.get('customer_id','Default value if key does not exist')
+#         product_ids = request.POST.getlist('product_id')
+        
+        
+#         quantities = request.POST.getlist('quantity')
+        
+#         # for i in range(len(product_ids)):
+#         #     print("Product ID:", product_ids[i])
+#         #     print("Quantity:", quantities[i])
+#         print("qantityyyyy",quantities)
+#         booking_date_str = request.POST.get('booking_date')
+#         state = request.POST.get('state')
+#         zip_code = request.POST.get('zip_code')
+#         address = request.POST.get('address')
+#         city = request.POST.get('city')
+#         area = request.POST.get('area')
+#         description = request.POST.get('description')
+#         total_amount = int(request.POST.get('total_amount'))
+        
+#         customer = Customer.objects.get(id=customer_id)
+#         if city:
+#             city = city.lower()
+#         customer.city = city
+#         customer.state = state
+#         customer.area = area
+#         customer.zipcode = zip_code
+#         customer.address=address,
+#         customer.save()
+#         booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
+        
+#         booking = Booking.objects.create(
+#             customer=customer,
+#             booking_date=booking_date,   
+#             description=description,          
+#             admin_by=admin_by
+#         )
+
+#         for i, product_id in enumerate(product_ids):
+#             product = Product.objects.get(id=product_id)
+#             quantity = int(quantities[i])
+#             print("qunatittt",quantity)
+#             price = int(request.POST.getlist('price')[i])
+            
+#             BookingProduct.objects.create(
+#                 booking=booking,
+#                 product=product,
+#                 quantity=quantity,
+#                 total_price=price * quantity
+#             )
+
+#         messages.success(request, 'Booking created successfully.')
+#         return redirect('booking_list')
+
+#     context = {
+#         'prod': prod,
+#         'state_choices':state_choices,
+#         'category':category,
+#         'support':support
+#     }
+#     return render(request, 'homofix_app/AdminDashboard/Booking_list/create_booking.html', context)
+
+
 def admin_booking(request):
+   
     
     user = request.user
     adminhod = AdminHOD.objects.get(admin=user)
@@ -1335,6 +1621,7 @@ def admin_booking(request):
             # print("producttttt",product)
             
             quantity = int(quantities[i])
+            print("quaaaaaa",quantity)
             price = int(request.POST.getlist('price')[i])
             
             BookingProduct.objects.create(
@@ -1638,6 +1925,17 @@ def admin_share_percentage(request):
     }
     return render(request,'homofix_app/AdminDashboard/SharePercentage/share_percentage.html',context)
 
+def admin_share_percentage_update(request):
+    if request.method == "POST":
+        hod_share_percentage_id = request.POST.get('hod_share_percentage_id')
+        share_amt = request.POST.get('share_amt')
+        percentage_id = HodSharePercentage.objects.get(id=hod_share_percentage_id)
+        percentage_id.percentage = share_amt
+        percentage_id.save()
+        messages.success(request,"Percentage updated successfully")
+        return redirect('admin_share_percentage')
+
+        
 def admin_share_list(request):
     share = Share.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
@@ -1653,6 +1951,13 @@ def admin_share_list(request):
     }
 
     return render(request,'homofix_app/AdminDashboard/SharePercentage/list_of_share.html',context)
+
+
+def admin_share_percentage_delete(request,id):
+    share_percentage = HodSharePercentage.objects.get(id=id)
+    share_percentage.delete()
+    messages.success(request, "Share Percentage deleted successfully.")
+    return redirect('admin_share_percentage')
 def admin_customer_list(request):
     customer = Customer.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
@@ -1845,6 +2150,8 @@ def recharge(request):
 
 
 
+# ------------------------------ Attendance ------------------------ 
+
 def attendence(request,id):
 
     attendence = Attendance.objects.filter(support_id=id)
@@ -1852,3 +2159,396 @@ def attendence(request,id):
         'attendence':attendence
     }
     return render(request,'homofix_app/AdminDashboard/Attendence/list_of_attendence.html',context)
+
+
+# ------------------------------ Coupon ------------------------ 
+
+
+def coupon(request):
+    
+    
+    coupon = Coupon.objects.all()
+    context = {
+        'coupon':coupon
+    }
+    return render(request,'homofix_app/AdminDashboard/Coupon/coupon.html',context)
+
+def coupon_save(request):
+    if request.method == "POST":
+        code = request.POST.get('code') 
+        discount_amt = request.POST.get('discount_amt') 
+        validity_period = request.POST.get('validity_period') 
+
+        code = Coupon.objects.create(code=code,discount_amount=discount_amt,validity_period=validity_period)
+        code.save()
+        messages.success(request,'Coupon Code Add Succesfull')
+        return redirect('coupon')
+
+
+def coupon_update(request):
+    if request.method == "POST":
+        pass
+
+
+
+def add_blog(request):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        feature_img = request.FILES.get('feature_img')
+        content = request.POST.get('content')
+        print("feature img",feature_img)
+        blog = Blog.objects.create(title=title,feature_img=feature_img,content=content)
+        messages.success(request,'Blog Add Successfully')
+        return redirect('view_blog')
+        
+    return render(request,'homofix_app/AdminDashboard/Blog/add_blog.html')
+
+
+def edit_blog(request,id):
+    blog = Blog.objects.get(id=id)
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    context = {
+        'blog':blog,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count
+    }
+
+    return render(request,'homofix_app/AdminDashboard/Blog/edit_blog.html',context)
+
+
+def blog_update(request):
+
+    if request.method == "POST":
+        blog_id = request.POST.get('blog_id')
+        title = request.POST.get('title')
+        feature_img = request.POST.get('feature_img')
+        content = request.POST.get('content')
+        blog = Blog.objects.get(id=blog_id)
+        blog.title = title
+        if feature_img: 
+            blog.feature_img = feature_img
+        blog.content = content
+        blog.save()
+        messages.success(request,"Blog Updated are successfully")
+        return redirect('view_blog')
+        
+
+def view_blog(request):
+    blog = Blog.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    
+    context = {
+        'blog':blog,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count
+
+    }
+
+    return render(request,'homofix_app/AdminDashboard/Blog/view_blog.html',context)
+
+
+def delete_blog(request,id):
+    blog = Blog.objects.get(id=id)
+    blog.delete()
+    messages.success(request,"Blog Delete Successfully")
+    return redirect('view_blog')
+
+
+
+
+
+
+
+
+def ViewPDF(request,booking_id):
+    
+    import os
+        
+    if os.path.exists('last_invoice_number.txt'):
+        with open('last_invoice_number.txt', 'r') as f:
+            last_invoice_number = int(f.read().strip())
+    else:
+        last_invoice_number = 0
+
+# Increment the last invoice number
+    new_invoice_number = f'INV-{last_invoice_number+1:03d}'
+
+# Save the new invoice number to the file
+    with open('last_invoice_number.txt', 'w') as f:
+        f.write(str(last_invoice_number+1))
+
+# Print the new invoice number
+    print("newwwwww",new_invoice_number)
+    # print("ggggg")
+    book_id = Booking.objects.get(id=booking_id)
+
+    filename  = f"invoice_{book_id.order_id}.pdf"
+    my_path = os.path.join(settings.MEDIA_ROOT, filename)
+    # my_path = f"F:\\Homofix\\v75\\invoice_{book_id.order_id}.pdf"
+    print("my path",my_path)
+    # filename = f"invoice_{instance.order_id}.pdf"
+    doc = SimpleDocTemplate(my_path, pagesize=letter,topMargin=0)
+
+    
+    # Add the title to the document
+    para_style2 = ParagraphStyle(
+    'title',
+    fontSize=18,
+    leading=20,
+    alignment=TA_CENTER,  # align text to the left
+    textColor=colors.black,
+    spaceBefore=0,  # no space before the paragraph
+    spaceAfter=12,
+)
+
+    
+    title = Paragraph('LIST OF ITEM', para_style2)
+    addon_title = Paragraph('LIST OF Addon', para_style2)
+    inv = Paragraph('Invoice',para_style2)
+    title.spaceBefore = 0  # set spaceBefore to zero
+    addon_title.spaceBefore = 0  # set spaceBefore to zero
+     # Create the table for bill to information
+    bookingid=Booking.objects.get(id=booking_id)
+   
+    bill_to_data = [    ['Bill To:', bookingid.customer.admin.first_name],
+        ['Address:', bookingid.customer.address],     
+        ['Mobile:', f'+91{bookingid.customer.mobile}' ],
+        ['Email:', bookingid.customer.admin.email],
+    ]
+    bill_to_table = Table(bill_to_data, colWidths=[150, None], hAlign='LEFT')
+    
+
+
+# Apply the bill to table style
+    # bill_to_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),])
+
+    bill_to_style = TableStyle([
+    ('FONTNAME', (0, 0), (-1, -1), 'Times-Roman'),
+    ('FONTSIZE', (0, 0), (-1, -1), 11),
+    # ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    
+    ('LINEAFTER', (1, 0), (1, -1), 0.5, colors.black),
+])
+
+    bill_to_table.setStyle(bill_to_style)
+
+    # Get the last invoice number from a file
+    
+# Create the table for invoice details
+    invoice_data = [    ['Invoice No:', 'INV-001'],
+        ['Invoice Date:', '18-Apr-2023'],
+        # ['Due Date:', '30-Apr-2023'],
+    ]
+
+    invoice_table = Table(invoice_data, colWidths=[150, None], hAlign='LEFT')
+
+
+
+    # Apply the invoice table style
+    # invoice_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),])
+    invoice_style = TableStyle([
+    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+    ('FONTSIZE', (0, 0), (-1, -1), 11),
+    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ('LEFTPADDING', (0, 0), (-1, -1), 6),
+])
+
+    invoice_table.setStyle(invoice_style)
+    
+    nested_table_style = TableStyle([
+    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+    ('FONTSIZE', (0, 0), (-1, -1), 11),
+    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ('BOX', (0, 0), (-1, -1), 1, colors.black),
+])
+
+    # Create the nested table with two columns and one row
+    nested_table_data = [[bill_to_table, invoice_table]]
+    nested_table = Table(nested_table_data, colWidths=[250, 250])
+    nested_table.setStyle(nested_table_style)
+
+
+    # Define the table data
+    
+    data = [['Product Name', 'Qty','RATE','TAX','AMOUNT'],]
+    addon = [['Addon Name', 'Qty','RATE','TAX','AMOUNT'],]
+    bookingProd=BookingProduct.objects.filter(booking=booking_id)
+    adon = Addon.objects.filter(booking_prod_id__booking=booking_id)
+    # stu = Booking.objects.all()
+    for bookingprod in bookingProd:
+
+        price = 0
+        if bookingprod.product.selling_price != None:
+            price = bookingprod.product.selling_price
+        else:
+            price = bookingprod.product.price
+        
+        data.append([bookingprod.product.name, bookingprod.quantity,price,'18%',f'{bookingprod.quantity*price*1.18:.2f}'])
+        # data.append([bookingprod.product.name, bookingprod.quantity,price,'18%',bookingprod.quantity*price*1.18])
+        for i in adon:
+            if i.spare_parts_id.product == bookingprod.product:
+                # addon.append([i.spare_parts_id.spare_part,i.quantity,i.spare_parts_id.price,'18%',i.quantity*i.spare_parts_id.price*1.18])
+                addon.append([i.spare_parts_id.spare_part, i.quantity, i.spare_parts_id.price, '18%', f'{i.quantity * i.spare_parts_id.price * 1.18:.2f}'])
+
+
+        # if i.spare_parts_id.product ==  bookingprod.product:
+        #     addon.append([i.spare_parts_id.spare_part])
+            
+        
+#     data.append(['Ac Repairing', '2','100','18%','200'])
+        
+
+    # Create the table
+    # col_widths = [100, 100]
+    col_widths = [270, 30, 75, 50, 70]
+    table = Table(data,colWidths=col_widths)
+    addon_col_widths = [270, 30, 75, 50, 70]
+    addontable = Table(addon,colWidths=addon_col_widths)
+
+    # Apply the table style
+    style = TableStyle([
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        # ('LINEBELOW', (0, 0), (-1, -1), 0.25, colors.black),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        # ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 0.25, colors.black),
+    ])
+    table.setStyle(style)
+    
+    addonstyle = TableStyle([
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        # ('LINEBELOW', (0, 0), (-1, -1), 0.25, colors.black),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        # ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 0.25, colors.black),
+    ])
+    addontable.setStyle(addonstyle)
+    
+
+    # Define the paragraph style
+    para_style = ParagraphStyle(
+        'title',
+        fontSize=18,
+        leading=24,
+        alignment=TA_CENTER,
+        textColor=colors.black,
+        spaceBefore=12,
+        spaceAfter=12,
+    )
+    
+    
+    logo_path = os.path.join(settings.MEDIA_ROOT, 'LOGO2.jpeg')
+
+    
+    
+    logo = Image(logo_path, width=1.5*inch, height=1.5*inch)
+    logo.hAlign = 'LEFT'
+
+
+
+    
+    
+    # Create the table for invoice totals
+    booking = Booking.objects.get(id=booking_id)
+    tax_rate = 0.18
+    total_price = total_price = booking.total_amount
+    print("ttoaalll",total_price)
+    gst = int(total_price * 18)/100
+    total = total_price+gst
+    # print("gsstttt",gst)
+
+    invoice_totals_data = [    ['Subtotal:', f'{total_price:.2f}'],
+        ['CGST @9%:', f'{gst/2:.2f}'],
+        ['SGST @9%:', f'{gst/2:.2f}'],
+        ['Total:', f'{total:.2f}'],
+    ]
+
+    invoice_totals_table = Table(invoice_totals_data, colWidths=[90, None], hAlign='RIGHT')
+
+# Apply the invoice totals table style
+    # invoice_totals_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),])
+    invoice_totals_style = TableStyle([    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),    ('FONTSIZE', (0, 0), (-1, -1), 11),    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),    ('LINEABOVE', (0, 3), (-1, 3), 1, colors.black),('LINEBELOW', (0, -1), (-1, -1), 1, colors.black),])
+    invoice_totals_table.setStyle(invoice_totals_style)
+
+
+    # Create the table for company information
+    company_data = [        [''],  # Add an empty row before the company information
+        [f'{"Homofix Technologies PVT Ltd":^65}'],
+        # [''],
+        [f'{"Corporate Office: 2nd Floor, WP-501-D, Unit 209, Shiv Market, Wazirpur Village ,":^50}'],
+        [f'{"Ashok Vihar, New Delhi, Central Delhi, Delhi, 110052":^90}'],
+        [f'{"Regd Office: 5139, Awas Vikas 3, Kalyanpur,Kanpur,Uttar Pradesh, India,208017":^50}'],
+        [f'{"GSTIN:07AAGCH4863F1Z1":^110}'],
+
+        # ['Ashok Vihar Delhi,New Delhi 110052'],
+        # [ '+1 (555) 987-6543'],
+        # ['info@abccorp.com'],
+    ]
+    
+
+    # company_table = Table(company_data, colWidths=[90, None])
+    company_table = Table(company_data, colWidths=[doc.width, 0])
+
+    # Apply the company table style
+ 
+    # Apply the company table style
+    company_style = TableStyle([
+    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+    ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.black),  # Add line below style to the first row
+    ('FONTSIZE', (0, 1), (-1, -1), 20),
+    ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
+    ('TOPPADDING', (0, 0), (0, 0), 6),  # Add top padding to the first cell of the first row
+    ('LEFTPADDING', (0, 0), (0, 0), 50),  # Add left padding to the first cell of the first row
+    ('ALIGN', (0, 0), (0, 0), 'CENTER'),  # Align the first cell of the first row to the center
+    # ('TEXTCOLOR', (0, 0), (-1, -1), colors.blue),
+    # ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid style to all cells
+    ('FONTSIZE', (0, 2), (-1, 2), 12),
+    ('FONTSIZE', (0, 3), (-1, 3), 12),
+    ('TOPPADDING', (0, 3), (-1, 3), -8),
+    ('FONTSIZE', (0, 4), (-1, 4), 12),
+    ('FONTSIZE', (0, 5), (-1, 5), 12),
+    ('TOPPADDING', (0, 5), (-1, 5), -6),
+    # ('LINEBELOW', (-1, -1), (-1, -1), 1, colors.black)  # Add line below style to the last row
+])
+    company_table.setStyle(company_style)
+
+   
+    # doc = SimpleDocTemplate(f'invoice{}.pdf', topMargin=0)
+
+    doc.build([inv,logo, nested_table, Spacer(1, 0.*inch),title, table,Spacer(1, 0.1*inch),addon_title,addontable, Spacer(1, 0.5*inch), invoice_totals_table, Spacer(1, 0.5*inch), company_table])
+    import os
+    if os.path.exists(my_path):
+        with open(my_path, 'rb') as pdf:
+            response = HttpResponse(pdf.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'inline; filename="invoice.pdf"'
+            return response
+    # else:
+    #     return HttpResponse("The requested file does not exist.")
+
+    return HttpResponse("Invoice generated successfully")        

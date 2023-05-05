@@ -60,7 +60,7 @@
                             <th>Task</th>
                            
                             <th>Actions</th>
-                            {% comment %} <th>Print</th> {% endcomment %}
+                            <th>Invoice</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -164,6 +164,7 @@
                                     {% endif %}
                                     
                                     <button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{booking.id}}">Cancel</button>
+                                    <td><a href="{% url 'admin_pdf_view' booking.id %}">invoice</a></td> 
                                     
                                     
                                     
@@ -171,7 +172,7 @@
                                     
                                 </div>
                             </td>
-                            {% comment %} <td><a href="{% url 'invoice' booking.id %}">invoice</a></td> {% endcomment %}
+                             
                         </tr>
 
                         <div class="col">
