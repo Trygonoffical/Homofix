@@ -48,6 +48,7 @@
                             <th>Subtotal</th>
                             <th>GST</th>
                             <th>GST Amount</th>
+                            <th>Addons Amount</th>
                             <th>total</th>
                             <th class="nowrap">Homofix Share  Percentage</th>
                             <th>Homofix Share</th>
@@ -85,22 +86,25 @@
                             <td>{{i.task.technician.admin.first_name}}</td>
                             <td>{{i.task.technician.admin.username}}</td>
                             <td>{{i.task.technician.mobile}}</td>
-                            <td>
+                            {% comment %} <td>
                                 {% if i.task.booking.bookingproduct_set.exists %}
                                     {{ i.task.booking.bookingproduct_set.first.total_price }}
                                 {% else %}
                                     N/A
                                 {% endif %} 
-                            </td>
+                            </td> {% endcomment %}
+                            <td>{{i.task.booking.subtotal}}</td>
                             <td>18%</td>
                             <td>{{i.task.booking.tax_amount}}</td>
-                            <td>
+                            <td>{{i.task.booking.total_addons}}</td>
+                            {% comment %} <td>
                                 {% if i.task.booking.bookingproduct_set.exists %}
                                 {{ i.task.booking.bookingproduct_set.first.total_price_with_tax }}
                             {% else %}
                                 N/A
                             {% endif %} 
-                            </td>
+                            </td> {% endcomment %}
+                            <td>{{ttl}}</td>
                             <td>{{i.hod_share_percentage.percentage}} %</td>
                             
                             

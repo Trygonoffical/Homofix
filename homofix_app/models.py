@@ -345,6 +345,22 @@ class Booking(models.Model):
         tax_rate = 0.18  # replace with your actual tax rate
         return round(self.total_amount * tax_rate, 2)
 
+    @property
+    def total_addons(self):
+        addons_prefetch = Prefetch('bookingproduct_set__addon_set',
+                                   queryset=Addon.objects.select_related('spare_parts_id'))
+        booking = Booking.objects.prefetch_related(addons_prefetch).get(id=self.id)
+        total = sum(addon.quantity * addon.spare_parts_id.price 
+                    for booking_product in booking.bookingproduct_set.all() 
+                    for addon in booking_product.addon_set.all())
+        return total
+    
+    @property
+    def subtotal(self):
+        subtl = self.total_amount - self.total_addons
+
+        return subtl
+
     
 
 
@@ -413,7 +429,9 @@ class HodSharePercentage(models.Model):
     percentage = models.IntegerField()
     date = models.DateField(auto_now_add=True,null=True,blank=True)
 
-
+    def __str__(self):
+        return str(self.percentage)
+    
 
    
 

@@ -49,7 +49,7 @@ class TechnicianAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class TechnicianAdmin(admin.ModelAdmin):
-    list_display=['id','total_amount','tax_amount']
+    list_display=['id','subtotal','total_amount','tax_amount','total_addons']
 
 
 @admin.register(Support)

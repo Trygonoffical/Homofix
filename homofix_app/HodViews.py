@@ -1942,12 +1942,18 @@ def admin_share_list(request):
     booking_count = Booking.objects.filter(status = "New").count()
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
+    for i in share:
+        sub_ttl = i.task.booking.total_amount
+        
+        ttl = sub_ttl + i.task.booking.tax_amount
+        
     context = {
         'new_expert_count':new_expert_count,
         'booking_count':booking_count,
         'rebooking_count':rebooking_count,
         'customer_count':customer_count,
-        'share':share
+        'share':share,
+        'ttl':ttl
     }
 
     return render(request,'homofix_app/AdminDashboard/SharePercentage/list_of_share.html',context)

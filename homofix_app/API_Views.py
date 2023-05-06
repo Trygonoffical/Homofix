@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation
-
+from decimal import Decimal
 
 
 class LoginViewSet(CreateAPIView):
@@ -104,16 +104,13 @@ class TaskViewSet(ModelViewSet):
                     print("helloooo booking amt",booking_amount)
                     hod_share_percentage = HodSharePercentage.objects.latest('id')
                     hod_share_percentage_value = hod_share_percentage.percentage
-                    
+                    print("percentage",hod_share_percentage)
                     hod_share = booking_amount * (hod_share_percentage_value / 100) 
-                    print("hellooo ggg")
+                    
                     print("new hod share0",hod_share)
                     technician_share = booking_amount-hod_share
                     print("technicia sare",technician_share)
-                    # print("testing",testing)
-                    # wallet_online = hod_share+tax_amt
-                    # print("Wallet online",wallet_online)
-                    # print("hod share",hod_share+tax_amt)
+                    
                     hod_share_with_tax = hod_share + tax_amt
                     print("hod_share_with_tax",hod_share_with_tax)
                    
@@ -123,7 +120,7 @@ class TaskViewSet(ModelViewSet):
                     share.save()
                     technician = task.technician
                     wallet, created = Wallet.objects.get_or_create(technician_id=technician)
-                    wallet.total_share += technician_share
+                    wallet.total_share -= Decimal(str(hod_share_with_tax))
                    
                     wallet.save()
                    
@@ -155,7 +152,7 @@ class TaskViewSet(ModelViewSet):
                     share.save()
                     technician = task.technician
                     wallet, created = Wallet.objects.get_or_create(technician_id=technician)
-                    wallet.total_share -= hod_share_with_tax
+                    wallet.total_share += hod_share_with_tax
                    
                     wallet.save()
                    
