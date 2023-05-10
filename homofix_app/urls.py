@@ -160,7 +160,13 @@ urlpatterns = [
     path('Accounts/Admin/Delete/<int:id>/', HodViews.delete_blog, name='delete_blog'),
 
 
+    ########################## Offers #######################################
 
+     path('Accounts/Admin/View/Offers', HodViews.view_offers, name='view_offers'),
+     path('Accounts/Admin/Add/Offers', HodViews.add_offers, name='add_offers'),
+     path('Accounts/Admin/Edit/Offers/<int:id>', HodViews.edit_offers, name='edit_offers'),
+     path('Accounts/Admin/Offers/Update', HodViews.offer_update, name='offer_update'),
+     path('Accounts/Admin/Offers/Delete/<int:id>/', HodViews.delete_offer, name='delete_offer'),
     # ------------------------------------ Invoice ------------------------------ 
 
     path('Accounts/Admin/Booking/Invoice/<int:booking_id>', HodViews.ViewPDF, name="admin_pdf_view"),

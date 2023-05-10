@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -2273,6 +2273,83 @@ def delete_blog(request,id):
 
 
 
+
+def view_offers(request):
+    offer = Offer.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    
+    context = {
+        'offer':offer,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count
+
+    }
+
+    return render(request,'homofix_app/AdminDashboard/Offers/view_offers.html',context)
+
+
+
+def add_offers(request):
+    if request.method == "POST":
+        offer_name = request.POST.get('offer_name')
+        offer_img = request.FILES.get('offer_img')
+        offer_url = request.POST.get('offer_url')
+        print("feature img",offer_url)
+        offer = Offer.objects.create(name=offer_name,offer_pic=offer_img,url=offer_url)
+        messages.success(request,'Offer Add Successfully')
+        return redirect('view_offers')
+        
+    return render(request,'homofix_app/AdminDashboard/Offers/add_offer.html')
+
+
+def edit_offers(request,id):
+    offer = Offer.objects.get(id=id)
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    context = {
+        'offer':offer,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count
+    }
+
+    return render(request,'homofix_app/AdminDashboard/Offers/edit_offer.html',context)
+
+
+
+
+def offer_update(request):
+
+    if request.method == "POST":
+        offer_id = request.POST.get('offer_id')
+        offer_name = request.POST.get('offer_name')
+        offer_img = request.FILES.get('offer_img')
+        offer_url = request.POST.get('offer_url')
+        offer = Offer.objects.get(id=offer_id)
+        offer.name = offer_name
+        if offer_img: 
+            offer.offer_pic = offer_img
+        offer.url = offer_url
+        offer.save()
+        messages.success(request,"Offer Updated are successfully")
+        return redirect('view_offers')
+        
+
+
+
+def delete_offer(request,id):
+    offer = Offer.objects.get(id=id)
+    offer.delete()
+    messages.success(request,"Offer Delete Successfully")
+    return redirect('view_offers')
 
 
 

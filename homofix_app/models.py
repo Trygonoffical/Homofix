@@ -688,7 +688,14 @@ class Blog(models.Model):
     title = models.CharField(max_length=100)
     feature_img = models.ImageField(upload_to='Blog/Feature Image')
     content = RichTextField()
-
+    
+class Offer(models.Model):
+    name = models.CharField(max_length=100)
+    offer_pic = models.ImageField(upload_to='Offer')
+    url = models.URLField()
+    def __str__(self):
+        return self.name
+    
 class feedback(models.Model):
 
     customer_id = models.ForeignKey(Customer,on_delete=models.CASCADE)    

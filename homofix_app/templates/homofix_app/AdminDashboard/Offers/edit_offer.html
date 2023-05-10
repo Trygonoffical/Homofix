@@ -5,13 +5,13 @@
 <div class="page-content">
    <!--breadcrumb-->
    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-      <div class="breadcrumb-title pe-3">Blog</div>
+      <div class="breadcrumb-title pe-3">Offer</div>
       <div class="ps-3">
          <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
                <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
                </li>
-               <li class="breadcrumb-item active" aria-current="page">Edit  Blog</li>
+               <li class="breadcrumb-item active" aria-current="page">Edit Offers</li>
             </ol>
          </nav>
       </div>
@@ -19,10 +19,10 @@
    <!--end breadcrumb-->
    <div class="card">
       <div class="card-body p-4">
-         <h5 class="card-title">Edit Blog</h5>
+         <h5 class="card-title">Edit Offer</h5>
          <hr>
          <div class="form-body mt-4">
-            <form action="{% url 'blog_update' %}" method="POST" enctype="multipart/form-data">
+            <form action="{% url 'offer_update' %}" method="POST" enctype="multipart/form-data">
                {% csrf_token %}
               
                <div class="row">
@@ -33,20 +33,19 @@
                            
                 
                            <div class="mb-3">
-                              <label for="inputDateTime" class="form-label">Title</label>
-                              <input class="form-control" type="text" value="{{blog.title}}" name="title" required>
-                              <input class="form-control" type="text" value="{{blog.id}}" name="blog_id" hidden required>
+                              <label for="inputDateTime" class="form-label">Name</label>
+                              <input class="form-control" type="text" value="{{offer.name}}" name="offer_name" required>
+                              <input class="form-control" type="text" value="{{offer.id}}" name="offer_id" hidden required>
                            </div>
                            <div class="mb-3">
-                              <label for="inputDateTime" class="form-label">Feature Image</label>
-                              <input class="form-control" type="file" name="feature_img" placeholder="optional">
-                              <a href="{{ blog.feature_img.url }}">{{ blog.feature_img.url }}</a>
-
+                              <label for="inputDateTime" class="form-label">Offer Image</label>
+                              <input class="form-control" type="file"  name="offer_img" placeholder="optional">
+                              <a href="{{ offer.offer_pic.url }}">{{ offer.offer_pic.url }}</a>
                            </div>
                            <div class="mb-3">
-                              <label for="inputemail" class="form-label">Content</label>
-                              {% comment %} <input class="form-control"id="inputemail" type="email" name="email" required> {% endcomment %}
-                              <textarea name="content">{{blog.content}}</textarea>
+                              <label for="inputemail" class="form-label">Url</label>
+                              <input class="form-control"id="inputemail" type="url" value={{offer.url}} name="offer_url" required>
+                              
                            </div>
                     
                             <input class="btn btn-primary" type="submit" value="Update">

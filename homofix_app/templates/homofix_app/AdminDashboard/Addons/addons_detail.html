@@ -39,7 +39,7 @@
                             {% comment %} <th>Product Title</th> {% endcomment %}
                             <th>Product Name</th>
                             <th>Spare Part</th>
-                            <th>Total Price</th>
+                            <th>Price</th>
                             <th>Description</th>
                             {% comment %} <th>Action</th> {% endcomment %}
                             
@@ -56,8 +56,8 @@
 
                             {% comment %} <td>{{i.product.product_title}}</td> {% endcomment %}
                             <td>{{i.booking_prod_id.product.name}}</td>
-                            <td>{{i.addon_products.spare_part}}</td>
-                            <td>{{i.booking_prod_id.booking.total_amount}}</td>
+                            <td>{{i.spare_parts_id.spare_part}}</td>
+                            <td>{{i.spare_parts_id.price}}</td>
                             <td>{{i.description}}</td>
                             {% comment %} <td>{{i.updated_at}}</td> {% endcomment %}
                             {% comment %} <td>

@@ -36,6 +36,9 @@
                      <th>Product</th>
                      <th>Customer</th>
                      <th>Status</th>
+                     <th>Subtotal</th>
+                     <th>Addons Amout</th>
+                     <th>Tax</th>
                      <th>Total</th>
                      <th>Date</th>
                      <th class="nowrap">Customer Details</th>
@@ -70,13 +73,17 @@
                            <i class='bx bxs-circle me-1'></i>{{ task.booking.status }}
                         </div>
                      </td>
-                     <td>
+                     {% comment %} <td>
                         {% if task.booking.bookingproduct_set.exists %}
                         Rs.{{ task.booking.bookingproduct_set.first.total_price }}
                         {% else %}
                         N/A
                         {% endif %} 
-                     </td>
+                     </td> {% endcomment %}
+                     <td>{{task.booking.subtotal}}</td>
+                     <td>{{task.booking.total_addons}}</td>
+                     <td>18%</td>
+                     <td>{{task.booking.total_amount}}</td>
                      <td class="nowrap">{{ task.booking.booking_date }}</td>
                      <td class="nowrap"><button type="button" class="btn btn-light btn-sm radius-30 px-4" data-bs-toggle="modal" data-bs-target="#exampleDarkModal{{task.id}}">View Details</button></td>
                      <div class="modal fade" id="exampleDarkModal{{task.id}}" tabindex="-1" aria-hidden="true">
