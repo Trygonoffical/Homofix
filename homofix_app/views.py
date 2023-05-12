@@ -183,9 +183,13 @@ def logout_user(request):
     if request.user.is_authenticated and request.user.user_type == "3":
         try:
             support = request.user.support
-            attendance = Attendance.objects.get(support_id=support, logout_time=None)
-            attendance.logout_time = timezone.now()
-            attendance.save()
+            
+            attendance_queryset = Attendance.objects.filter(support_id=support, logout_time=None)
+            for attendance in attendance_queryset:
+                attendance.logout_time = timezone.now()
+                attendance.save()
+
+            
         except Attendance.DoesNotExist:
             pass
 
