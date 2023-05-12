@@ -11,7 +11,7 @@ urlpatterns = [
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
 
-    
+    # path("404",HodViews.Error404,name="404"),
     path("Accounts/Admin/Change/Password",HodViews.admin_reset_psw,name="admin_reset_psw"),
     path("Accounts/Admin/Dashboard/",HodViews.admin_dashboard,name="admin_dashboard"),
     path('Accounts/Admin/Add',HodViews.add_admin,name="add_admin"),
@@ -178,4 +178,4 @@ urlpatterns = [
 
 
 
-    
+# handler404 = 'homofix_app.HodViews.Error404'    
