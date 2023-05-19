@@ -1,19 +1,25 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
 # from homofix_app.EmailBackEnd import EmailBackEnd
 from rest_framework.decorators import action
-from rest_framework.viewsets import ViewSet,ModelViewSet
+from rest_framework.viewsets import ViewSet,ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from .models import Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation
+from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory
 from decimal import Decimal
-
-
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import get_user_model
+from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import get_token
+import random
+import requests
+from urllib.parse import urlencode
+import urllib
 class LoginViewSet(CreateAPIView):
     authentication_classes = [BasicAuthentication]
     serializer_class = LoginSerliazer
@@ -300,7 +306,8 @@ def ExpertTaskCountViewSet(request):
     queryset2 = Task.objects.all()
     rebooking = Rebooking.objects.all()
     # if technician_id is not None:
-    queryset = queryset.filter(technician=technician_id,booking__status="Completed").count()
+    booking_completed = Task.objects.filter(technician_id=technician_id,booking__status="Completed").count()
+    
     new_booking_count = queryset2.filter(technician=technician_id,booking__status="Assign").count()
     print(queryset)
     rebooking_count = rebooking.filter(technician=technician_id,status="Assign").count()
@@ -309,7 +316,7 @@ def ExpertTaskCountViewSet(request):
     return Response({
         'status':True,
         'message':'Wallet History fetched',
-        'data':queryset,
+        'Booking_Completed':booking_completed,
         'rebooking_count':rebooking_count,
         'new_booking_count':new_booking_count
     })
@@ -611,3 +618,161 @@ def get_Withdraw_Req(request):
         'message':'Withdraw Request Send',
         'data':serializer.data
     })
+
+
+
+class BlogGetViewSet(ReadOnlyModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+
+
+class MostViewedGetViewSet(ReadOnlyModelViewSet):
+    queryset = MostViewed.objects.all()
+    serializer_class = MostViewedSerializer
+
+
+
+
+# ----------------------- Customer Login --------------------------- 
+
+
+class CustomerViewSet(ModelViewSet):
+    authentication_classes = [BasicAuthentication]
+    serializer_class = CustSerailizer
+    queryset = Customer.objects.all()
+    print("helloooo")
+
+    # queryset = Customer.objects.all() 
+    # print("queryset",queryset)    
+    # serializer_class  = CustomerSerailizer
+     
+
+    # def get(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data) 
+    
+
+    # def put(self, request, *args, **kwargs):
+    #     partial = kwargs.pop('partial', False)
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance, data=request.data, partial=partial)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data)
+
+def verify_otp(otp, user):
+    # Implement your OTP verification logic here
+    # Compare the provided OTP with the OTP associated with the user
+
+    # For example, assuming you have an OTP field in the CustomUser model:
+    if user.otp == otp:
+        return True
+    else:
+        return False
+
+
+class CustomerLoginViewSet(CreateAPIView):
+    authentication_classes = [BasicAuthentication]
+    serializer_class = LoginSerliazer
+    def get(self,request,*args, **kwargs):
+        otp_number = random.randint(0,9999)
+        otp_unique = str(otp_number).zfill(3)
+        phone_number = request.POST.get('phone_number')
+
+        request.session['phone_number'] = phone_number
+        request.session['otp'] = otp_unique
+        username = "TRYGON"
+        apikey = "E705A-DFEDC"
+        apirequest="Text"
+        sender ="TRYGON"
+        mobile=phone_number
+        message=f"Dear User {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+        TemplateID="1707162192151162124"
+        url = f"http://message.trygon.in/sms-panel/api/http/index.php?username={username}&apikey={apikey}&apirequest={apirequest}&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
+
+        response = requests.get(url) 
+        print("response",response)
+        
+        # cust = Customer.objects.get(mobile=phone_number)
+        
+        return Response({'message': 'Otp is sent your mobile number'}, status=status.HTTP_200_OK)
+       
+
+class CustomerVerifyOtp(CreateAPIView):
+    authentication_classes = [BasicAuthentication]
+    serializer_class = VerifyOtpSerializer
+    def post(self,request,*args, **kwargs):
+        otp = request.POST.get('otp')
+        otp_no = request.session.get('otp', 'Default value if key does not exist')
+        mobile = request.session.get('phone_number', 'Default value if key does not exist')
+        if otp == otp_no:
+            if Customer.objects.filter(mobile=mobile).exists():
+                
+                    cust = Customer.objects.get(mobile=mobile)
+                    username = cust.admin.username
+                    print("usernameeee",username)
+                    
+                    user=authenticate(request,username=username, password = mobile)
+                    # return Response({'message': 'Logged in successfully.'}, status=status.HTTP_200_OK)
+
+                    if user!=None:
+                        login(request,user)
+                        user_type = user.user_type
+                        if user_type == '4':
+                            user_data = {
+                                'id': user.customer.id,
+                                'username': user.username,
+                                
+                                # Add any other user fields you want to return
+                            }
+                    
+                            return Response({'message': 'Logged in successfully.','user': user_data}, status=status.HTTP_200_OK)
+            else:
+                last_three_digits = mobile[-3:]
+                userr = "user"
+                user = CustomUser.objects.create(username=userr+last_three_digits, user_type='4')    
+                user.set_password(mobile)
+                user.customer.mobile = mobile
+                user.save()
+                
+
+                custm = Customer.objects.get(mobile=mobile)
+                usernme = custm.admin.username
+                print("usernammeee",usernme)
+                usrr=authenticate(request,username=usernme, password = mobile)
+                if usrr!=None:
+                        login(request,user)
+                        user_type = usrr.user_type
+                        if user_type == '4':
+                            user_data1 = {
+                                'id': usrr.customer.id,
+                                'username': usrr.username,
+                                
+                                # Add any other user fields you want to return
+                            }
+                    
+                            return Response({'message': 'Logged in successfully.','user': user_data1}, status=status.HTTP_200_OK)
+        return Response({'message': 'Invalid Otp.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
+                
+                
+
+            
+# ------------------------ Category ------------------------ 
+
+
+
+class CategoryGetViewSet(ReadOnlyModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+            
+
+
+# ------------------------ Subcategory ------------------------ 
+
+
+class SubcategoryGetViewSet(ReadOnlyModelViewSet):
+    queryset = SubCategory.objects.all()
+    serializer_class = SubcategorySerializer

@@ -203,8 +203,11 @@ class CustomPasswordResetView(PasswordResetView):
     success_url = reverse_lazy('password_reset_done')
     template_name = 'password_reset_form.html'
 
+    
+
 
 class CustomPasswordResetDoneView(PasswordResetDoneView):
+   
     template_name = 'password_reset_done.html'
 
 
@@ -217,3 +220,8 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'password_reset_complete.html'
+
+
+
+def Error404(request, exception):
+    return render(request,'homofix_app/AdminDashboard/Error/error-404-error.html')

@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -22,6 +22,8 @@ from reportlab.lib.enums import TA_CENTER,TA_LEFT,TA_RIGHT
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Paragraph,Image
 from django.conf import settings
 from decimal import Decimal
+from django.db.models import Sum
+
 # def all_location(request):
 #     all_location = AllTechnicianLocation.objects.all()
    
@@ -58,12 +60,17 @@ def all_location(request):
 # @login_required
 def admin_dashboard(request):
    
+    booking = Booking.objects.order_by('-id')[:10]
+
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
+    booking_complete = Booking.objects.filter(status = "Completed").count()
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
+    total_hod_share = Share.objects.aggregate(Sum('hod_share'))['hod_share__sum'] or 0
     
-    return render(request,'homofix_app/AdminDashboard/dashboard.html',{'booking_count':booking_count,'new_expert_count':new_expert_count,'rebooking_count':rebooking_count,'customer_count':customer_count})
+    
+    return render(request,'homofix_app/AdminDashboard/dashboard.html',{'booking_count':booking_count,'new_expert_count':new_expert_count,'rebooking_count':rebooking_count,'customer_count':customer_count,'booking_complete':booking_complete,'total_hod_share':total_hod_share,'booking':booking})
 
 
 def admin_profile(request):
@@ -76,6 +83,7 @@ def admin_profile(request):
         'new_expert_count':new_expert_count,
         'booking_count':booking_count,
         'rebooking_count':rebooking_count,
+        
     }
     return render(request,'homofix_app/AdminDashboard/profile.html',context)
 
@@ -201,6 +209,7 @@ def add_category(request):
     if request.method == "POST":
         
         category_name = request.POST.get('category_name')
+        category_img = request.FILES.get('category_img')
         
         
         
@@ -209,7 +218,7 @@ def add_category(request):
             messages.warning(request,f'{category_name} already Exists')
             return redirect('category')
             
-        category = Category.objects.create(category_name=category_name)
+        category = Category.objects.create(category_name=category_name,icon=category_img)
         category.save()
         messages.success(request,f'{category_name} Add Successfully')
         return redirect('category')
@@ -227,9 +236,12 @@ def delete_Category(request,id):
 def edit_Category(request):
     if request.method == "POST":
         category_id = request.POST.get('category_id')
+        category_img = request.FILES.get('category_img')
+        
         category_name = request.POST.get('category_name')
         category = Category.objects.get(id=category_id) 
         category.category_name = category_name
+        category.icon = category_img
         category.save()
         messages.success(request,"Records are Updated Successfully")
         return redirect('category')
@@ -243,12 +255,17 @@ def subcategory(request):
         category_id = request.POST.get('category_id')
 
         
-        subcategory_names = request.POST.getlist('subcategory_name[]')
+        subcategory_image = request.FILES.get('subcategory_image')
+        subcategory_names = request.POST.get('subcategory_name')
         ctg_id = Category.objects.get(id=category_id)
+        subcategory = SubCategory.objects.create(Category_id=ctg_id, name=subcategory_names,subcategory_image=subcategory_image)
+        subcategory.save()
         
-        for name in subcategory_names:
-            subcategory = SubCategory.objects.create(Category_id=ctg_id, name=name)
-            subcategory.save()
+
+        
+        # for name in subcategory_names:
+        #     subcategory = SubCategory.objects.create(Category_id=ctg_id, name=name)
+        #     subcategory.save()
             
 
     context = {
@@ -264,6 +281,7 @@ def edit_subcategory(request):
     if request.method == "POST":
         category_id = request.POST.get('category_id')
         sub_category_id = request.POST.get('sub_category_id')
+        sub_category_image = request.FILES.get('sub_category_image')
         sub_category_name = request.POST.get('sub_category_name')
 
         category = Category.objects.get(id=category_id)
@@ -271,6 +289,8 @@ def edit_subcategory(request):
         subcategory = SubCategory.objects.get(id=sub_category_id) 
         subcategory.Category_id= category
         subcategory.name= sub_category_name
+        if sub_category_image:
+            subcategory.subcategory_image= sub_category_image
         subcategory.save()
         messages.success(request,"Records are Updated Successfully")
         return redirect('subcategory')
@@ -1938,14 +1958,18 @@ def admin_share_percentage_update(request):
         
 def admin_share_list(request):
     share = Share.objects.all()
+    testint = Share.objects.aggregate(Sum('hod_share'))
+    print("sssssssssss",testint)
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
+    ttl = 0
     for i in share:
         sub_ttl = i.task.booking.total_amount
+        tax_amount = i.task.booking.tax_amount
         
-        ttl = sub_ttl + i.task.booking.tax_amount
+        ttl += sub_ttl + tax_amount
         
     context = {
         'new_expert_count':new_expert_count,
@@ -1953,7 +1977,8 @@ def admin_share_list(request):
         'rebooking_count':rebooking_count,
         'customer_count':customer_count,
         'share':share,
-        'ttl':ttl
+        'ttl':ttl,
+        'testint':testint
     }
 
     return render(request,'homofix_app/AdminDashboard/SharePercentage/list_of_share.html',context)
@@ -2635,3 +2660,78 @@ def ViewPDF(request,booking_id):
     #     return HttpResponse("The requested file does not exist.")
 
     return HttpResponse("Invoice generated successfully")        
+
+
+
+
+def most_view_list(request):
+    mst_View = MostViewed.objects.all()
+    context = {
+        'mst_View':mst_View
+    }
+    return render(request,'homofix_app/AdminDashboard/MostViewed/view_mostViewed.html',context)
+
+
+def add_mostViewed(request):
+    product = Product.objects.all()
+    context = {
+        'product': product
+    }
+    if request.method == "POST":
+        # product_ids = request.POST.get('product_id')
+        product_ids = request.POST.getlist('product_id[]')
+        most_view_pics = request.FILES.getlist('most_img[]')
+
+        print("mooss",most_view_pics)
+        # prod = Product.objects.get(id=product_ids)
+        # print("hello")
+
+        # for name in most_view_pics:
+        #     mst = MostViewed.objects.create(proudct=prod, img=name)
+        #     mst.save()
+
+        for product_id, image in zip(product_ids, most_view_pics):
+            prod = Product.objects.get(id=product_id)
+
+            # Create a new MostViewed object for each product and image
+            mst = MostViewed.objects.create(product_id=prod, img=image)
+            mst.save()
+        messages.success(request,"MostViewed Add Successfully")
+        return redirect('most_view_list')
+            
+
+        # Limit the number of entries to a maximum of four
+        
+
+    
+    return render(request, 'homofix_app/AdminDashboard/MostViewed/add_mostViewed.html', context)
+
+        
+
+
+def edit_mostViewed(request,id):
+    mst_view = MostViewed.objects.get(id=id)
+    product = Product.objects.all()
+    context= {
+        'mst_view':mst_view,
+        'product':product
+    }
+    return render(request, 'homofix_app/AdminDashboard/MostViewed/edit_most_viewed.html', context)
+
+
+def update_Save_mostViewed(request):
+    if request.method == "POST":
+        mst_view_id = request.POST.get('mst_view_id')
+        product_id = request.POST.get('product_id')
+        mst_view_pic = request.FILES.get('most_img')
+
+        prod = Product.objects.get(id=product_id)
+        most_viewed = MostViewed.objects.get(id=mst_view_id)
+        if mst_view_pic:
+            most_viewed.img = mst_view_pic
+        
+        most_viewed.product_id = prod
+
+        most_viewed.save()
+        messages.success(request,"Most Viewed Updted Successfully")
+        return redirect('most_view_list')

@@ -11,7 +11,7 @@
             </div>
             
 
-            <form action="{% url 'edit_subcategory' %}" method="POST" id="categoryform">
+            <form action="{% url 'edit_subcategory' %}" method="POST" id="categoryform" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row mb-2 mx-1">
                     <div class="col-xl-9 mx-auto">
@@ -32,6 +32,18 @@
                             </div>
                         </div>
 
+                    <div class="col-xl-12 mx-auto">
+                        <div class="row mb-3">
+                            <label for="inputEnterYourName" class="col-sm-12 col-form-label">Sub-Category Image
+                                </label>
+                            <div class="col-sm-12">
+                                <input class="form-control" type="file"  name="sub_category_image" >
+                                {% if i.subcategory_image.url != "" %}<a href="{{i.subcategory_image.url}}">{{i.subcategory_image}}</a>{% endif %}
+                               
+                               
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-xl-12 mx-auto">
                         <div class="row mb-3">
                             <label for="inputEnterYourName" class="col-sm-12 col-form-label">Sub-Category

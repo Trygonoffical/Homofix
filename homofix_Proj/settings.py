@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-emn+k5ze0*u)aj-8%2yd9j!881g%q=)y_8@2f&p=93ktlesvo+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT=BASE_DIR / 'media'
@@ -83,12 +83,28 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'homofix',
         'USER': 'root',
-        # 'PASSWORD': 'root',
-        
-        # 'HOST': '127.0.0.1',
-        # 'PORT': '3306',
+       
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'homofix',
+#         'HOST': 'database.caxj1wczqvkk.us-east-2.rds.amazonaws.com',
+#         'USER': 'admin',
+#         'PASSWORD': 'homofixcmp',   
+#         'PORT': '3306',
+#     }
+# }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'homofix',
+#         'USER': 'root',
+       
+#     }
+# }
 
 
 # Password validation
@@ -126,7 +142,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    
+]
 
 
 # Default primary key field type
@@ -156,13 +175,17 @@ GOOGLE_MAPS_API_KEY = 'https://armaan.pythonanywhere.com/api/ExpertAllLocation/'
 # ]
 
 
+
+
 # settings.py
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'armaanalamf65@gmail.com'
-EMAIL_HOST_PASSWORD = 'wqdg kuki aovn cnkb'
+EMAIL_HOST = 'smtpout.secureserver.net'
+EMAIL_HOST_USER = 'info@homofixcompany.com'
+EMAIL_HOST_PASSWORD = 'Homofixcompany@139'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 
 PASSWORD_RESET_URL = 'password_reset/'
+DEFAULT_FROM_EMAIL = 'info@homofixcompany.com'
+

@@ -36,10 +36,17 @@ class AdminHOD(models.Model):
 
 class Category(models.Model):    
     
+    icon = models.ImageField(upload_to='CatogryIcon',null=True,blank=True)
     category_name = models.CharField(max_length=50)
     created_at=models.DateField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     objects=models.Manager()
+
+    def delete(self, *args, **kwargs):
+        if self.icon:
+            if os.path.isfile(self.icon.path):
+                os.remove(self.icon.path)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.category_name
@@ -49,9 +56,16 @@ class Category(models.Model):
     
 class SubCategory(models.Model):
     Category_id = models.ForeignKey(to=Category,on_delete=models.CASCADE)
+    subcategory_image = models.ImageField(upload_to='subcategory-Image',null=True,blank=True)
     name = models.CharField(max_length=100)
     created_at=models.DateField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+
+    def delete(self, *args, **kwargs):
+        if self.subcategory_image:
+            if os.path.isfile(self.subcategory_image.path):
+                os.remove(self.subcategory_image.path)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -704,6 +718,11 @@ class feedback(models.Model):
     feedback = models.CharField(max_length=100)
 
 
+
+class MostViewed(models.Model):
+    product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
+    img = models.ImageField(upload_to='MostViewed',null=True,blank=True)
+    
 
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):

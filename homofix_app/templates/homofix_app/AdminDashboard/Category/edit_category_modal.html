@@ -11,10 +11,21 @@
             </div>
             
 
-            <form action="{% url 'edit_Category' %}" method="POST" id="categoryform">
+            <form action="{% url 'edit_Category' %}" method="POST" id="categoryform" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row mb-2 mx-1">
                     <div class="col-xl-9 mx-auto">
+                        
+                        <div class="row mb-3">
+                            <label for="inputEnterYourName" class="col-sm-12 col-form-label">Icon Image</label>
+                            <div class="col-sm-12">
+                                
+                                <input type="file" class="form-control"
+                                    placeholder="Enter Your Category Name" id="category_img"
+                                    name="category_img"  required>
+                                    {% if i.icon.url != "" %}<a href="{{i.icon.url}}">{{i.icon}}</a>{% endif %}
+                            </div>
+                        </div>
                         <div class="row mb-3">
                             <label for="inputEnterYourName" class="col-sm-12 col-form-label">Enter Your
                                 Category Name</label>

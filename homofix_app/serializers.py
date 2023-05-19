@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -407,6 +407,43 @@ class TechnicianWithdrawRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class BlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Blog
+        fields = '__all__'
+
+
+
+class MostViewedSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product_id.name', read_only=True)
+    class Meta:
+        model = MostViewed
+        fields = ['product_id', 'product_name', 'img']
+
+
+# ----------------------------- Category ------------------- 
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    
+    
+    class Meta:
+        model = Category
+        fields = ['id','icon','category_name']
+
+
+
+# ----------------------------- Sub-Category ------------------- 
+
+
+
+class SubcategorySerializer(serializers.ModelSerializer):
+    Category_name = serializers.CharField(source='Category_id.category_name', read_only=True)    
+
+    class Meta:
+        model = SubCategory
+        fields = ['id','subcategory_image','name','Category_id','Category_name']
+
 
 # ------------------------- Reebooking -------------------------         
 
@@ -414,3 +451,31 @@ class TechnicianWithdrawRequestSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model=Rebooking
 #         fields = '__all__'
+
+
+
+
+# ---------------------------- Customer Login ------------------------------
+
+
+class CustomerLoginSerliazer(serializers.Serializer):
+    
+    phone_number = serializers.CharField
+   
+    class Meta:
+       
+        fields = ('phone_number')  
+        
+
+class VerifyOtpSerializer(serializers.Serializer):
+    otp = serializers.CharField
+    class Meta:
+        fields = ('otp')  
+
+
+
+class CustSerailizer(serializers.ModelSerializer):
+    class Meta:
+        model=Customer
+        fields = '__all__'
+

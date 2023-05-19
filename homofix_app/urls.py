@@ -3,7 +3,8 @@ from homofix_app import views,HodViews
 from homofix_app import views
 from django.conf import settings
 from django.conf.urls.static import static
-
+from homofix_app import views
+from django.views.static import serve
 
 urlpatterns = [
     
@@ -11,7 +12,7 @@ urlpatterns = [
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
 
-    # path("404",HodViews.Error404,name="404"),
+    
     path("Accounts/Admin/Change/Password",HodViews.admin_reset_psw,name="admin_reset_psw"),
     path("Accounts/Admin/Dashboard/",HodViews.admin_dashboard,name="admin_dashboard"),
     path('Accounts/Admin/Add',HodViews.add_admin,name="add_admin"),
@@ -167,9 +168,25 @@ urlpatterns = [
      path('Accounts/Admin/Edit/Offers/<int:id>', HodViews.edit_offers, name='edit_offers'),
      path('Accounts/Admin/Offers/Update', HodViews.offer_update, name='offer_update'),
      path('Accounts/Admin/Offers/Delete/<int:id>/', HodViews.delete_offer, name='delete_offer'),
+    
+
+
+
+    ########################## Most Viewed #######################################
+
+    path('Accounts/Admin/MostViewed/List', HodViews.most_view_list, name='most_view_list'),
+    path('Accounts/Admin/MostViewed/Add', HodViews.add_mostViewed, name='add_mostViewed'),
+    path('Accounts/Admin/MostViewed/Edit/<int:id>', HodViews.edit_mostViewed, name='edit_mostViewed'),
+    path('Accounts/Admin/MostViewed/Update/Save', HodViews.update_Save_mostViewed, name='update_Save_mostViewed'),
+
+
     # ------------------------------------ Invoice ------------------------------ 
 
+
     path('Accounts/Admin/Booking/Invoice/<int:booking_id>', HodViews.ViewPDF, name="admin_pdf_view"),
+
+
+    
 
 
     
@@ -177,5 +194,9 @@ urlpatterns = [
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# handler404 = 'homofix_app.HodViews.Error404'    
+
+
+   
