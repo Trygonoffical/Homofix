@@ -25,18 +25,29 @@ router.register('MostViewed-Get', API_Views.MostViewedGetViewSet, basename='Most
 router.register('Category-Get', API_Views.CategoryGetViewSet, basename='CategoryGetViewSet')
 router.register('Subcategory-Get', API_Views.SubcategoryGetViewSet, basename='SubcategoryGetViewSet')
 router.register('Customer', API_Views.CustomerViewSet, basename='Customer')
+router.register('Customer/Booking/Details', API_Views.CustomerBookingViewSet, basename='CustomerBookingViewSet')
+router.register('Feedback', API_Views.FeedbackViewSet, basename='feedback')
+router.register('Offer', API_Views.OfferGetViewSet, basename='offer')
+router.register('HomePageService', API_Views.HomePageServiceViewSet, basename='HomePageService')
+
 
 # router.register('ExpertTaskCounting', API_Views.ExpertTaskCountViewSet, basename='ExpertTaskCounting')
 # router.register('update_online', API_Views.update_online, basename='update_online')
+
+
 from homofix_app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("",include('homofix_app.urls')),
     path("Support/",include('homofix_app.support_urls')),
     path("Technician/",include('homofix_app.technician_urls')),
+
     path('api/Login/',API_Views.LoginViewSet.as_view(),name="api_login"),
+    path('api/create_booking/',API_Views.create_booking,name="create_booking"),
+    path('Demo/api/Login/',API_Views.LoginAPI.as_view(),name="demo_login"),
     path('api/Send/Otp/',API_Views.CustomerLoginViewSet.as_view(),name="api_customer_login"),
     path('api/Verify/otp/',API_Views.CustomerVerifyOtp.as_view(),name="verify_otp"),
+    path('api/Custom/Login/',API_Views.CustomerLoginAPI.as_view(),name="customer_login"),
     
     path('api/',include(router.urls),name="api"),
     path('api/RechargeHistory/Post/',API_Views.post_rechargeHistory,name="recharge_history"),
@@ -48,6 +59,9 @@ urlpatterns = [
     path('api/Task/Counting/Get/',API_Views.ExpertTaskCountViewSet,name="get_task_counting"),
     # path("404",views.Error404,name="404"),
     # path('api/Expert/AllLocation',API_Views.create_or_update_all_technician_location,name="create_or_update_all_technician_location")
+    # path("api/hompageservice/",API_Views.homepgservice,name="homepageserv"),
+
+    path('<str:title>/', API_Views.BlogByTitleViewSet.as_view({'get': 'retrieve'}), name='blog-detail'),
     
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

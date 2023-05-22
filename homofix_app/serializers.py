@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -220,6 +220,33 @@ class ProductSerializerr(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'price', 'product_pic']
 
 
+class testingBooking(serializers.ModelSerializer):
+    products = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Booking
+        fields = "__all__"
+    
+    def get_products(self, booking):
+        booking_products = BookingProduct.objects.filter(booking=booking)
+        product_data = []
+        
+        for booking_product in booking_products:
+            product_data.append({
+                'product_id': booking_product.product.id,
+                'quantity': booking_product.quantity,
+                # Include any other product details you want to display
+            })
+        
+        return product_data
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['products'] = self.get_products(instance)
+        return representation
+
+
+
 
 class BokingSerializer(serializers.ModelSerializer):
     # customer = customerSerializer()
@@ -408,10 +435,24 @@ class TechnicianWithdrawRequestSerializer(serializers.ModelSerializer):
 
 
 class BlogSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Blog
+        
         fields = '__all__'
+    
+    
 
+class OfferSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Offer
+        
+        fields = '__all__'
+    
+    
+
+   
 
 
 class MostViewedSerializer(serializers.ModelSerializer):
@@ -474,8 +515,50 @@ class VerifyOtpSerializer(serializers.Serializer):
 
 
 
+
 class CustSerailizer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source='admin.username')
     class Meta:
         model=Customer
         fields = '__all__'
+        ['id', 'admin', 'username', 'address', 'mobile', 'city', 'state', 'area', 'zipcode']
+        
+# -------------------- feedback ------------------------- 
 
+
+class FeedbackSerailizer(serializers.ModelSerializer):
+    # username = serializers.ReadOnlyField(source='admin.username')
+    class Meta:
+        model=feedback
+        fields = '__all__'
+        # ['id', 'admin', 'username', 'address', 'mobile', 'city', 'state', 'area', 'zipcode']
+        
+
+
+class LoginCustomrSerializers(serializers.Serializer):
+    phone_number = serializers.CharField()
+
+
+
+# --------------------------------- Home Page Service API ------------ 
+
+class SubcategrySerializer(serializers.ModelSerializer):
+    # Category_name = serializers.CharField(source='Category_id.category_name', read_only=True)    
+
+    class Meta:
+        model = SubCategory
+        fields = ['id','subcategory_image','name']
+
+
+
+
+class HomePageSerailizer(serializers.ModelSerializer):
+    category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    subcategory = SubcategrySerializer(many=True, read_only=True, source='category_id.subcategory_set')
+    
+    
+    class Meta:
+        model=HomePageService
+        
+        fields = ['id', 'title', 'category_id', 'subcategory']
+        

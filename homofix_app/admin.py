@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed
+from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed,HomePageService
 
 # Register your models here.
 
@@ -32,6 +32,7 @@ admin.site.register(Attendance)
 admin.site.register(Blog)
 admin.site.register(Offer)
 admin.site.register(MostViewed)
+admin.site.register(HomePageService)
 
 
 

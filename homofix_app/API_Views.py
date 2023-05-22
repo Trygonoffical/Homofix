@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet,ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory
+from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService
 from decimal import Decimal
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
@@ -20,6 +20,10 @@ import random
 import requests
 from urllib.parse import urlencode
 import urllib
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 class LoginViewSet(CreateAPIView):
     authentication_classes = [BasicAuthentication]
     serializer_class = LoginSerliazer
@@ -107,10 +111,10 @@ class TaskViewSet(ModelViewSet):
                     booking_amount = booking.total_amount
                     
                     tax_amt =booking.tax_amount
-                    print("helloooo booking amt",booking_amount)
+                    
                     hod_share_percentage = HodSharePercentage.objects.latest('id')
                     hod_share_percentage_value = hod_share_percentage.percentage
-                    print("percentage",hod_share_percentage)
+                   
                     hod_share = booking_amount * (hod_share_percentage_value / 100) 
                     
                     print("new hod share0",hod_share)
@@ -138,7 +142,7 @@ class TaskViewSet(ModelViewSet):
                     
 
                     tax_amt =booking.tax_amount
-                    print("helloooo")
+                    
                     hod_share_percentage = HodSharePercentage.objects.latest('id')
                     hod_share_percentage_value = hod_share_percentage.percentage
                     hod_share = booking_amount * (hod_share_percentage_value / 100) 
@@ -213,6 +217,46 @@ class BookingViewSet(ModelViewSet):
     queryset = Booking.objects.all()     
     serializer_class  = BokingSerializer
      
+
+# class CustomerBookingSet(ModelViewSet):
+#     queryset = Booking.objects.all()
+#     serializer_class = testingBooking
+    
+#     def perform_create(self, serializer):
+#         booking = serializer.save()
+#         product_data = self.request.data.get('products', [])
+        
+#         for product_item in product_data:
+#             product_id = product_item.get('product_id')
+#             quantity = product_item.get('quantity')
+            
+#             product = Product.objects.get(id=product_id)
+            
+#             BookingProduct.objects.create(
+#                 booking=booking,
+#                 product=product,
+#                 quantity=quantity
+#             )
+
+
+@api_view(['POST'])
+def create_booking(request):
+    serializer = testingBooking(data=request.data)
+    if serializer.is_valid():
+        booking = serializer.save()
+        product_ids = request.data.get('products', [])
+        
+        for product_id in product_ids:
+            product = Product.objects.get(id=product_id)
+            
+            BookingProduct.objects.create(
+                booking=booking,
+                product=product,
+                quantity=1  # You can set the quantity as desired
+            )
+        
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
 
 class KycViewSet(ModelViewSet):
     # queryset = Kyc.objects.all()     
@@ -624,6 +668,42 @@ def get_Withdraw_Req(request):
 class BlogGetViewSet(ReadOnlyModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    lookup_field = 'title'
+
+    def retrieve(self, request, *args, **kwargs):
+        # Get the title from the URL parameters
+        title = self.kwargs['title']
+
+        # Perform the lookup based on the title field
+        queryset = self.filter_queryset(self.get_queryset())
+        blog = self.get_object()
+        
+        # You can add any additional logic or filtering here if needed
+        
+        serializer = self.get_serializer(blog)
+        return Response(serializer.data)
+
+class OfferGetViewSet(ReadOnlyModelViewSet):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+    lookup_field = 'name'
+
+    def retrieve(self, request, *args, **kwargs):
+        # Get the title from the URL parameters
+        name = self.kwargs['name']
+
+        # Perform the lookup based on the title field
+        queryset = self.filter_queryset(self.get_queryset())
+        offer = self.get_object()
+        
+        # You can add any additional logic or filtering here if needed
+        
+        serializer = self.get_serializer(offer)
+        return Response(serializer.data)
+
+
+
+
 
 
 class MostViewedGetViewSet(ReadOnlyModelViewSet):
@@ -631,17 +711,62 @@ class MostViewedGetViewSet(ReadOnlyModelViewSet):
     serializer_class = MostViewedSerializer
 
 
+# ----------------------Booking Customer Details ---------------- 
 
+class CustomerBookingViewSet(ModelViewSet):
+    authentication_classes = [JWTAuthentication]
+    queryset = Booking.objects.all()     
+    serializer_class  = BokingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated:
+            # Filter customers based on the authenticated user
+            queryset = Booking.objects.filter(customer__admin=user)
+        else:
+            # If there is no authenticated user, return an empty queryset
+            queryset = Customer.objects.none()
+
+        return queryset
+     
 
 # ----------------------- Customer Login --------------------------- 
 
 
-class CustomerViewSet(ModelViewSet):
-    authentication_classes = [BasicAuthentication]
-    serializer_class = CustSerailizer
+class CustomerViewSet(viewsets.ModelViewSet):
+    authentication_classes = [JWTAuthentication]
     queryset = Customer.objects.all()
-    print("helloooo")
+    serializer_class = CustSerailizer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated:
+            # Filter customers based on the authenticated user
+            queryset = Customer.objects.filter(admin=user)
+        else:
+            # If there is no authenticated user, return an empty queryset
+            queryset = Customer.objects.none()
+
+        return queryset
+    def partial_update(self, request, *args, **kwargs):
+        # Retrieve the customer object to update
+        instance = self.get_object()
+
+        # Check if the current user is the owner of the customer object
+        if instance.admin == request.user:
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(
+                {"detail": "You do not have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
     # queryset = Customer.objects.all() 
     # print("queryset",queryset)    
     # serializer_class  = CustomerSerailizer
@@ -698,6 +823,168 @@ class CustomerLoginViewSet(CreateAPIView):
         
         return Response({'message': 'Otp is sent your mobile number'}, status=status.HTTP_200_OK)
        
+
+class CustomerLoginAPI(APIView):
+    def post(self,request):
+        try:
+            data = request.data
+            
+            serializer = LoginCustomrSerializers(data = data)
+            if serializer.is_valid():
+                password = serializer.data['phone_number']
+                
+                if Customer.objects.filter(mobile=password).exists():
+                    cus = Customer.objects.get(mobile=password)
+                    username = cus.admin.username
+                    
+
+                    user = authenticate(password=password,username=username)
+                    if user is None:
+                        return Response({
+                        'status':400,
+                        'message':'Invalid Password',
+                        'data':{}
+                        })
+
+                    user_type = user.user_type
+                    if user_type == '4':
+                        user_data = {
+                            'id': user.customer.id,
+                            'mobile': user.customer.mobile,
+                            'message':'Login Success'
+                            # 'username': user.username,
+                            
+                            # Add any other user fields you want to return
+                    }
+                    refresh = RefreshToken.for_user(user)
+
+                    return Response({
+                        # 'refresh': str(refresh),
+                        'token': str(refresh.access_token),
+                        'Customer': user_data
+                    })
+                else:
+                    last_three_digits = password[-3:]
+                    userr = "user"
+                    
+                    user = CustomUser.objects.create(username=userr+last_three_digits, user_type='4')    
+                    user.set_password(password)
+                    user.customer.mobile = password
+                    user.save()
+                    
+
+                    custm = Customer.objects.get(mobile=password)
+                    usernme = custm.admin.username
+                   
+                    usrr=authenticate(request,username=usernme, password = password)
+                    if usrr is None:
+                        return Response({
+                        'status':400,
+                        'message':'Invalid Password',
+                        'data':{}
+                        })
+                    user_type = user.user_type
+                    if user_type == '4':
+                        user_data = {
+                            'id': user.customer.id,
+                            'username': user.username,
+                            
+                            # Add any other user fields you want to return
+                    }
+                    refresh = RefreshToken.for_user(usrr)
+
+                    return Response({
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                        'user': user_data
+                    })
+            return Response({
+                'status':400,
+                'message':'something went wrong',
+                'data':serializer.errors
+            })
+        except Exception as e:
+            print(e)
+
+
+
+
+# -------------------------------- feedback --------------------------
+
+class FeedbackViewSet(viewsets.ModelViewSet):
+    authentication_classes = [JWTAuthentication]
+    queryset = feedback.objects.all()
+    serializer_class = FeedbackSerailizer
+    permission_classes = [IsAuthenticated]
+
+# class CustomerVerifyOtp(CreateAPIView):
+#     authentication_classes = [BasicAuthentication]
+#     serializer_class = VerifyOtpSerializer
+#     def post(self,request,*args, **kwargs):
+        
+#         mobile = request.session.get('phone_number', 'Default value if key does not exist')
+        
+#         if Customer.objects.filter(mobile="llll").exists():
+            
+#             cust = Customer.objects.get(mobile=mobile)
+#             username = cust.admin.username
+#             print("userneeeeeeeeameeee",username)
+            
+#             user=authenticate(request,username=username, password = mobile)
+#             # return Response({'message': 'Logged in successfully.'}, status=status.HTTP_200_OK)
+
+#             if user!=None:
+#                 login(request,user)
+#                 user_type = user.user_type
+#                 if user_type == '4':
+#                     user_data = {
+#                         'id': user.customer.id,
+#                         'username': user.username,
+                        
+#                         # Add any other user fields you want to return
+#                     }
+
+#                     refresh = RefreshToken.for_user(user)
+#                     return Response({
+#                     # 'refresh': str(refresh),
+#                     'token': str(refresh.access_token),
+#                 })
+            
+#                     # return Response({'message': 'Logged in successfully.','user': user_data}, status=status.HTTP_200_OK)
+#         else:
+#                 last_three_digits = mobile[-3:]
+#                 userr = "user"
+#                 user = CustomUser.objects.create(username=userr+last_three_digits, user_type='4')    
+#                 user.set_password(mobile)
+#                 user.customer.mobile = mobile
+#                 user.save()
+                
+
+#                 custm = Customer.objects.get(mobile=mobile)
+#                 usernme = custm.admin.username
+               
+#                 usrr=authenticate(request,username=usernme, password = mobile)
+#                 if usrr!=None:
+#                     login(request,user)
+#                     user_type = usrr.user_type
+#                     if user_type == '4':
+#                         user_data1 = {
+#                             'id': usrr.customer.id,
+#                             'username': usrr.username,
+                            
+#                             # Add any other user fields you want to return
+#                         }
+#                         refresh = RefreshToken.for_user(usrr)
+#                         return Response({
+#                         'refresh': str(refresh),
+#                         'access': str(refresh.access_token),
+#                          })
+                
+#                         # return Response({'message': 'Logged in successfully.','user': user_data1}, status=status.HTTP_200_OK)
+#         return Response({'message': 'Invalid Otp.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
+                
 
 class CustomerVerifyOtp(CreateAPIView):
     authentication_classes = [BasicAuthentication]
@@ -769,10 +1056,70 @@ class CategoryGetViewSet(ReadOnlyModelViewSet):
     serializer_class = CategorySerializer
             
 
-
 # ------------------------ Subcategory ------------------------ 
 
 
-class SubcategoryGetViewSet(ReadOnlyModelViewSet):
+# class SubcategoryGetViewSet(ReadOnlyModelViewSet):
+#     queryset = SubCategory.objects.all()
+#     serializer_class = SubcategorySerializer
+
+class SubcategoryGetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubcategorySerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category_id = self.request.query_params.get('Category_id')
+        if category_id is not None:
+            queryset = queryset.filter(Category_id=category_id)
+        return queryset
+
+class LoginAPI(APIView):
+    def post(self,request):
+        try:
+            data = request.data
+            serializer = LoginCustomrSerializers(data = data)
+            if serializer.is_valid():
+                password = serializer.data['password']
+                cus = Customer.objects.get(mobile=password)
+                username = cus.admin.username
+                print("usernameee",username)
+
+                user = authenticate(password=password,username=username)
+                if user is None:
+                    return Response({
+                    'status':400,
+                    'message':'Invalid Password',
+                    'data':{}
+                    })
+                refresh = RefreshToken.for_user(user)
+
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                })
+
+            return Response({
+                'status':400,
+                'message':'something went wrong',
+                'data':serializer.errors
+            })
+        except Exception as e:
+            print(e)
+
+
+class BlogByTitleViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+    lookup_field = 'title'            
+
+
+
+
+
+class HomePageServiceViewSet(ModelViewSet):
+    queryset = HomePageService.objects.all()     
+    serializer_class  = HomePageSerailizer
+
+
+

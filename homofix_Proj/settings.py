@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ckeditor',
     'rest_framework',
+    'rest_framework_simplejwt',
     'homofix_app',
     
     
@@ -167,7 +168,14 @@ DATE_INPUT_FORMATS = [
 
 GOOGLE_MAPS_API_KEY = 'https://armaan.pythonanywhere.com/api/ExpertAllLocation/'
 
-
+REST_FRAMEWORK = {
+    
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+    
+}
 
 # STATICFILES_DIRS = [
 #     BASE_DIR / "homofixapp/static",

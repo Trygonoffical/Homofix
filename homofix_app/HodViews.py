@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -1301,8 +1301,7 @@ def booking_list(request):
         request.session['otp'] = otp_unique
 
         if Customer.objects.filter(mobile=mob).exists():
-            print("helloooo suceess")
-            # print("heloooooooo")
+            
             
 
 
@@ -1321,10 +1320,7 @@ def booking_list(request):
 
             return JsonResponse({'status':'Save'})
 
-        # elif Customer.objects.filter(mobile=mob).exists():
-        #     print("hellooooo")
-        #     return JsonResponse({'status':'Error'})
-
+        
             
         else:
             
@@ -2735,3 +2731,87 @@ def update_Save_mostViewed(request):
         most_viewed.save()
         messages.success(request,"Most Viewed Updted Successfully")
         return redirect('most_view_list')
+
+
+
+
+def homepageservice_view_list(request):
+    home_page_Service = HomePageService.objects.all()
+    context = {
+        'home_page_Service':home_page_Service
+    }
+    return render(request,'homofix_app/AdminDashboard/HomePageService/view_homepage_service.html',context)
+
+
+
+def add_homepage_service(request):
+    category = Category.objects.all()
+    
+    context = {
+        'category': category
+    }
+    if request.method == "POST":
+        # product_ids = request.POST.get('product_id')
+        category_ids = request.POST.getlist('category_id[]')
+        title = request.POST.getlist('title[]')
+        print("category idss",category_ids,"title",title)
+
+        # print("mooss",most_view_pics)
+        # prod = Product.objects.get(id=product_ids)
+        # print("hello")
+
+        # for name in most_view_pics:
+        #     mst = MostViewed.objects.create(proudct=prod, img=name)
+        #     mst.save()
+
+        for category_id, image in zip(category_ids, title):
+            prod = Category.objects.get(id=category_id)
+
+            # Create a new MostViewed object for each product and image
+            mst = HomePageService.objects.create(category_id=prod, title=image)
+            mst.save()
+        messages.success(request,"HomePageService Add Successfully")
+        return redirect('homepageservice_view_list')
+            
+
+        # Limit the number of entries to a maximum of four
+        
+
+    
+    return render(request, 'homofix_app/AdminDashboard/HomePageService/add_homepage_service.html', context)
+
+
+
+
+def edit_homepage_service(request,id):
+    homepageservice = HomePageService.objects.get(id=id)
+    
+    category = Category.objects.all()
+    print("Category",category)
+    context= {
+        'homepageservice':homepageservice,
+        'category':category
+    }
+    return render(request, 'homofix_app/AdminDashboard/HomePageService/edit_homepage_service.html', context)
+
+
+
+
+def update_Save_homepageservice(request):
+    if request.method == "POST":
+        homepageservice_id = request.POST.get('homepageservice_id')
+        category_id = request.POST.get('category_id')
+        title = request.POST.get('title')
+
+        cat = Category.objects.get(id=category_id)
+        homepageservice = HomePageService.objects.get(id=homepageservice_id)
+        
+        
+        homepageservice.category_id = cat
+        homepageservice.title = title
+
+        homepageservice.save()
+        messages.success(request,"Home Page Service Updted Successfully")
+        return redirect('homepageservice_view_list')
+
+

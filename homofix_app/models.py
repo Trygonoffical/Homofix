@@ -352,11 +352,13 @@ class Booking(models.Model):
         # tax_rate = 0.18  # replace with your actual tax rate
         # total_with_tax = total + (total * tax_rate)
         # return round(total_with_tax, 2)
+        if self.coupon:
+            total -= self.coupon.discount_amount
         return total
 
     @property
     def tax_amount(self):
-        tax_rate = 0.18  # replace with your actual tax rate
+        tax_rate = Decimal('0.18')  # replace with your actual tax rate
         return round(self.total_amount * tax_rate, 2)
 
     @property
@@ -465,11 +467,6 @@ class AllTechnicianLocation(models.Model):
     date = models.DateField(auto_now_add=True)
     
 
-    
-class feedback(models.Model):
-    Customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
-    Product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    description = models.TextField(null=True,blank=True)
 
 
 
@@ -703,25 +700,35 @@ class Blog(models.Model):
     feature_img = models.ImageField(upload_to='Blog/Feature Image')
     content = RichTextField()
     
+    
+
 class Offer(models.Model):
     name = models.CharField(max_length=100)
     offer_pic = models.ImageField(upload_to='Offer')
-    url = models.URLField()
+    url = models.URLField(null=True,blank=True)
     def __str__(self):
         return self.name
     
+
 class feedback(models.Model):
 
     customer_id = models.ForeignKey(Customer,on_delete=models.CASCADE)    
     technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
-    rating = models.CharField(max_length=50)
-    feedback = models.CharField(max_length=100)
+    rating = models.IntegerField()
+    description = models.TextField()
 
 
 
 class MostViewed(models.Model):
     product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
     img = models.ImageField(upload_to='MostViewed',null=True,blank=True)
+    
+
+class HomePageService(models.Model):
+    category_id = models.ForeignKey(Category,on_delete=models.CASCADE)
+    title = models.CharField(max_length=100)
+    
+
     
 
 @receiver(post_save,sender=CustomUser)

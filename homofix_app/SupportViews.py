@@ -794,7 +794,7 @@ def support_orders(request):
         if Customer.objects.filter(mobile=mob).exists():
 
             
-            print("helloooo suceess")
+            
             # print("heloooooooo")
             
 
@@ -816,10 +816,7 @@ def support_orders(request):
             customer.save()
             return JsonResponse({'status':'Save'})
 
-        # elif Customer.objects.filter(mobile=mob).exists():
-        #     print("hellooooo")
-        #     return JsonResponse({'status':'Error'})
-
+        
             
         else:
             

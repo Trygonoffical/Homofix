@@ -180,6 +180,12 @@ urlpatterns = [
     path('Accounts/Admin/MostViewed/Update/Save', HodViews.update_Save_mostViewed, name='update_Save_mostViewed'),
 
 
+    # ------------------------------------- homepageserive --------------------
+
+    path('Accounts/Admin/HomePageService/List', HodViews.homepageservice_view_list, name='homepageservice_view_list'),
+    path('Accounts/Admin/HomePageService/Add', HodViews.add_homepage_service, name='add_homepage_service'),
+    path('Accounts/Admin/HomePageService/Edit/<int:id>', HodViews.edit_homepage_service, name='edit_homepage_service'),
+    path('Accounts/Admin/HomePageService/Update/Save', HodViews.update_Save_homepageservice, name='update_Save_homepageservice'),
     # ------------------------------------ Invoice ------------------------------ 
 
 
