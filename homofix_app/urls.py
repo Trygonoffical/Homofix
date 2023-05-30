@@ -5,14 +5,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from homofix_app import views
 from django.views.static import serve
+from django.urls import re_path
 
 urlpatterns = [
-    
+    re_path('media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path('static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('All/Location',HodViews.all_location,name="all_location"),
     path('',views.login,name="login"),
     path('user/logout',views.logout_user,name="user_logout"),
 
-    
     path("Accounts/Admin/Change/Password",HodViews.admin_reset_psw,name="admin_reset_psw"),
     path("Accounts/Admin/Dashboard/",HodViews.admin_dashboard,name="admin_dashboard"),
     path('Accounts/Admin/Add',HodViews.add_admin,name="add_admin"),
@@ -101,7 +102,16 @@ urlpatterns = [
 
     ########################## Contact Us ##################################
     path('Accounts/Admin/ContactUs/', HodViews.contactus, name='contact_us'),
+    path('Accounts/Admin/Carrer/Update', HodViews.carrer_update_Save, name='carrer_update_Save'),
+    path('Accounts/Admin/ApplicantCarrer/<int:id>', HodViews.applicant_carrer, name='applicant_carrer'),
 
+
+
+    ########################## Page Legal ###################################
+    path('Accounts/Page/Legal',HodViews.page_legal_list,name="page_legal_list"),
+    path('Accounts/Add/Page/Legal/',HodViews.add_page_legal,name="add_page_legal"),
+    path('Accounts/Edit/Page/Legal/<int:id>/',HodViews.edit_page_legal,name="edit_page_legal"),
+    path('Accounts/Update/Page/Legal/Save/',HodViews.update_page_legal_save,name="update_page_legal_save"),
     ########################## Job Enquiry ##################################
     path('Accounts/Admin/Job/Enquiry', HodViews.admin_job_enquiry, name='admin_job_enquiry'),
 

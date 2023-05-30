@@ -424,9 +424,47 @@
         </li> {% endcomment %}
 
 
-         
-        <li> 
-            <a href="{% url 'contact_us' %}"></span><i class="bx bx-right-arrow-alt"></i>Contact Us</a>
+        <li class="">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Carrer</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href="{% url 'contact_us' %}"></span><i class="bx bx-right-arrow-alt"></i>Career List</a>
+                </li>
+                {% comment %} <li> 
+                    <a href="{% url 'applicant_carrer' %}"></span><i class="bx bx-right-arrow-alt"></i>Applicant Career List</a>
+                </li>
+                  {% endcomment %}
+                
+                
+              
+               
+            </ul>
+        </li>
+        <li class="">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon"><i class='bx bx-store'></i>
+                </div>
+                <div class="menu-title">Page Legal</div>
+            </a>
+            <ul class="mb-3">
+               
+                <li> 
+                    <a href="{% url 'page_legal_list' %}"></span><i class="bx bx-right-arrow-alt"></i>Page Legal</a>
+                </li>
+                {% comment %} <li> 
+                    <a href="{% url 'applicant_carrer' %}"></span><i class="bx bx-right-arrow-alt"></i>Applicant Career List</a>
+                </li>
+                  {% endcomment %}
+                
+                
+              
+               
+            </ul>
         </li>
         
         <li> 

@@ -52,22 +52,22 @@
                            <td >{{booking.order_id}}</td>
                            {% comment %} <td>{{booking.product.category.category_name}}</td> {% endcomment %}
                            <td>
-                              {% if booking.bookingproduct_set.exists %}
-                                    {{ booking.bookingproduct_set.first.product.subcategory.Category_id.category_name }}
+                              {% if booking.booking_product.exists %}
+                                    {{ booking.booking_product.first.product.subcategory.Category_id.category_name }}
                                 {% else %}
                                     N/A
                                 {% endif %} 
                            </td>
                            <td>
-                              {% if booking.bookingproduct_set.exists %}
-                                    {{ booking.bookingproduct_set.first.product.subcategory.name }}
+                              {% if booking.booking_product.exists %}
+                                    {{ booking.booking_product.first.product.subcategory.name }}
                                 {% else %}
                                     N/A
                                 {% endif %} 
                            </td>
                            {% comment %} <td>{{booking.product.name}}</td> {% endcomment %}
                            <td>
-                              {% for booking_product in booking.bookingproduct_set.all %}
+                              {% for booking_product in booking.booking_product.all %}
                               {{ booking_product.product.name }} 
                               {% endfor %}
                            </td>
@@ -77,8 +77,8 @@
                            <td>{{booking.customer.state}}</td>
                            <td>{{booking.customer.area}}</td>
                            <td>
-                              {% if booking.bookingproduct_set.exists %}
-                                    Rs.{{ booking.bookingproduct_set.first.total_price }}
+                              {% if booking.booking_product.exists %}
+                                    Rs.{{ booking.booking_product.first.total_price }}
                                 {% else %}
                                     N/A
                                 {% endif %} 

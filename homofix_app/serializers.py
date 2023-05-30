@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService,ApplicantCarrer,Carrer,Coupon,LegalPage
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -78,7 +78,7 @@ class BookingProductSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    bookingproduct_set = BookingProductSerializer(many=True)
+    booking_product = BookingProductSerializer(many=True)
     customer = CustomerSerializer()
     products = ProductSerializer(many=True)
     # total_amount = serializers.DecimalField(max_digits=8, decimal_places=2, read_only=True)
@@ -219,34 +219,27 @@ class ProductSerializerr(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'name', 'description', 'price', 'product_pic']
 
+class BookingProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookingProduct
+        fields = '__all__'
 
 class testingBooking(serializers.ModelSerializer):
-    products = serializers.SerializerMethodField()
+    # booking_product = BookingProductSerializer(many=True)
     
     class Meta:
         model = Booking
-        fields = "__all__"
+        fields = ('customer', 'products')
+
+
     
-    def get_products(self, booking):
-        booking_products = BookingProduct.objects.filter(booking=booking)
-        product_data = []
-        
-        for booking_product in booking_products:
-            product_data.append({
-                'product_id': booking_product.product.id,
-                'quantity': booking_product.quantity,
-                # Include any other product details you want to display
-            })
-        
-        return product_data
-    
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['products'] = self.get_products(instance)
-        return representation
 
-
-
+    def create(self, validated_data):
+        products_data = validated_data.pop('products')
+        booking = Booking.objects.create(**validated_data)
+        for product_data in products_data:
+            BookingProduct.objects.create(booking=booking, **product_data)
+        return booking
 
 class BokingSerializer(serializers.ModelSerializer):
     # customer = customerSerializer()
@@ -509,9 +502,9 @@ class CustomerLoginSerliazer(serializers.Serializer):
         
 
 class VerifyOtpSerializer(serializers.Serializer):
-    otp = serializers.CharField
+    OTPP = serializers.CharField
     class Meta:
-        fields = ('otp')  
+        fields = ('OTPP')  
 
 
 
@@ -562,3 +555,144 @@ class HomePageSerailizer(serializers.ModelSerializer):
         
         fields = ['id', 'title', 'category_id', 'subcategory']
         
+
+
+
+
+# ---------------------- Testing ----------------- 
+
+
+class CustomerLoginn(serializers.Serializer):
+    
+    phone_number = serializers.CharField()
+   
+    class Meta:
+       
+        fields = ('phone_number',)
+      
+
+class AddonsDeleteSerailizers(serializers.Serializer):
+    
+    id = serializers.CharField()
+   
+    class Meta:
+       
+        fields = ('id',)
+
+
+class ApplicantCarrerSerliazer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ApplicantCarrer
+        fields = "__all__"
+
+
+class CarrerSerliazer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Carrer
+        fields = "__all__"
+
+
+
+
+class BkingProductSerializer(serializers.ModelSerializer):
+   
+
+    class Meta:
+        model = BookingProduct
+        fields = ['product', 'quantity']
+
+
+# class BkingSerializer(serializers.ModelSerializer):
+   
+
+#     class Meta:
+#         model = Booking
+#         fields = '__all__'        
+
+
+class ProSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField()
+
+# class BkingSerializer(serializers.ModelSerializer):
+#     booking_products = BkingProductSerializer(many=True)
+
+#     class Meta:
+#         model = Booking
+#         fields = '__all__'
+
+#         # read_only_fields = ['supported_by']
+
+
+#     def create(self, validated_data):
+        
+#         booking_products_data = validated_data.pop('booking_products', [])
+#         booking = Booking.objects.create(**validated_data)
+#         print("nanooooooo",booking)
+
+#         for product_data in booking_products_data:
+#             print("hhhhh")
+#             product = product_data.get('product')
+            
+#             quantity = product_data.get('quantity')
+#             total_price = int(100)
+#             # if product and product.price is not None:
+#             #     total_price = quantity * product.price
+#             # total_price = quantity * product.price
+#             BookingProduct.objects.create(
+#                 booking=booking,
+#                 product=product,
+#                 quantity=quantity,
+#                 total_price=100
+#             )
+
+#         return booking    
+
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = ['code', 'discount_amount', 'validity_period']
+
+
+class BkingSerializer(serializers.ModelSerializer):
+    booking_product = BkingProductSerializer(many=True)
+    # coupon = CouponSerializer()
+
+    
+    class Meta:
+        model = Booking
+        fields = "__all__"
+        # exclude = ('products',)
+
+    def create(self, validated_data):
+        
+        product_ids_data = validated_data.pop('booking_product', [])
+        
+        booking = Booking.objects.create(**validated_data)
+
+        for product_id_data in product_ids_data:
+            product_id = product_id_data.get('product')
+            quantity = product_id_data.get('quantity')
+            
+            product = Product.objects.get(name=product_id)
+            total_price = quantity * product.price  # Calculate total price based on quantity and product price
+            BookingProduct.objects.create(
+                booking=booking,
+                product=product,
+                quantity=quantity,
+                total_price=total_price
+            )
+
+        return booking
+
+   
+# ------------------------ Legal Page --------------- 
+
+class LegalPageSerializer(serializers.ModelSerializer):
+   
+    
+    class Meta:
+        model = LegalPage
+        fields = "__all__"

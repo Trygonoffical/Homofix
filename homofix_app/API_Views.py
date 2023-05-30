@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,8 +9,8 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet,ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
-from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService
+from rest_framework.decorators import api_view,authentication_classes, permission_classes
+from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage
 from decimal import Decimal
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
@@ -23,6 +23,12 @@ import urllib
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import serializers
+from django.utils import timezone
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+import pdfkit
+from .helpers import save_pdf
 
 class LoginViewSet(CreateAPIView):
     authentication_classes = [BasicAuthentication]
@@ -237,27 +243,122 @@ class BookingViewSet(ModelViewSet):
 #                 product=product,
 #                 quantity=quantity
 #             )
+class BkingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BkingSerializer
 
+class BkingProductViewSet(viewsets.ModelViewSet):
+    queryset = BookingProduct.objects.all()
+    serializer_class = BkingProductSerializer     
 
 @api_view(['POST'])
-def create_booking(request):
-    serializer = testingBooking(data=request.data)
-    if serializer.is_valid():
-        booking = serializer.save()
-        product_ids = request.data.get('products', [])
-        
-        for product_id in product_ids:
-            product = Product.objects.get(id=product_id)
-            
-            BookingProduct.objects.create(
-                booking=booking,
-                product=product,
-                quantity=1  # You can set the quantity as desired
-            )
-        
-        return Response(serializer.data)
-    return Response(serializer.errors, status=400)
+def create_booking_manually(request):
+    data = request.data
+    # serializer = BookingCreateManuallySerailizer(data=data)
+    print("ggggggggggggggg",data)
+    return Response({
+        'status':"ok",
+        'message':data
+    })
 
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def create_booking(request):
+   
+    data = request.data
+    booking_products_data = data.pop('booking_products', [])
+    
+    
+    serializer = BkingSerializer(data=data)
+    
+    if serializer.is_valid():
+        # print("gggg",serializer)
+        booking = serializer.save()
+
+        # Create BookingProduct instances if available
+        for booking_product_data in booking_products_data:
+            booking_product_data['booking'] = booking.id
+            # demo = booking_product_data.booking
+            # print("ssss",demo)
+            testo = booking_product_data['booking']
+            print("demoooo datasaa",booking_product_data['booking']) 
+            booking_product_serializer = BkingProductSerializer(data=booking_product_data)
+            print("demooooo",booking_product_serializer)
+            if booking_product_serializer.is_valid():
+                print("gggg")
+                booking_product_serializer.save()
+            else:
+                # If there are any errors in BookingProduct data, delete the created Booking instance
+                booking.delete()
+                return Response({
+                    'status': 'error',
+                    'message': 'Invalid BookingProduct data',
+                    'errors': booking_product_serializer.errors
+                })
+
+        return Response({
+            'status': 'ok',
+            'data': serializer.data
+        })
+    else:
+
+        return Response({
+            'status': 'error',
+            'message': 'Invalid Booking data',
+            'errors': serializer.errors
+        })
+
+# @api_view(['POST'])
+# def create_booking(request):
+#     try:
+#         data = request.data
+#         serializer = testingBooking(data=data)
+#         if serializer.is_valid():
+
+#             print(data)
+#             return Response({
+#                 'status':200,
+#                 'data':serializer.data
+#             })
+#         return Response({
+#                 'status':200,
+#                 'message':'some thing error',
+#                 'data':serializer.errors
+#             })
+        
+#     except Exception as e:
+#         print(e)
+
+# @api_view(['POST'])
+# def create_booking(request):
+#     try:
+#         data = request.data
+#         serializer = testingBooking(data=data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({
+#                 'status': True,
+#                 'message': 'Booking created successfully',
+#                 'data': serializer.data
+#             }, status=status.HTTP_201_CREATED)
+        
+#         return Response({
+#             'status': False,
+#             'message': 'Invalid data',
+#             'data': serializer.errors
+#         }, status=status.HTTP_400_BAD_REQUEST)
+    
+#     except Exception as e:
+#         print(e)
+#         return Response({
+#             'status': False,
+#             'message': 'Something went wrong'
+#         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+        
 class KycViewSet(ModelViewSet):
     # queryset = Kyc.objects.all()     
     serializer_class  = KycSerializer
@@ -393,6 +494,11 @@ class AddonsViewSet(ModelViewSet):
 class AddonsGetViewSet(ModelViewSet):
     queryset = Addon.objects.all()     
     serializer_class  = AddonsGetSerializer
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete'] 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
      
 
 
@@ -531,6 +637,7 @@ class TechnicianOnlineViewSet(viewsets.ViewSet):
 
 @api_view(['GET'])
 def get_RechargeHistory(request):
+    print("helooooooo")
     technician_id = request.GET.get('technician_id') # retrieve the technician_id query parameter
     queryset = RechargeHistory.objects.all()
     if technician_id is not None:
@@ -797,33 +904,63 @@ def verify_otp(otp, user):
         return False
 
 
+# class CustomerLoginViewSet(CreateAPIView):
+#     authentication_classes = [BasicAuthentication]
+#     serializer_class = CustomerLoginSerliazer
+#     def post(self,request,*args, **kwargs):
+#         otp_number = random.randint(0,9999)
+#         otp_unique = str(otp_number).zfill(3)
+#         phone_number = request.POST.get('phone_number')
+
+#         request.session['phone_number'] = phone_number
+#         request.session['otp'] = otp_unique
+#         username = "TRYGON"
+#         apikey = "E705A-DFEDC"
+#         apirequest="Text"
+#         sender ="TRYGON"
+#         mobile=phone_number
+#         message=f"Dear User {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+#         TemplateID="1707162192151162124"
+#         url = f"https://sms.webtextsolution.com/sms-panel/api/http/index.php?username=TRYGON&apikey=E705A-DFEDC&apirequest=Text&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
+
+#         response = requests.get(url) 
+#         print("response",response)
+        
+#         # cust = Customer.objects.get(mobile=phone_number)
+        
+#         return Response({'message': 'Otp is sent your mobile number'}, status=status.HTTP_200_OK)
+       
+
+
 class CustomerLoginViewSet(CreateAPIView):
     authentication_classes = [BasicAuthentication]
-    serializer_class = LoginSerliazer
-    def get(self,request,*args, **kwargs):
-        otp_number = random.randint(0,9999)
+    serializer_class = CustomerLoginSerliazer
+    
+    def post(self, request, *args, **kwargs):
+        otp_number = random.randint(0, 9999)
         otp_unique = str(otp_number).zfill(3)
-        phone_number = request.POST.get('phone_number')
+        phone_number = request.data.get('phone_number')
+       
 
         request.session['phone_number'] = phone_number
         request.session['otp'] = otp_unique
+        ottt = request.session.get('otp', 'Default value if key does not exist')
+        
+        
         username = "TRYGON"
         apikey = "E705A-DFEDC"
-        apirequest="Text"
-        sender ="TRYGON"
-        mobile=phone_number
-        message=f"Dear User {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
-        TemplateID="1707162192151162124"
-        url = f"http://message.trygon.in/sms-panel/api/http/index.php?username={username}&apikey={apikey}&apirequest={apirequest}&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
-
+        apirequest = "Text"
+        sender = "TRYGON"
+        mobile = phone_number
+        message = f"Dear User {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+        template_id = "1707162192151162124"
+        
+        url = f"https://sms.webtextsolution.com/sms-panel/api/http/index.php?username=TRYGON&apikey=E705A-DFEDC&apirequest=Text&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
+        
         response = requests.get(url) 
-        print("response",response)
         
-        # cust = Customer.objects.get(mobile=phone_number)
         
-        return Response({'message': 'Otp is sent your mobile number'}, status=status.HTTP_200_OK)
-       
-
+        return Response({'message': 'OTP is sent to your mobile number','otp_session':ottt}, status=status.HTTP_200_OK)
 class CustomerLoginAPI(APIView):
     def post(self,request):
         try:
@@ -985,62 +1122,151 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
         
                 
-
 class CustomerVerifyOtp(CreateAPIView):
     authentication_classes = [BasicAuthentication]
     serializer_class = VerifyOtpSerializer
-    def post(self,request,*args, **kwargs):
-        otp = request.POST.get('otp')
-        otp_no = request.session.get('otp', 'Default value if key does not exist')
+    
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        Otp = data.get('OTPP')
+        print("hellooooo")
+        
+        otp_nUMB = request.session.get('otp', 'Default value if key does not exist')
+        print("OTP from session:", otp_nUMB)
         mobile = request.session.get('phone_number', 'Default value if key does not exist')
-        if otp == otp_no:
-            if Customer.objects.filter(mobile=mobile).exists():
+        
+        return Response({
+            'otp_input': Otp,
+            'otp_session': otp_nUMB,
+        })       # if otp == otp_no:
+        #     if Customer.objects.filter(mobile=mobile).exists():
                 
-                    cust = Customer.objects.get(mobile=mobile)
-                    username = cust.admin.username
-                    print("usernameeee",username)
+        #             cust = Customer.objects.get(mobile=mobile)
+        #             username = cust.admin.username
+        #             print("usernameeee",username)
                     
-                    user=authenticate(request,username=username, password = mobile)
+        #             user=authenticate(request,username=username, password = mobile)
                     # return Response({'message': 'Logged in successfully.'}, status=status.HTTP_200_OK)
 
-                    if user!=None:
-                        login(request,user)
-                        user_type = user.user_type
-                        if user_type == '4':
-                            user_data = {
-                                'id': user.customer.id,
-                                'username': user.username,
+        #             if user!=None:
+        #                 login(request,user)
+        #                 user_type = user.user_type
+        #                 if user_type == '4':
+        #                     user_data = {
+        #                         'id': user.customer.id,
+        #                         'username': user.username,
                                 
-                                # Add any other user fields you want to return
-                            }
+        #                         # Add any other user fields you want to return
+        #                     }
+        #                     refresh = RefreshToken.for_user(user)
+        #                     return Response({
+        #                     # 'refresh': str(refresh),
+        #                     'token': str(refresh.access_token),
+        #                     'message': 'Logged in successfully.','user': user_data
+        #                 })
                     
-                            return Response({'message': 'Logged in successfully.','user': user_data}, status=status.HTTP_200_OK)
-            else:
-                last_three_digits = mobile[-3:]
-                userr = "user"
-                user = CustomUser.objects.create(username=userr+last_three_digits, user_type='4')    
-                user.set_password(mobile)
-                user.customer.mobile = mobile
-                user.save()
+        #                     # return Response({'message': 'Logged in successfully.','user': user_data}, status=status.HTTP_200_OK)
+        #     else:
+        #         last_three_digits = mobile[-3:]
+        #         userr = "user"
+        #         user = CustomUser.objects.create(username=userr+last_three_digits, user_type='4')    
+        #         user.set_password(mobile)
+        #         user.customer.mobile = mobile
+        #         user.save()
                 
 
-                custm = Customer.objects.get(mobile=mobile)
-                usernme = custm.admin.username
-                print("usernammeee",usernme)
-                usrr=authenticate(request,username=usernme, password = mobile)
-                if usrr!=None:
-                        login(request,user)
-                        user_type = usrr.user_type
-                        if user_type == '4':
-                            user_data1 = {
-                                'id': usrr.customer.id,
-                                'username': usrr.username,
+        #         custm = Customer.objects.get(mobile=mobile)
+        #         usernme = custm.admin.username
+        #         print("usernammeee",usernme)
+        #         usrr=authenticate(request,username=usernme, password = mobile)
+        #         if usrr!=None:
+        #                 login(request,user)
+        #                 user_type = usrr.user_type
+        #                 if user_type == '4':
+        #                     user_data1 = {
+        #                         'id': usrr.customer.id,
+        #                         'username': usrr.username,
                                 
-                                # Add any other user fields you want to return
-                            }
+        #                         # Add any other user fields you want to return
+        #                     }
+        #                     refresh = RefreshToken.for_user(usrr)
+        #                     return Response({
+        #                     # 'refresh': str(refresh),
+        #                     'token': str(refresh.access_token),
+        #                     'message': 'Logged in successfully.','user': user_data1
+        #                 })
                     
-                            return Response({'message': 'Logged in successfully.','user': user_data1}, status=status.HTTP_200_OK)
-        return Response({'message': 'Invalid Otp.'}, status=status.HTTP_401_UNAUTHORIZED)
+        #                     # return Response({'message': 'Logged in successfully.','user': user_data1}, status=status.HTTP_200_OK)
+        # return Response({'message': 'Invalid Otp.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
+# class CustomerVerifyOtp(CreateAPIView):
+#     authentication_classes = [BasicAuthentication]
+#     serializer_class = VerifyOtpSerializer
+#     def post(self,request,*args, **kwargs):
+#         otp = request.POST.get('otp')
+#         otp_no = request.session.get('otp', 'Default value if key does not exist')
+#         mobile = request.session.get('phone_number', 'Default value if key does not exist')
+#         if otp == otp_no:
+#             if Customer.objects.filter(mobile=mobile).exists():
+                
+#                     cust = Customer.objects.get(mobile=mobile)
+#                     username = cust.admin.username
+#                     print("usernameeee",username)
+                    
+#                     user=authenticate(request,username=username, password = mobile)
+#                     # return Response({'message': 'Logged in successfully.'}, status=status.HTTP_200_OK)
+
+#                     if user!=None:
+#                         login(request,user)
+#                         user_type = user.user_type
+#                         if user_type == '4':
+#                             user_data = {
+#                                 'id': user.customer.id,
+#                                 'username': user.username,
+                                
+#                                 # Add any other user fields you want to return
+#                             }
+#                             refresh = RefreshToken.for_user(user)
+#                             return Response({
+#                             # 'refresh': str(refresh),
+#                             'token': str(refresh.access_token),
+#                             'message': 'Logged in successfully.','user': user_data
+#                         })
+                    
+#                             # return Response({'message': 'Logged in successfully.','user': user_data}, status=status.HTTP_200_OK)
+#             else:
+#                 last_three_digits = mobile[-3:]
+#                 userr = "user"
+#                 user = CustomUser.objects.create(username=userr+last_three_digits, user_type='4')    
+#                 user.set_password(mobile)
+#                 user.customer.mobile = mobile
+#                 user.save()
+                
+
+#                 custm = Customer.objects.get(mobile=mobile)
+#                 usernme = custm.admin.username
+#                 print("usernammeee",usernme)
+#                 usrr=authenticate(request,username=usernme, password = mobile)
+#                 if usrr!=None:
+#                         login(request,user)
+#                         user_type = usrr.user_type
+#                         if user_type == '4':
+#                             user_data1 = {
+#                                 'id': usrr.customer.id,
+#                                 'username': usrr.username,
+                                
+#                                 # Add any other user fields you want to return
+#                             }
+#                             refresh = RefreshToken.for_user(usrr)
+#                             return Response({
+#                             # 'refresh': str(refresh),
+#                             'token': str(refresh.access_token),
+#                             'message': 'Logged in successfully.','user': user_data1
+#                         })
+                    
+#                             # return Response({'message': 'Logged in successfully.','user': user_data1}, status=status.HTTP_200_OK)
+#         return Response({'message': 'Invalid Otp.'}, status=status.HTTP_401_UNAUTHORIZED)
 
         
                 
@@ -1123,3 +1349,170 @@ class HomePageServiceViewSet(ModelViewSet):
 
 
 
+
+
+
+
+class CustomerLogin(APIView):
+    def post(self,request):
+        data = request.data 
+        serializer = CustomerLoginn(data = data)
+        if serializer.is_valid():
+            # return Response(data)
+            phone_number = serializer.validated_data.get('phone_number')
+            # print("helooo phone",phone_number)
+            # return Response({
+            #     'phone_number':phone_number
+            # })
+            
+            if Customer.objects.filter(mobile=phone_number).exists():
+            
+                cust = Customer.objects.get(mobile=phone_number)
+                username = cust.admin.username
+                print("usernameeee",username)
+                
+                user=authenticate(request,username=username, password = phone_number)
+                # return Response({'message': 'Logged in successfully.'}, status=status.HTTP_200_OK)
+
+                if user!=None:
+                    login(request,user)
+                    user_type = user.user_type
+                    if user_type == '4':
+                        user_data = {
+                            'id': user.customer.id,
+                            'username': user.username,
+                            
+                            # Add any other user fields you want to return
+                        }
+                        refresh = RefreshToken.for_user(user)
+                        return Response({
+                        # 'refresh': str(refresh),
+                        'token': str(refresh.access_token),
+                        'message': 'Logged in successfully.','user': user_data
+                    })
+                
+                        # return Response({'message': 'Logged in successfully.','user': user_data}, status=status.HTTP_200_OK)
+            else:
+                last_three_digits = phone_number[-3:]
+                userr = "user"
+                user = CustomUser.objects.create(username=userr+last_three_digits, user_type='4')    
+                user.set_password(phone_number)
+                user.customer.mobile = phone_number
+                user.save()
+
+                
+                    
+                custm = Customer.objects.get(mobile=phone_number)
+                usernme = custm.admin.username
+                print("usernammeee",usernme)
+                usrr=authenticate(request,username=usernme, password = phone_number)
+                if usrr!=None:
+                    login(request,user)
+                    user_type = usrr.user_type
+                    if user_type == '4':
+                        user_data1 = {
+                            'id': usrr.customer.id,
+                            'username': usrr.username,
+                            
+                            # Add any other user fields you want to return
+                        }
+                        refresh = RefreshToken.for_user(usrr)
+                        return Response({
+                        # 'refresh': str(refresh),
+                        'token': str(refresh.access_token),
+                        'message': 'Logged in successfully.','user': user_data1
+                    })
+        
+        # try:
+            
+            
+        #     if serializer.is_valid():
+        #         password = serializer.data['password']
+        #         cus = Customer.objects.get(mobile=password)
+        #         username = cus.admin.username
+        #         print("usernameee",username)
+
+        #         user = authenticate(password=password,username=username)
+        #         if user is None:
+        #             return Response({
+        #             'status':400,
+        #             'message':'Invalid Password',
+        #             'data':{}
+        #             })
+        #         refresh = RefreshToken.for_user(user)
+
+        #         return Response({
+        #             'refresh': str(refresh),
+        #             'access': str(refresh.access_token),
+        #         })
+
+        #     return Response({
+        #         'status':400,
+        #         'message':'something went wrong',
+        #         'data':serializer.errors
+        #     })
+        # except Exception as e:
+        #     print(e)
+
+class addonsDelete(APIView):
+    def delete(self, request):
+        data = request.data
+        serializer = AddonsDeleteSerailizers(data=data)
+        if serializer.is_valid():
+            try:
+                id = serializer.data['id']
+                addon = Addon.objects.get(id=id)
+                addon.delete()
+                return Response({
+                    'message': "Addons Delete Successfully"
+                })
+            except Addon.DoesNotExist:
+                return Response({
+                    'message': "Addon not found"
+                })
+        return Response({
+            'message': "Invalid Id"
+        })     
+
+
+class ApplicantCarrerViewSet(ModelViewSet):
+    queryset = ApplicantCarrer.objects.all()     
+    serializer_class  = ApplicantCarrerSerliazer
+
+
+
+class CarrerViewedGetViewSet(ReadOnlyModelViewSet):
+    queryset = Carrer.objects.filter(status = True)
+    serializer_class = CarrerSerliazer    
+
+
+
+# ------------------------- Lega Page ----------------------- 
+class LegalPageViewSet(ReadOnlyModelViewSet):
+    queryset = LegalPage.objects.all()
+    serializer_class = LegalPageSerializer    
+
+
+
+# ------------------- generate PDF ------------------     
+@api_view(['GET'])
+def generate_invoice_pdf(request):
+    category_objs = Category.objects.all()
+    params = {
+        # 'today':datetime
+        'category_objs':category_objs
+    }
+    file_name,status= save_pdf(params)
+    if not status:
+        return Response({
+       'status':400
+    })
+
+    # file_path = f'/static/invoice/{file_name}'
+    # print("file path",file_path)
+
+    
+    return Response({
+       'status':200,
+       'path':f'/media/{file_name}'
+    })

@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -23,7 +23,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Par
 from django.conf import settings
 from decimal import Decimal
 from django.db.models import Sum
-
+from reportlab.lib.styles import getSampleStyleSheet
 # def all_location(request):
 #     all_location = AllTechnicianLocation.objects.all()
    
@@ -276,7 +276,6 @@ def subcategory(request):
     }
     
     return render(request,'homofix_app/AdminDashboard/Subcategory/sub_category.html',context)
-
 def edit_subcategory(request):
     if request.method == "POST":
         category_id = request.POST.get('category_id')
@@ -1885,13 +1884,13 @@ def admin_rebooking_update(request):
 
 
 def contactus(request):
-    contact_us = ContactUs.objects.all()
+    carrer = Carrer.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
     context = {
-        'contact_us':contact_us,
+        'carrer':carrer,
         'new_expert_count':new_expert_count,
         'booking_count':booking_count,
         'rebooking_count':rebooking_count,
@@ -1899,8 +1898,67 @@ def contactus(request):
         
     }
 
+    if request.method == "POST":
+        career_title = request.POST.get('career_title')
+        carrer_desc = request.POST.get('carrer_desc')
+        carer = Carrer.objects.create(title = career_title,description=carrer_desc)
+        carer.save()
+        messages.success(request,'Carrer Add Successfully')
+        return redirect('contact_us')
+
     return render(request,'homofix_app/AdminDashboard/Contactus/contact_us.html',context)
 
+
+
+def carrer_update_Save(request):
+    if request.method == "POST":
+        
+        carrer_id = request.POST.get('carrer_id')
+        career_title = request.POST.get('career_title')
+        carrer_desc = request.POST.get('carrer_desc')
+        career_status = request.POST.get('career_status')
+        print("ssss",career_status)
+
+        
+        carrer = Carrer.objects.get(id=carrer_id)
+        carrer.title = career_title
+        carrer.description = carrer_desc
+        carrer.status = career_status
+
+
+        # if career_status == "Open":
+        #     career_status = True
+        #     carrer.status = career_status
+        #     print("cccc",career_status)
+
+        # elif career_status == "Close":
+        #     career_status = False
+        #     print("statusss",career_status)
+        #     carrer.status = career_status
+        carrer.save()   
+            
+        # else:
+            
+        messages.success(request,'Carrer Updated Successfully')
+        return redirect('contact_us')
+
+
+def applicant_carrer(request,id):
+    applicant_Carrer = ApplicantCarrer.objects.filter(carrer_id=id)
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    context = {
+        'applicant_Carrer':applicant_Carrer,
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+        
+    }
+
+    return render(request,'homofix_app/AdminDashboard/Contactus/applicant_carrer.html',context)
 def admin_job_enquiry(request):
     job_enquiry = JobEnquiry.objects.all()
     new_expert_count = Technician.objects.filter(status="New").count()
@@ -2407,7 +2465,7 @@ def ViewPDF(request,booking_id):
     # Add the title to the document
     para_style2 = ParagraphStyle(
     'title',
-    fontSize=18,
+    fontSize=15,
     leading=20,
     alignment=TA_CENTER,  # align text to the left
     textColor=colors.black,
@@ -2423,13 +2481,15 @@ def ViewPDF(request,booking_id):
     addon_title.spaceBefore = 0  # set spaceBefore to zero
      # Create the table for bill to information
     bookingid=Booking.objects.get(id=booking_id)
-   
+    styles = getSampleStyleSheet()
+    address_lines = bookingid.customer.address.split('\n')
     bill_to_data = [    ['Bill To:', bookingid.customer.admin.first_name],
-        ['Address:', bookingid.customer.address],     
+        ['Address:', Paragraph(bookingid.customer.address, styles['Normal'])],
         ['Mobile:', f'+91{bookingid.customer.mobile}' ],
         ['Email:', bookingid.customer.admin.email],
     ]
-    bill_to_table = Table(bill_to_data, colWidths=[150, None], hAlign='LEFT')
+    
+    bill_to_table = Table(bill_to_data, hAlign='LEFT')
     
 
 
@@ -2524,10 +2584,10 @@ def ViewPDF(request,booking_id):
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         # ('LINEBELOW', (0, 0), (-1, -1), 0.25, colors.black),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        # ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        # ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
         # ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
@@ -2541,7 +2601,7 @@ def ViewPDF(request,booking_id):
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         # ('LINEBELOW', (0, 0), (-1, -1), 0.25, colors.black),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        # ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 14),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
@@ -2584,7 +2644,7 @@ def ViewPDF(request,booking_id):
     total_price = total_price = booking.total_amount
     print("ttoaalll",total_price)
     gst = int(total_price * 18)/100
-    total = total_price+gst
+    total = total_price + Decimal(str(gst))
     # print("gsstttt",gst)
 
     invoice_totals_data = [    ['Subtotal:', f'{total_price:.2f}'],
@@ -2815,3 +2875,106 @@ def update_Save_homepageservice(request):
         return redirect('homepageservice_view_list')
 
 
+# ----------------------------------- PAGE LEGAL ----------------- 
+
+def page_legal_list(request):
+    pagelegal = LegalPage.objects.all()
+    entry_count = LegalPage.objects.count()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    booking_complete = Booking.objects.filter(status = "Completed").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    context = {
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'booking_complete':booking_complete,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+        'pagelegal':pagelegal,
+        'entry_count': entry_count,
+    }
+    return render(request, 'homofix_app/AdminDashboard/PageLegal/page_legal_list.html', context)
+
+def add_page_legal(request):
+
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    booking_complete = Booking.objects.filter(status = "Completed").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    if request.method == "POST":
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        legal_page = LegalPage.objects.create(title=title,content=content)
+        legal_page.save()
+        messages.success(request,'Legal Page Add Successfully')
+        return redirect('page_legal_list')
+
+    context = {
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'booking_complete':booking_complete,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+        
+    }
+
+    return render(request, 'homofix_app/AdminDashboard/PageLegal/add_page_legal.html', context)
+
+
+def edit_page_legal(request,id):
+    legalpage = LegalPage.objects.get(id=id)
+    new_expert_count = Technician.objects.filter(status="New").count()
+    booking_count = Booking.objects.filter(status = "New").count()
+    booking_complete = Booking.objects.filter(status = "Completed").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+
+    context = {
+        'new_expert_count':new_expert_count,
+        'booking_count':booking_count,
+        'booking_complete':booking_complete,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+        'legalpage':legalpage,
+        
+    }
+
+    return render(request, 'homofix_app/AdminDashboard/PageLegal/edit_page_legal.html', context)
+
+
+def update_page_legal_save(request):
+    if request.method == "POST":
+        print("ehlooooo")
+        legal_page_id = request.POST.get('legalpage_id')    
+        title = request.POST.get('title')    
+        content = request.POST.get('content')    
+
+        legalpage = LegalPage.objects.get(id=legal_page_id)
+        legalpage.title = title
+        legalpage.content = content
+        legalpage.save()
+
+        print("id",legal_page_id,"title",title,'content',content)
+        messages.success(request,'Page Legal Updtaed Successfully')
+        return redirect('page_legal_list')
+
+
+
+
+
+def test(request):
+    category = Category.objects.all()
+    new_expert_count = Technician.objects.filter(status="New").count()
+    rebooking_count = Rebooking.objects.all().count()
+    customer_count = Customer.objects.all().count()
+    context= {
+        'category':category,
+        'new_expert_count':new_expert_count,
+        'rebooking_count':rebooking_count,
+        'customer_count':customer_count,
+    }
+    # return render(request,'homofix_app/AdminDashboard/Category/category.html',{'category':category,'new_expert_count':new_expert_count,'rebooking_count':rebooking_count,'customer_count':customer_count})
+
+    return render(request,'test.html',context)

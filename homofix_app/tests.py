@@ -9,11 +9,11 @@ username = "TRYGON"
 apikey = "E705A-DFEDC"
 apirequest="Text"
 sender ="TRYGON"
-mobile="9973884727"
+mobile="9310140032"
 message="Dear armaan 123485 is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
 TemplateID="1707162192151162124"
 # url = f"http://message.trygon.in/sms-panel/api/http/index.php?username={username}&apikey={apikey}&apirequest={apirequest}&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
-url = f"https://sms.webtextsolution.com/sms-panel/api/http/index.php?username=TRYGON&apikey=E705A-DFEDC&apirequest=Text&sender=SenderID&mobile={mobile}&message={urllib.parse.quote(message)}&route=RouteName&TemplateID=DLT-Template-ID&format=JSON"
+url = f"https://sms.webtextsolution.com/sms-panel/api/http/index.php?username=TRYGON&apikey=E705A-DFEDC&apirequest=Text&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
 
 response = requests.get(url)
 print("ddddddddd",response)

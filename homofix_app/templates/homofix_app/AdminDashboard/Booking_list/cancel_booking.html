@@ -62,15 +62,15 @@
                             </td>
                             {% comment %} <td>{{booking.product.category.category_name}}</td> {% endcomment %}
                             <td>
-                                 {% if booking.bookingproduct_set.exists %}
-                                    {{ booking.bookingproduct_set.first.product.subcategory.Category_id.category_name }}
+                                 {% if booking.booking_product.exists %}
+                                    {{ booking.booking_product.first.product.subcategory.Category_id.category_name }}
                                     {% else %}
                                         N/A
                                 {% endif %}
                             </td>
                             <td>
-                                 {% if booking.bookingproduct_set.exists %}
-                                    {{ booking.bookingproduct_set.first.product.subcategory.name }}
+                                 {% if booking.booking_product.exists %}
+                                    {{ booking.booking_product.first.product.subcategory.name }}
                                     {% else %}
                                         N/A
                                 {% endif %}
@@ -79,7 +79,7 @@
                                 <div class="d-flex align-items-center">
                                     <div class="ms-2">
                                         {% comment %} <h6 class="mb-1 font-14">{{booking.product.name}}</h6> {% endcomment %}
-                                        {% for booking_product in booking.bookingproduct_set.all %}
+                                        {% for booking_product in booking.booking_product.all %}
                                         <h6 class="mb-1 nowrap font-14">{{ booking_product.product.name }} ({{ booking_product.quantity }})</h6>
                                         {% endfor %}
                                     </div>
@@ -97,8 +97,8 @@
                             </td>
                             {% comment %} <td>Rs{{booking.product.price}}</td> {% endcomment %}
                             <td>
-                                {% if booking.bookingproduct_set.exists %}
-                                    Rs {{ booking.bookingproduct_set.first.total_price }}
+                                {% if booking.booking_product.exists %}
+                                    Rs {{ booking.booking_product.first.total_price }}
                                 {% else %}
                                     N/A
                                 {% endif %} 

@@ -292,6 +292,95 @@ class Coupon(models.Model):
     def __str__(self):
         return self.code
 
+# class Booking(models.Model):
+#     STATUS_CHOICES = (
+#         ('New', 'New'),
+#         ('Inprocess', 'Inprocess'),
+#         ('Cancelled', 'Cancelled'),
+#         ('Completed', 'Completed'),
+#         ('Reached', 'Reached'),
+#         ('Assign', 'Assign'),
+#         ('Proceed', 'Proceed'),
+#     )
+
+#     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+#     products = models.ManyToManyField(Product, related_name='bookings', through='BookingProduct')
+#     booking_date = models.DateTimeField()
+#     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
+#     admin_by = models.ForeignKey(AdminHOD, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_admin_by')
+#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
+#     description = models.TextField(null=True,blank=True) 
+#     order_id = models.CharField(max_length=9, unique=True, null=True, blank=True)
+#     cash_on_service = models.BooleanField(default=False,null=True,blank=True)
+#     online = models.BooleanField(default=True,null=True,blank=True)
+#     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_used_coupon')
+
+
+
+#     def save(self, *args, **kwargs):
+#         if not self.order_id:
+#             today = datetime.datetime.now()
+#             year_month = today.strftime('%Y%m')
+#             last_order = Booking.objects.filter(order_id__startswith=year_month).order_by('-id').first()
+#             if last_order:
+#                 last_id = int(last_order.order_id[-2:])
+#             else:
+#                 last_id = 0
+#             new_id = last_id + 1
+#             self.order_id = f'{year_month}{new_id:02}'
+#         super().save(*args, **kwargs)
+
+
+
+
+#     @property
+#     def total_amount(self):
+#         # booking_products_prefetch = Prefetch('bookingproduct_set',
+#                                             #  queryset=BookingProduct.objects.select_related('product'))
+#         booking_products_prefetch = Prefetch('bookingproduct_set', queryset=BookingProduct.objects.select_related('product'))
+
+
+                                            
+        
+#         addons_prefetch = Prefetch('bookingproduct_set__addon_set',
+#                            queryset=Addon.objects.select_related('spare_parts_id'))
+#         booking = Booking.objects.prefetch_related(booking_products_prefetch, addons_prefetch)\
+#                                  .get(id=self.id)
+#         # total = sum(booking_product.quantity * booking_product.product.price for booking_product in booking.bookingproduct_set.all())
+#         total = sum(booking_product.quantity * 
+#             (booking_product.product.selling_price or booking_product.product.price) 
+#             for booking_product in booking.bookingproduct_set.all())
+
+#         total += sum(addon.quantity * addon.spare_parts_id.price for booking_product in booking.bookingproduct_set.all() for addon in booking_product.addon_set.all())
+#         # tax_rate = 0.18  # replace with your actual tax rate
+#         # total_with_tax = total + (total * tax_rate)
+#         # return round(total_with_tax, 2)
+#         if self.coupon:
+#             total -= self.coupon.discount_amount
+#         return total
+
+#     @property
+#     def tax_amount(self):
+#         tax_rate = Decimal('0.18')  # replace with your actual tax rate
+#         return round(self.total_amount * tax_rate, 2)
+
+#     @property
+#     def total_addons(self):
+#         addons_prefetch = Prefetch('bookingproduct_set__addon_set',
+#                                    queryset=Addon.objects.select_related('spare_parts_id'))
+#         booking = Booking.objects.prefetch_related(addons_prefetch).get(id=self.id)
+#         total = sum(addon.quantity * addon.spare_parts_id.price 
+#                     for booking_product in booking.bookingproduct_set.all() 
+#                     for addon in booking_product.addon_set.all())
+#         return total
+    
+#     @property
+#     def subtotal(self):
+#         subtl = self.total_amount - self.total_addons
+
+#         return subtl
+
+    
 class Booking(models.Model):
     STATUS_CHOICES = (
         ('New', 'New'),
@@ -304,18 +393,16 @@ class Booking(models.Model):
     )
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product, related_name='bookings', through='BookingProduct')
+    products = models.ManyToManyField(Product, related_name='booking_products', through='BookingProduct')
     booking_date = models.DateTimeField()
     supported_by = models.ForeignKey(Support, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_supported_by')
     admin_by = models.ForeignKey(AdminHOD, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_admin_by')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
-    description = models.TextField(null=True,blank=True) 
+    description = models.TextField(null=True, blank=True) 
     order_id = models.CharField(max_length=9, unique=True, null=True, blank=True)
-    cash_on_service = models.BooleanField(default=False,null=True,blank=True)
-    online = models.BooleanField(default=True,null=True,blank=True)
+    cash_on_service = models.BooleanField(default=False, null=True, blank=True)
+    online = models.BooleanField(default=True, null=True, blank=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_used_coupon')
-
-
 
     def save(self, *args, **kwargs):
         if not self.order_id:
@@ -330,28 +417,16 @@ class Booking(models.Model):
             self.order_id = f'{year_month}{new_id:02}'
         super().save(*args, **kwargs)
 
-
-
-
     @property
     def total_amount(self):
-        booking_products_prefetch = Prefetch('bookingproduct_set',
-                                             queryset=BookingProduct.objects.select_related('product'))
-        # addons_prefetch = Prefetch('bookingproduct_set__addon_set',
-        #                            queryset=Addon.objects.select_related('addon_products'))
-        addons_prefetch = Prefetch('bookingproduct_set__addon_set',
-                           queryset=Addon.objects.select_related('spare_parts_id'))
-        booking = Booking.objects.prefetch_related(booking_products_prefetch, addons_prefetch)\
-                                 .get(id=self.id)
-        # total = sum(booking_product.quantity * booking_product.product.price for booking_product in booking.bookingproduct_set.all())
-        total = sum(booking_product.quantity * 
-            (booking_product.product.selling_price or booking_product.product.price) 
-            for booking_product in booking.bookingproduct_set.all())
-
-        total += sum(addon.quantity * addon.spare_parts_id.price for booking_product in booking.bookingproduct_set.all() for addon in booking_product.addon_set.all())
-        # tax_rate = 0.18  # replace with your actual tax rate
-        # total_with_tax = total + (total * tax_rate)
-        # return round(total_with_tax, 2)
+        booking_products_prefetch = Prefetch('booking_product', queryset=BookingProduct.objects.select_related('product'))
+        addons_prefetch = Prefetch('booking_product__addon_set', queryset=Addon.objects.select_related('spare_parts_id'))
+        booking = Booking.objects.prefetch_related(booking_products_prefetch, addons_prefetch).get(id=self.id)
+        total = sum(booking_product.quantity * (booking_product.product.selling_price or booking_product.product.price) 
+                    for booking_product in booking.booking_product.all())
+        total += sum(addon.quantity * addon.spare_parts_id.price 
+                     for booking_product in booking.booking_product.all() 
+                     for addon in booking_product.addon_set.all())
         if self.coupon:
             total -= self.coupon.discount_amount
         return total
@@ -363,41 +438,46 @@ class Booking(models.Model):
 
     @property
     def total_addons(self):
-        addons_prefetch = Prefetch('bookingproduct_set__addon_set',
-                                   queryset=Addon.objects.select_related('spare_parts_id'))
+        addons_prefetch = Prefetch('booking_product__addon_set', queryset=Addon.objects.select_related('spare_parts_id'))
         booking = Booking.objects.prefetch_related(addons_prefetch).get(id=self.id)
         total = sum(addon.quantity * addon.spare_parts_id.price 
-                    for booking_product in booking.bookingproduct_set.all() 
+                    for booking_product in booking.booking_product.all() 
                     for addon in booking_product.addon_set.all())
         return total
-    
+
     @property
     def subtotal(self):
-        subtl = self.total_amount - self.total_addons
-
-        return subtl
-
-    
+        subtotal = self.total_amount - self.total_addons
+        return subtotal
 
 
 class BookingProduct(models.Model):
     
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    # booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='booking_product')
+
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)  
     total_price = models.IntegerField()
     total_price_with_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
 
+    # def save(self, *args, **kwargs):
+    #     # Calculate the total price with tax
+    #     total_price_with_tax = self.total_price * Decimal('1.18')
+    #     # Set the total price with tax for this booking product
+    #     self.total_price_with_tax = total_price_with_tax
+    #     super(BookingProduct, self).save(*args, **kwargs)
+
     def save(self, *args, **kwargs):
         # Calculate the total price with tax
         total_price_with_tax = self.total_price * Decimal('1.18')
         # Set the total price with tax for this booking product
         self.total_price_with_tax = total_price_with_tax
-        super(BookingProduct, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.product.name
+    # def __str__(self):
+    #     return self.product.name
     
     # def total_price(self):
     #     return self.quantity * self.price
@@ -606,12 +686,28 @@ class ContactUs(models.Model):
     def __str__(self):
         return self.name
 
+class Carrer(models.Model):
+    title = models.CharField(max_length=100)
+    description = RichTextField()
+    status = models.BooleanField(default=True)
 
-class JobEnquiry(models.Model):
-    name = models.CharField(max_length=50)    
+class ApplicantCarrer(models.Model):
+    carrer_id = models.ForeignKey(Carrer,on_delete=models.CASCADE)    
+    name = models.CharField(max_length=100)
     mobile = models.CharField(max_length=20)
     email = models.EmailField(max_length=100)
     resume = models.FileField(upload_to='Job/Job Enquiry Form',null=True,blank=True)
+    date = models.DateField(auto_now_add=True)
+
+
+    
+class JobEnquiry(models.Model):
+    resume = models.FileField(upload_to='Job/Job Enquiry Form',null=True,blank=True)
+    name = models.CharField(max_length=50)    
+    mobile = models.CharField(max_length=20)
+    email = models.EmailField(max_length=100)
+    expert_in = models.CharField(max_length=100)
+    full_address = models.TextField()
     date = models.DateField(auto_now_add=True)
 
     def __str__(self):
@@ -730,7 +826,11 @@ class HomePageService(models.Model):
     
 
     
+class LegalPage(models.Model):
+    title = models.CharField(max_length=100)
+    content = RichTextField()
 
+    
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):
     if created:

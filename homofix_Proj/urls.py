@@ -5,6 +5,8 @@ from rest_framework.routers import DefaultRouter
 from homofix_app import API_Views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
+from django.urls import re_path
 
 router = DefaultRouter()
 router.register('Expert', API_Views.ExpertViewSet,basename="Expert")
@@ -29,6 +31,11 @@ router.register('Customer/Booking/Details', API_Views.CustomerBookingViewSet, ba
 router.register('Feedback', API_Views.FeedbackViewSet, basename='feedback')
 router.register('Offer', API_Views.OfferGetViewSet, basename='offer')
 router.register('HomePageService', API_Views.HomePageServiceViewSet, basename='HomePageService')
+router.register('Carrer-Get', API_Views.CarrerViewedGetViewSet, basename='carrer-get')
+router.register('ApplicantCarrer', API_Views.ApplicantCarrerViewSet, basename='carrer')
+router.register('Bking', API_Views.BkingViewSet, basename='booking')
+router.register('booking-products', API_Views.BkingProductViewSet, basename='booking-products')
+router.register('Legal-Page-Get', API_Views.LegalPageViewSet, basename='Legal-Page')
 
 
 # router.register('ExpertTaskCounting', API_Views.ExpertTaskCountViewSet, basename='ExpertTaskCounting')
@@ -37,6 +44,8 @@ router.register('HomePageService', API_Views.HomePageServiceViewSet, basename='H
 
 from homofix_app import views
 urlpatterns = [
+    re_path('media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path('static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
     path("",include('homofix_app.urls')),
     path("Support/",include('homofix_app.support_urls')),
@@ -44,6 +53,7 @@ urlpatterns = [
 
     path('api/Login/',API_Views.LoginViewSet.as_view(),name="api_login"),
     path('api/create_booking/',API_Views.create_booking,name="create_booking"),
+    path('api/create_booking/manually',API_Views.create_booking_manually,name="create_booking_manually"),
     path('Demo/api/Login/',API_Views.LoginAPI.as_view(),name="demo_login"),
     path('api/Send/Otp/',API_Views.CustomerLoginViewSet.as_view(),name="api_customer_login"),
     path('api/Verify/otp/',API_Views.CustomerVerifyOtp.as_view(),name="verify_otp"),
@@ -57,6 +67,10 @@ urlpatterns = [
     path('api/Withdraw/Request/Post/',API_Views.post_withdraw_req,name="post_withdraw_req"),
     path('api/Withdraw/Request/Get/',API_Views.get_Withdraw_Req,name="get_Withdraw_Req"),
     path('api/Task/Counting/Get/',API_Views.ExpertTaskCountViewSet,name="get_task_counting"),
+    path('api/CustomerLogin/',API_Views.CustomerLogin.as_view(),name="CustomerLogin"),
+    path('api/Addons/Delete',API_Views.addonsDelete.as_view(),name="addons_delete"),
+    path('api/Invoice/',API_Views.generate_invoice_pdf,name="invoice"),
+    
     # path("404",views.Error404,name="404"),
     # path('api/Expert/AllLocation',API_Views.create_or_update_all_technician_location,name="create_or_update_all_technician_location")
     # path("api/hompageservice/",API_Views.homepgservice,name="homepageserv"),

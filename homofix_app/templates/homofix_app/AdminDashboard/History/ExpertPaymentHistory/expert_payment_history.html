@@ -149,7 +149,7 @@
         <div class="card-body">
             
             <div class="table-responsive">
-                <table id="example2" class="table table-striped">
+                <table id="example" class="table table-striped">
                     <thead>
                         <tr>
                             <th>#Order</th>
@@ -175,21 +175,21 @@
                         <tr>
                             <td>{{i.task.booking.order_id}}</td>
                             <td>
-                                {% if i.task.booking.bookingproduct_set.exists %}
-                                {{ i.task.booking.bookingproduct_set.first.product.subcategory.Category_id.category_name }}
+                                {% if i.task.booking.booking_product.exists %}
+                                {{ i.task.booking.booking_product.first.product.subcategory.Category_id.category_name }}
                             {% else %}
                                 N/A
                             {% endif %} 
                             </td>
                             <td>
-                                {% if i.task.booking.bookingproduct_set.exists %}
-                                {{ i.task.booking.bookingproduct_set.first.product.subcategory.name }}
+                                {% if i.task.booking.booking_product.exists %}
+                                {{ i.task.booking.booking_product.first.product.subcategory.name }}
                             {% else %}
                                 N/A
                             {% endif %} 
                             </td>
                             <td>
-                                {% for booking_product in i.task.booking.bookingproduct_set.all %}
+                                {% for booking_product in i.task.booking.booking_product.all %}
                                         <h6 class="mb-1 nowrap font-14">{{ booking_product.product.name }} ({{ booking_product.quantity }})</h6>
                                         {% endfor %}
                             </td>
@@ -197,15 +197,15 @@
                            
                             <td>{{i.task.technician.mobile}}</td>
                             <td>
-                                {% if i.task.booking.bookingproduct_set.exists %}
-                                    {{ i.task.booking.bookingproduct_set.first.total_price }}
+                                {% if i.task.booking.booking_product.exists %}
+                                    {{ i.task.booking.booking_product.first.total_price }}
                                 {% else %}
                                     N/A
                                 {% endif %} 
                             </td>
                             <td>
-                                {% if i.task.booking.bookingproduct_set.exists %}
-                                {{ i.task.booking.bookingproduct_set.first.total_price_with_tax }}
+                                {% if i.task.booking.booking_product.exists %}
+                                {{ i.task.booking.booking_product.first.total_price_with_tax }}
                             {% else %}
                                 N/A
                             {% endif %} 

@@ -16,8 +16,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-MEDIA_ROOT=BASE_DIR / 'media'
 
 # Application definition
 
@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'rest_framework',
     'rest_framework_simplejwt',
+    "corsheaders",
     'homofix_app',
     
     
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+     "corsheaders.middleware.CorsMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -142,11 +144,29 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = 'staticfiles'
+STATIC_URL = '/static/'
+STATIC_URL = '/static/'
+STATIC_ROOT=os.path.join(BASE_DIR,'staticfiles')
+
+# STATIC_URL = 'static/'
+# STATIC_ROOT = os.path.join(BASE_DIR,'static/')
+
+
+
+
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR,'static/invoice')
+    
+   
     
 ]
+
+MEDIA_ROOT =os.path.join(BASE_DIR,'media/Invoice')
+MEDIA_URL='/media/'
+# MEDIA_URL="/media/"
+# MEDIA_ROOT=os.path.join(BASE_DIR,"media")
 
 
 # Default primary key field type
@@ -197,3 +217,11 @@ EMAIL_USE_SSL = True
 PASSWORD_RESET_URL = 'password_reset/'
 DEFAULT_FROM_EMAIL = 'info@homofixcompany.com'
 
+
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    # 'http://192.168.0.100:3000/',
+    # 'https://support.homofixcompany.com/api/Verify/otp/'
+] 
