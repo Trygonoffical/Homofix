@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 from homofix_app import views
 from django.views.static import serve
 from django.urls import re_path
-
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     re_path('media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path('static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
@@ -197,7 +197,7 @@ urlpatterns = [
     path('Accounts/Admin/HomePageService/Edit/<int:id>', HodViews.edit_homepage_service, name='edit_homepage_service'),
     path('Accounts/Admin/HomePageService/Update/Save', HodViews.update_Save_homepageservice, name='update_Save_homepageservice'),
     # ------------------------------------ Invoice ------------------------------ 
-
+    path("testing",HodViews.testing,name="testing"),
 
     path('Accounts/Admin/Booking/Invoice/<int:booking_id>', HodViews.ViewPDF, name="admin_pdf_view"),
 
@@ -215,4 +215,6 @@ if settings.DEBUG:
 
 
 
-   
+
+
+urlpatterns += staticfiles_urlpatterns()       

@@ -456,27 +456,37 @@ class MostViewedSerializer(serializers.ModelSerializer):
 
 
 # ----------------------------- Category ------------------- 
-
+class SubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'subcategory_image', 'name']    
 
 class CategorySerializer(serializers.ModelSerializer):
-    
+    subcategories = SubCategorySerializer(source='subcategory_set', many=True)
+   
     
     class Meta:
         model = Category
-        fields = ['id','icon','category_name']
+        fields = ['id','icon','category_name','subcategories']
 
 
 
 # ----------------------------- Sub-Category ------------------- 
 
+class ProductfilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+    
+        fields = ['id', 'product_pic', 'product_title','name','description','warranty','price','dis_amt','selling_price']    
 
 
 class SubcategorySerializer(serializers.ModelSerializer):
     Category_name = serializers.CharField(source='Category_id.category_name', read_only=True)    
+    products = ProductfilterSerializer(source='product_set', many=True)
 
     class Meta:
         model = SubCategory
-        fields = ['id','subcategory_image','name','Category_id','Category_name']
+        fields = ['id','subcategory_image','name','Category_id','Category_name','products']
 
 
 # ------------------------- Reebooking -------------------------         

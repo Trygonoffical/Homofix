@@ -2978,3 +2978,8 @@ def test(request):
     # return render(request,'homofix_app/AdminDashboard/Category/category.html',{'category':category,'new_expert_count':new_expert_count,'rebooking_count':rebooking_count,'customer_count':customer_count})
 
     return render(request,'test.html',context)
+
+
+
+def testing(request):
+    return render(request,'test.html')    

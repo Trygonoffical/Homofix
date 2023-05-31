@@ -5,10 +5,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .testing {
+            border: 1px solid black;
+            
+            {% comment %} display: flex; {% endcomment %}
+        }
+        {% comment %} .testing div:first-child {
+            flex: 1;
+        } {% endcomment %}
+    </style>
 </head>
 <body>
-    {% for i in category %}
-    {{i.category_name}}
-    {% endfor %}
+    <center><h1>Invoice</h1></center>
+    <img src="F:\Homofix\v87\media\LOGO2.jpeg" alt="" height="100px">
+
+    
+    <div class="testing " style="diplay:flex ;  flex-direction: row; flex-wrap: wrap; ">
+        <div style="border:1px solid red; display:inline; width:250px" >
+            
+            <h1>Billing Details</h1>
+        </div>
+        <div  style="border:1px solid red; display:inline; width:250px">
+            
+            <h1>Invoice Details</h1>
+        </div>
+
+        {% comment %} <div style="display: inline-block; width:500px !important"><span>dd</span></div> {% endcomment %}
+    </div>
+    
+    
+    
+    
 </body>
 </html>

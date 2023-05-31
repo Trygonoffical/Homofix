@@ -273,7 +273,6 @@ class Product(models.Model):
         return self.name
     
 
-  
 
 class FAQ(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='faqs')
@@ -291,6 +290,8 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.code
+
+
 
 # class Booking(models.Model):
 #     STATUS_CHOICES = (
@@ -705,7 +706,7 @@ class JobEnquiry(models.Model):
     resume = models.FileField(upload_to='Job/Job Enquiry Form',null=True,blank=True)
     name = models.CharField(max_length=50)    
     mobile = models.CharField(max_length=20)
-    email = models.EmailField(max_length=100)
+    email = models.EmailField(max_length=100,null=True,blank=True)
     expert_in = models.CharField(max_length=100)
     full_address = models.TextField()
     date = models.DateField(auto_now_add=True)

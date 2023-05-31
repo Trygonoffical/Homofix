@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve
 from django.urls import re_path
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 router = DefaultRouter()
 router.register('Expert', API_Views.ExpertViewSet,basename="Expert")
@@ -44,6 +45,7 @@ router.register('Legal-Page-Get', API_Views.LegalPageViewSet, basename='Legal-Pa
 
 from homofix_app import views
 urlpatterns = [
+    
     re_path('media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path('static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
@@ -85,3 +87,6 @@ handler404 = 'homofix_app.views.Error404'
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+urlpatterns += staticfiles_urlpatterns()    

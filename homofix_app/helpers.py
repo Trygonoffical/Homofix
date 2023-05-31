@@ -8,11 +8,14 @@ from django.conf import settings
 def save_pdf(params: dict):
     template = get_template("test.html")
     html = template.render(params)
-    file_name = f"{uuid.uuid4()}.pdf"
-    print("sssss",file_name)
+    response = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode('UTF-8')),response)
+    # file_name = f"{uuid.uuid4()}.pdf"
+    file_name = uuid.uuid4()
+    # print("sssss",file_name)
 
     try:
-        with open(str(settings.BASE_DIR) + f'/media/Invoice/{file_name}.pdf', 'wb') as output:
+        with open(str(settings.BASE_DIR) + f'/media/{file_name}.pdf', 'wb+') as output:
             pdf = pisa.pisaDocument(BytesIO(html.encode('UTF-8')), output)
 
         if pdf.err:
@@ -20,6 +23,8 @@ def save_pdf(params: dict):
 
     except Exception as e:
         print(e)
-        return '', False
+        
+    if pdf.err:
+        return '',False
 
     return file_name, True

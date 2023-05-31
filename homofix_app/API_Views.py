@@ -475,7 +475,7 @@ class JobEnquiryViewSet(ModelViewSet):
      
 
 
-class ProductViewSet(ModelViewSet):
+class ProductViewSet(ReadOnlyModelViewSet):
     queryset = Product.objects.all()     
     serializer_class  = ProductSerializer
      
@@ -807,9 +807,6 @@ class OfferGetViewSet(ReadOnlyModelViewSet):
         
         serializer = self.get_serializer(offer)
         return Response(serializer.data)
-
-
-
 
 
 
@@ -1497,6 +1494,7 @@ class LegalPageViewSet(ReadOnlyModelViewSet):
 # ------------------- generate PDF ------------------     
 @api_view(['GET'])
 def generate_invoice_pdf(request):
+    print("helloooo")
     category_objs = Category.objects.all()
     params = {
         # 'today':datetime
@@ -1514,5 +1512,5 @@ def generate_invoice_pdf(request):
     
     return Response({
        'status':200,
-       'path':f'/media/{file_name}'
+       'path':f'/media/{file_name}.pdf'
     })
