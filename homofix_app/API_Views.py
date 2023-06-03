@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet,ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view,authentication_classes, permission_classes
-from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage
+from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage,FAQ
 from decimal import Decimal
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
@@ -29,6 +29,9 @@ from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 import pdfkit
 from .helpers import save_pdf
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import NotFound
+
 
 class LoginViewSet(CreateAPIView):
     authentication_classes = [BasicAuthentication]
@@ -127,7 +130,8 @@ class TaskViewSet(ModelViewSet):
                     technician_share = booking_amount-hod_share
                     print("technicia sare",technician_share)
                     
-                    hod_share_with_tax = hod_share + tax_amt
+                    # hod_share_with_tax = hod_share + tax_amt
+                    hod_share_with_tax = Decimal(str(hod_share)) + tax_amt
                     print("hod_share_with_tax",hod_share_with_tax)
                    
                     # technician_share = booking_amount - hod_share
@@ -478,13 +482,21 @@ class JobEnquiryViewSet(ModelViewSet):
 class ProductViewSet(ReadOnlyModelViewSet):
     queryset = Product.objects.all()     
     serializer_class  = ProductSerializer
-     
+    
 
 
-class SparePartsViewSet(ModelViewSet):
-    queryset = SpareParts.objects.all()     
+class SparePartsViewSet(ReadOnlyModelViewSet):
+    # queryset = SpareParts.objects.all()     
     serializer_class  = SparePartsSerializer
-     
+    def get_queryset(self):
+        product_id = self.request.data.get('product_id')
+        queryset = SpareParts.objects.all()
+
+        if product_id:
+            product = get_object_or_404(Product, pk=product_id)
+            queryset = queryset.filter(product=product)
+
+        return queryset
 
 class AddonsViewSet(ModelViewSet):
     queryset = Addon.objects.all()     
@@ -1289,13 +1301,16 @@ class CategoryGetViewSet(ReadOnlyModelViewSet):
 class SubcategoryGetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubcategorySerializer
+    lookup_field = 'name' 
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        category_id = self.request.query_params.get('Category_id')
-        if category_id is not None:
-            queryset = queryset.filter(Category_id=category_id)
-        return queryset
+    
+    # def get_queryset(self):
+    #     queryset = super().get_queryset()
+    #     subcategory_name  = self.request.query_params.get('name')
+    #     if subcategory_name  is not None:
+    #         queryset = queryset.filter(name=subcategory_name)
+    #     return queryset
+        
 
 class LoginAPI(APIView):
     def post(self,request):
@@ -1514,3 +1529,30 @@ def generate_invoice_pdf(request):
        'status':200,
        'path':f'/media/{file_name}.pdf'
     })
+
+
+
+
+
+# class FAQViewSet(ReadOnlyModelViewSet):
+#     queryset = FAQ.objects.all()     
+#     serializer_class  = faqSerializer
+#     lookup_field = 'product'
+
+
+
+class FAQViewSet(ReadOnlyModelViewSet):
+    queryset = FAQ.objects.all()
+    serializer_class = faqSerializer
+    lookup_field = 'product'
+
+    def retrieve(self, request, *args, **kwargs):
+        product = self.kwargs['product']
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        faqs = queryset.filter(product=product)
+        if not faqs.exists():
+            raise NotFound("No FAQs found for the given product.")
+        
+        serializer = self.get_serializer(faqs, many=True)
+        return Response(serializer.data)

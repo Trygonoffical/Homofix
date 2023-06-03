@@ -37,6 +37,7 @@ router.register('ApplicantCarrer', API_Views.ApplicantCarrerViewSet, basename='c
 router.register('Bking', API_Views.BkingViewSet, basename='booking')
 router.register('booking-products', API_Views.BkingProductViewSet, basename='booking-products')
 router.register('Legal-Page-Get', API_Views.LegalPageViewSet, basename='Legal-Page')
+router.register('Faq-Get', API_Views.FAQViewSet, basename='Faq')
 
 
 # router.register('ExpertTaskCounting', API_Views.ExpertTaskCountViewSet, basename='ExpertTaskCounting')

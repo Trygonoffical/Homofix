@@ -550,8 +550,6 @@ class AllTechnicianLocation(models.Model):
 
 
 
-
-
 class Task(models.Model):
 
     

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService,ApplicantCarrer,Carrer,Coupon,LegalPage
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService,ApplicantCarrer,Carrer,Coupon,LegalPage,FAQ
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -126,6 +126,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
+        # depth = 1
     
 # ----------------------- Rebooking ------------------------
 
@@ -477,7 +478,7 @@ class ProductfilterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
     
-        fields = ['id', 'product_pic', 'product_title','name','description','warranty','price','dis_amt','selling_price']    
+        fields = ['id', 'product_pic', 'product_title','name','description','warranty','warranty_desc','price','dis_amt','selling_price']    
 
 
 class SubcategorySerializer(serializers.ModelSerializer):
@@ -487,6 +488,7 @@ class SubcategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
         fields = ['id','subcategory_image','name','Category_id','Category_name','products']
+        
 
 
 # ------------------------- Reebooking -------------------------         
@@ -705,4 +707,11 @@ class LegalPageSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = LegalPage
+        fields = "__all__"
+
+
+
+class faqSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQ
         fields = "__all__"

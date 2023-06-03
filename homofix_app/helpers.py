@@ -9,7 +9,7 @@ def save_pdf(params: dict):
     template = get_template("test.html")
     html = template.render(params)
     response = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html.encode('UTF-8')),response)
+    pdf = pisa.pisaDocument(BytesIO(html.encode('ISO-8859-1')),response)
     # file_name = f"{uuid.uuid4()}.pdf"
     file_name = uuid.uuid4()
     # print("sssss",file_name)

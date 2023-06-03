@@ -1057,7 +1057,7 @@ def reschedule_booking(request):
 
 def cancel_booking(request,booking_id):
     booking = Booking.objects.get(id=booking_id)
-    booking.status = 'cancelled'
+    booking.status = 'Cancelled'
     booking.save()
     messages.success(request, 'Booking has been cancelled.')
     return redirect('support_orders')    
@@ -1163,7 +1163,7 @@ def order_cancel(request):
     user = request.user
     support = Support.objects.get(admin=user)
     order_count = Booking.objects.filter(status="New").count()
-    booking = Booking.objects.filter(status="cancelled")
+    booking = Booking.objects.filter(status="Cancelled")
     context = {
         'booking':booking,
         'support':support,
