@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet,ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view,authentication_classes, permission_classes
-from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage,FAQ
+from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage,FAQ,Invoice
 from decimal import Decimal
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
@@ -31,6 +31,9 @@ import pdfkit
 from .helpers import save_pdf
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import NotFound
+from django.template.loader import get_template
+from django.template.loader import render_to_string
+from django.core.files.base import ContentFile
 
 
 class LoginViewSet(CreateAPIView):
@@ -142,8 +145,90 @@ class TaskViewSet(ModelViewSet):
                     wallet, created = Wallet.objects.get_or_create(technician_id=technician)
                     wallet.total_share -= Decimal(str(hod_share_with_tax))
                    
-                    wallet.save()
                    
+                    wallet.save()
+                    try:
+
+
+                        booking = Booking.objects.get(id=booking_id)
+                        # tax = booking.tax_amount
+                        subtotal = booking.subtotal
+                        tax = subtotal * 0.18
+                        total = tax+subtotal
+                        total_amt = float(booking.total_amount + booking.tax_amount)
+                        cgst_sgst = total_amt * 0.09
+                        grandtotal = total_amt + (cgst_sgst*2)
+                        
+                        
+                        bkng_id = Booking.objects.filter(id=booking_id)
+                        if booking:
+                            invoice = Invoice.objects.filter(booking_id=booking).first()
+                            if not invoice:
+
+                                invoice = Invoice.objects.create(booking_id=booking)
+                                bookingprod = BookingProduct.objects.filter(booking=booking).first()
+                                print("boookingg prod",bookingprod)
+                                # addon = Addon.objects.filter(booking_prod_id=bookingprod)
+                                
+                                addon = Addon.objects.filter(booking_prod_id=bookingprod)
+                                
+                               
+                            
+                                input_file = render_to_string('Invoice/invoice.html', {'booking': invoice,'addon':addon,'total':total,"cgst_sgst":cgst_sgst,'grandtotal':grandtotal})
+                                options = {
+                                        "enable-local-file-access": ""
+                                    }
+
+                                pdf_data = pdfkit.from_string(input_file, False, options=options)
+
+                                
+                                if pdf_data:
+                                    invoice.invoice = pdf_data
+                                    invoice.save()
+                                    # invoice.save()
+                                    print("PDF data saved in invoice successfully.")
+                            
+                                # return Response({'success': True})
+                            else:
+                                pass
+                                # Booking does not exist
+                                # return Response({'Error': False, 'error': 'Invoice already created'})
+                    except Exception as e:
+                        print(e)
+
+                # return Response({'success': False, 'error': 'Missing booking ID or status'})
+
+
+
+
+
+                    # booking = Booking.objects.filter(id=booking_id).first()
+                    # print("bookinggg")
+                    
+                    # if booking:
+                    #     inv = Invoice.objects.filter(booking_id=booking)
+                    #     input_file = render_to_string('Invoice/invoice.html', {'invoice': inv})
+                    #     options = {
+                    #                     "enable-local-file-access": ""
+                    #                 }
+                    #     pdf_data = pdfkit.from_string(input_file, False, options=options)
+                    #     invoice = Invoice.objects.filter(booking_id=booking_id).first()
+                    #     if invoice:
+                    #         # Update existing invoice
+                    #         invoice.invoice = pdf_data
+                    #         invoice.save()
+                    #     else:
+                    #         # Create a new invoice
+                    #         invoice = Invoice.objects.create(
+                    #             booking_id=booking,
+                    #             invoice=pdf_data,  # Convert to bytes before assigning
+                    #             invoice_name='invoice.pdf'
+                    #         )
+                    #     return Response({'success': True})
+                    # else:
+                    #     return Response({'success': False, 'error': 'Invalid booking ID'})
+
+
                     
                 if booking.status == "Completed" and booking.cash_on_service == True:
                     
@@ -187,14 +272,6 @@ class TaskViewSet(ModelViewSet):
 
 class RebookingViewSet(ModelViewSet):
     
-    # authentication_classes = [BasicAuthentication]
-    # serializer_class = RebookingSerializer
-    # queryset = Rebooking.objects.all()
-
-    # def get(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance)
-    #     return Response(serializer.data) 
     
 
     queryset = Rebooking.objects.all()     
@@ -208,19 +285,18 @@ class RebookingViewSet(ModelViewSet):
             queryset = queryset.filter(technician_id=technician_id)
         return queryset
     
-    def update(self, request, pk=None):
-        try:
-            rebooking = self.get_object()
-            serializer = self.get_serializer(rebooking, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Rebooking.DoesNotExist:
-            return Response({"error": "Rebooking not found."}, status=status.HTTP_404_NOT_FOUND)
-
-# ---------------- Booking --------------------- 
+    # def update(self, request, pk=None):
+    #     try:
+    #         rebooking = self.get_object()
+    #         serializer = self.get_serializer(rebooking, data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #             return Response(serializer.data)
+    #         else:
+    #             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     except Rebooking.DoesNotExist:
+    #         return Response({"error": "Rebooking not found."}, status=status.HTTP_404_NOT_FOUND)
+    # ---------------- Booking --------------------- 
 
 
 class BookingViewSet(ModelViewSet):
@@ -264,6 +340,45 @@ def create_booking_manually(request):
         'status':"ok",
         'message':data
     })
+
+
+@api_view(['PATCH'])
+def RebookingStatusUpdated(request):
+    
+    try:
+        data = request.data
+        print("data",data)
+        if not data.get("technician_id"):
+            return Response({
+                'status':False,
+                'message':"Technician id is required",
+                "data":{}
+            })
+        obj = Rebooking.objects.get(technician = data.get("technician_id"))
+        
+        serializer = RebookingSerializer(obj,data=data,partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'status':True,
+                'message':'Success Data',
+                'data':serializer.data
+            })
+        return Response({
+            'status':False,
+            'message':'invalid data',
+            'data':serializer.errors
+        })
+    except Exception as e:
+        print(e)
+    
+    return Response({
+        'status':False,
+        'message':'Invalid Technician Id',
+        'data':{}
+    })
+
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -874,7 +989,11 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         # Check if the current user is the owner of the customer object
         if instance.admin == request.user:
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            # serializer = self.get_serializer(instance, data=request.data, partial=True)
+            # serializer.is_valid(raise_exception=True)
+            # serializer.save()
+            serializer = self.get_serializer(instance, data=request.data, partial=True,
+                                             fields=['first_name', 'address', 'mobile', 'city', 'state', 'area', 'zipcode'])
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)

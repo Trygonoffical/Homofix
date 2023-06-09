@@ -40,6 +40,7 @@ router.register('Legal-Page-Get', API_Views.LegalPageViewSet, basename='Legal-Pa
 router.register('Faq-Get', API_Views.FAQViewSet, basename='Faq')
 
 
+
 # router.register('ExpertTaskCounting', API_Views.ExpertTaskCountViewSet, basename='ExpertTaskCounting')
 # router.register('update_online', API_Views.update_online, basename='update_online')
 
@@ -73,6 +74,8 @@ urlpatterns = [
     path('api/CustomerLogin/',API_Views.CustomerLogin.as_view(),name="CustomerLogin"),
     path('api/Addons/Delete',API_Views.addonsDelete.as_view(),name="addons_delete"),
     path('api/Invoice/',API_Views.generate_invoice_pdf,name="invoice"),
+    path('api/Rebooking/Status/Update',API_Views.RebookingStatusUpdated,name="RebookingStatusUpdated"),
+    
     
     # path("404",views.Error404,name="404"),
     # path('api/Expert/AllLocation',API_Views.create_or_update_all_technician_location,name="create_or_update_all_technician_location")

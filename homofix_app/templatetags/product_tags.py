@@ -15,4 +15,19 @@ def call_gst(subtotal):
 
 @register.simple_tag
 def call_sellprice(price, quantity):
-    return Decimal(price) * Decimal(quantity)
+    amt= Decimal(price) * Decimal(quantity)
+    amt += (amt*18)/100
+    return amt
+
+@register.simple_tag
+def call_subtotal(total, tax):
+    totl= float(total + tax)
+    
+    return totl
+
+
+register.simple_tag
+def call_gsthalf(price, quantity):
+    amt = call_sellprice(price, quantity)
+    half_tax = (amt * 9) / 100 / 2
+    return half_tax

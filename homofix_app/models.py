@@ -11,7 +11,7 @@ from django.db.models import Sum
 from decimal import Decimal
 import datetime
 from django.db.models import Prefetch
-
+from django.core.files.base import ContentFile
 
 
 # Create your models here.
@@ -829,7 +829,30 @@ class LegalPage(models.Model):
     title = models.CharField(max_length=100)
     content = RichTextField()
 
-    
+
+
+
+
+class Invoice(models.Model):
+    booking_id = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True)
+    invoice = models.BinaryField(null=True, blank=True)
+    invoice_no =  models.IntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # New invoice entry, increment the invoice number
+            last_invoice = Invoice.objects.order_by('-invoice_no').first()
+            if last_invoice:
+                self.invoice_no = last_invoice.invoice_no + 1
+            else:
+                self.invoice_no = 1
+        super().save(*args, **kwargs)
+
+
+        def save_invoice(self, pdf_data):
+            self.invoice.save('invoice.pdf', ContentFile(pdf_data), save=True)
+
+
 @receiver(post_save,sender=CustomUser)
 def create_user_profile(sender,instance,created,**kwargs):
     if created:

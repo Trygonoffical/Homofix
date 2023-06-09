@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage
+from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice
 
 # Register your models here.
 
@@ -8,7 +8,7 @@ admin.site.register(AdminHOD)
 # admin.site.register(Technician)
 admin.site.register(Product)
 # admin.site.register(SpareParts)
-admin.site.register(Customer)
+# admin.site.register(Customer)
 # admin.site.register(Support)
 admin.site.register(FAQ)
 # admin.site.register(Booking)
@@ -36,6 +36,7 @@ admin.site.register(HomePageService)
 admin.site.register(Carrer)
 admin.site.register(ApplicantCarrer)
 admin.site.register(LegalPage)
+admin.site.register(Invoice)
 
 
 
@@ -70,6 +71,10 @@ class SupportAdmin(admin.ModelAdmin):
 
     
 
+
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+    list_display=['id','address','mobile','city']
 
 
 @admin.register(Category)

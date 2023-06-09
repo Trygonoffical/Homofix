@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -30,6 +30,8 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 import os
+import pdfkit
+from django.template.loader import render_to_string
 
 # def all_location(request):
 #     all_location = AllTechnicianLocation.objects.all()
@@ -2488,10 +2490,10 @@ def ViewPDF(request,booking_id):
     addon_title.spaceBefore = 0  # set spaceBefore to zero
      # Create the table for bill to information
     bookingid=Booking.objects.get(id=booking_id)
-    styles = getSampleStyleSheet()
+    # styles = getSampleStyleSheet()
     address_lines = bookingid.customer.address.split('\n')
     bill_to_data = [    ['Bill To:', bookingid.customer.admin.first_name],
-        ['Address:', Paragraph(bookingid.customer.address, styles['Normal'])],
+        ['Address:', Paragraph(bookingid.customer.address)],
         ['Mobile:', f'+91{bookingid.customer.mobile}' ],
         ['Email:', bookingid.customer.admin.email],
     ]
@@ -3003,3 +3005,119 @@ def render_to_pdf(template_src, context_dict={}):
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     return None
+
+
+
+
+
+
+
+def read_invoice_counter():
+    try:
+        with open('invoice_counter.txt', 'r') as file:
+            counter = int(file.read())
+    except FileNotFoundError:
+        counter = 1
+    return counter
+
+
+def write_invoice_counter(counter):
+    with open('invoice_counter.txt', 'w') as file:
+        file.write(str(counter))
+    
+
+# def new_invoice(request, booking_id):
+#     # Retrieve the Booking object based on the booking_id
+#     booking = get_object_or_404(Booking, id=booking_id)
+
+#     # Read the current invoice counter from the file
+#     invoice_counter = read_invoice_counter()
+
+#     # Convert the invoice counter to a string
+#     invoice_number = str(invoice_counter)
+    
+#     # Render the template with the booking data
+#     html_content = render_to_string('Invoice/invoice.html', {'booking': booking,'invoice_number':invoice_number})
+
+#     input_file = None  # We will pass the HTML content directly
+#     output_file = f'file{invoice_number}.pdf'
+#     options = {
+#         "enable-local-file-access": ""
+#     }
+
+#     # Generate the PDF from the HTML content
+#     import os
+#     if os.path.exists(output_file):
+#         with open(output_file, 'rb') as pdf:
+#             response = HttpResponse(pdf.read(), content_type='application/pdf')
+#             response['Content-Disposition'] = 'inline; filename="invoice.pdf"'
+#             return response
+#     pdfkit.from_string(html_content, output_file, options=options)
+    
+
+#     # Increment the invoice counter for the next invoice
+#     invoice_counter += 1
+
+#     # Write the updated invoice counter back to the file
+#     write_invoice_counter(invoice_counter)
+
+#     # Return a response or redirect as needed
+#     import os
+#     if os.path.exists(output_file):
+#         with open(output_file, 'rb') as pdf:
+#             response = HttpResponse(pdf.read(), content_type='application/pdf')
+#             response['Content-Disposition'] = 'inline; filename="invoice.pdf"'
+#             return response
+#     return HttpResponse("PDF generated successfully")
+
+
+def new_invoice(request, booking_id):
+
+    invoice = Invoice.objects.get(booking_id=booking_id)
+    # print("invoiceeeee",invoice)
+    print(invoice.invoice)
+    
+    # # Retrieve the Booking object based on the booking_id
+    # booking = get_object_or_404(Booking, id=booking_id)
+
+    # # Read the current invoice counter from the file
+    # invoice_counter = read_invoice_counter()
+
+    # # Convert the invoice counter to a string
+    # invoice_number = str(invoice_counter)
+
+    # # Render the template with the booking data
+    # html_content = render_to_string('Invoice/invoice.html', {'booking': booking, 'invoice_number': invoice_number})
+
+    # # Define the PDF file path
+    # output_file = f'invoice{invoice_number}.pdf'
+
+    # # Check if the PDF file already exists
+    # if os.path.isfile(output_file):
+       
+    #     with open(output_file, 'rb') as pdf:
+    #         response = HttpResponse(pdf.read(), content_type='application/pdf')
+    #         response['Content-Disposition'] = 'inline; filename="invoice.pdf"'
+    #         return response
+
+    # # Generate the PDF from the HTML content
+    # options = {
+    #     "enable-local-file-access": ""
+    # }
+    # pdfkit.from_string(html_content, output_file, options=options)
+
+    # # Increment the invoice counter for the next invoice
+    # invoice_counter += 1
+
+    # # Write the updated invoice counter back to the file
+    # write_invoice_counter(invoice_counter)
+
+    # # Return the generated PDF as a response
+    # with open(output_file, 'rb') as pdf:
+    #     print("testinggggggggg")
+    #     response = HttpResponse(pdf.read(), content_type='application/pdf')
+    #     response['Content-Disposition'] = 'inline; filename="invoice.pdf"'
+    #     return response
+
+    # Return a response or redirect as needed
+    # return HttpResponse("PDF generated successfully")

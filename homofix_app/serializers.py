@@ -52,7 +52,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    
+   
     warranty_desc = serializers.SerializerMethodField()
     
     class Meta:
@@ -71,9 +71,10 @@ class techSerializer(serializers.ModelSerializer):
 
 
 class BookingProductSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = BookingProduct
-        fields = ['id','product']
+        fields = ['id','product','quantity']
 
 
 
@@ -523,10 +524,11 @@ class VerifyOtpSerializer(serializers.Serializer):
 
 class CustSerailizer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='admin.username')
+    first_name = serializers.ReadOnlyField(source='admin.first_name')
     class Meta:
         model=Customer
         fields = '__all__'
-        ['id', 'admin', 'username', 'address', 'mobile', 'city', 'state', 'area', 'zipcode']
+        ['id', 'admin', 'username','first_name', 'address', 'mobile', 'city', 'state', 'area', 'zipcode']
         
 # -------------------- feedback ------------------------- 
 

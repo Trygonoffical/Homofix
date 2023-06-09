@@ -200,6 +200,7 @@ urlpatterns = [
     path("testing",HodViews.testing,name="testing"),
 
     path('Accounts/Admin/Booking/Invoice/<int:booking_id>', HodViews.ViewPDF, name="admin_pdf_view"),
+    path('Accounts/Admin/Booking/New/Invoice/<int:booking_id>', HodViews.new_invoice, name="new_invoice"),
 
 
     
