@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer,HodSharPercentageSerliazer,CouponSerializer,TskSerializer,PaymentSerializer
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer,HodSharPercentageSerliazer,CouponSerializer,TskSerializer,PaymentSerializer,cuSeralizerDemo
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -1001,6 +1001,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         # Check if the current user is the owner of the customer object
         if instance.admin == request.user:
+            print("useerrrrrrr",request.user)
             # serializer = self.get_serializer(instance, data=request.data, partial=True)
             # serializer.is_valid(raise_exception=True)
             # serializer.save()
@@ -1879,3 +1880,38 @@ class PaymentViewSet(ModelViewSet):
 
 #         return queryset
      
+
+
+
+
+@api_view(['PATCH'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def customerupdateprofile(request):
+    user = request.user
+    customer = user.customer  # Assuming the customer profile is already created for the user
+    data = request.data
+
+    # Update the first_name field of the associated CustomUser model
+    user.first_name = data.get('first_name', user.first_name)
+    user.save()
+
+    serializer = cuSeralizerDemo(customer, data=data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+
+        # Include first_name in the serialized data
+        serializer.data['first_name'] = user.first_name
+
+        return Response({
+            'status': "success",
+            'data': serializer.data
+        })
+
+    return Response({
+        'status': "Error",
+        'data': serializer.errors
+    })
+
+
+

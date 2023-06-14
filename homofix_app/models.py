@@ -473,8 +473,8 @@ class Booking(models.Model):
 
     @property
     def final_amount(self):
-        final_amount = self.total_amount + self.tax_amount
-        return final_amount
+        final_amount = Decimal(self.total_amount) + Decimal(self.tax_amount)
+        return round(final_amount,2)
 
 
     # @property

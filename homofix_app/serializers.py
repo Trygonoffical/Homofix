@@ -812,3 +812,16 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment   
         fields = '__all__'     
+
+
+
+
+# --------------------------- Demo ------------------------- 
+
+
+class cuSeralizerDemo(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='admin.first_name', read_only=True)
+    
+    class Meta:
+        model = Customer
+        fields = ['address','mobile','city','state','area','zipcode','first_name']

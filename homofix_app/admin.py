@@ -3,7 +3,7 @@ from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,
 
 # Register your models here.
 
-admin.site.register(CustomUser)
+# admin.site.register(CustomUser)
 admin.site.register(AdminHOD)
 # admin.site.register(Technician)
 admin.site.register(Product)
@@ -44,6 +44,10 @@ admin.site.register(LegalPage)
 @admin.register(Technician)
 class TechnicianAdmin(admin.ModelAdmin):
     list_display=['id','admin']
+
+@admin.register(CustomUser)
+class CustomerAdmin(admin.ModelAdmin):
+    list_display=['id','username']
 
 @admin.register(BookingProduct)
 class BookingProductAdmin(admin.ModelAdmin):

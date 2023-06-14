@@ -82,6 +82,7 @@ urlpatterns = [
     path('check-coupon-validity/', API_Views.check_coupon_validity, name='check_coupon_validity'),
     path('check-token-expiration/', API_Views.TokenExpirationCheckAPIView.as_view(), name='check-token-expiration'),
     path('api/paymentss/',API_Views.customerpayments,name="payment"),
+    path('api/customer/profile/update/',API_Views.customerupdateprofile,name="customerupdateprofile"),
     
     
     
