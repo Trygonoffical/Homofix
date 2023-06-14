@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer,HodSharPercentageSerliazer,CouponSerializer,TskSerializer,PaymentSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet,ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view,authentication_classes, permission_classes
-from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage,FAQ,Invoice
+from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage,FAQ,Invoice,Coupon,Payment
 from decimal import Decimal
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
@@ -34,6 +34,17 @@ from rest_framework.exceptions import NotFound
 from django.template.loader import get_template
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+from django.urls import reverse
+from datetime import datetime
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
+from rest_framework_simplejwt.tokens import Token
+from datetime import timedelta
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework import generics
+
+
+
 
 
 class LoginViewSet(CreateAPIView):
@@ -119,7 +130,7 @@ class TaskViewSet(ModelViewSet):
                 # return Response({'success': True})
                 if booking.status == "Completed" and booking.online == True:
                     
-                    tax_rate = 0.18
+                    # tax_rate = 0.18
                     booking_amount = booking.total_amount
                     
                     tax_amt =booking.tax_amount
@@ -127,26 +138,27 @@ class TaskViewSet(ModelViewSet):
                     hod_share_percentage = HodSharePercentage.objects.latest('id')
                     hod_share_percentage_value = hod_share_percentage.percentage
                    
-                    hod_share = booking_amount * (hod_share_percentage_value / 100) 
+                    hod_share = (booking_amount * (hod_share_percentage_value / 100) )
                     
                     print("new hod share0",hod_share)
                     technician_share = booking_amount-hod_share
                     print("technicia sare",technician_share)
                     
                     # hod_share_with_tax = hod_share + tax_amt
-                    hod_share_with_tax = Decimal(str(hod_share)) + tax_amt
+                    hod_share_with_tax = float(str(hod_share)) + tax_amt
                     print("hod_share_with_tax",hod_share_with_tax)
                    
                     # technician_share = booking_amount - hod_share
                    
-                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,hod_share=hod_share)
+                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,cmp_share=hod_share_percentage_value,hod_share=hod_share)
                     share.save()
                     technician = task.technician
                     wallet, created = Wallet.objects.get_or_create(technician_id=technician)
                     wallet.total_share -= Decimal(str(hod_share_with_tax))
                    
-                   
                     wallet.save()
+
+                    # ----------------------------------- Invoice Part ----------------------- 
                     try:
 
 
@@ -167,17 +179,17 @@ class TaskViewSet(ModelViewSet):
 
                                 invoice = Invoice.objects.create(booking_id=booking)
                                 bookingprod = BookingProduct.objects.filter(booking=booking).first()
-                                print("boookingg prod",bookingprod)
+                                
                                 # addon = Addon.objects.filter(booking_prod_id=bookingprod)
                                 
                                 addon = Addon.objects.filter(booking_prod_id=bookingprod)
-                                
-                               
+                                                             
                             
                                 input_file = render_to_string('Invoice/invoice.html', {'booking': invoice,'addon':addon,'total':total,"cgst_sgst":cgst_sgst,'grandtotal':grandtotal})
                                 options = {
                                         "enable-local-file-access": ""
                                     }
+                               
 
                                 pdf_data = pdfkit.from_string(input_file, False, options=options)
 
@@ -1651,8 +1663,76 @@ def generate_invoice_pdf(request):
 
 
 
+# @api_view(['GET'])
+# def invoice_pdf(request, booking_id):
+#     try:
+#         invoice = Invoice.objects.get(booking_id=booking_id)
+#         invoice_data = invoice.invoice if invoice else None
+
+#         if invoice_data:
+#             response = HttpResponse(invoice_data, content_type='application/pdf')
+#             response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+#             return response
+#         else:
+#             return Response({
+#                 'status': 404,
+#                 'message': 'Invoice not found.'
+#             })
+#     except Invoice.DoesNotExist:
+#         return Response({
+#             'status': 404,
+#             'message': 'Invoice not found.'
+#         })
 
 
+
+@api_view(['GET'])
+def invoice_pdf(request, booking_id):
+    try:
+        invoice = Invoice.objects.get(booking_id=booking_id)
+        invoice_data = invoice.invoice if invoice else None
+
+        if invoice_data:
+            response_data = {
+                'status': 200,
+                'invoice_url': request.build_absolute_uri(reverse('invoice_download', args=[booking_id])),
+            }
+
+            return Response(response_data)
+        else:
+            return Response({
+                'status': 404,
+                'message': 'Invoice not found.'
+            })
+    except Invoice.DoesNotExist:
+        return Response({
+            'status': 404,
+            'message': 'Invoice not found.'
+        })
+
+
+
+@api_view(['GET'])
+def invoice_download(request, booking_id):
+    try:
+        invoice = Invoice.objects.get(booking_id=booking_id)
+        invoice_data = invoice.invoice if invoice else None
+
+        if invoice_data:
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'filename="invoice.pdf"'
+            response.write(invoice_data)
+            return response
+        else:
+            return Response({
+                'status': 404,
+                'message': 'Invoice not found.'
+            })
+    except Invoice.DoesNotExist:
+        return Response({
+            'status': 404,
+            'message': 'Invoice not found.'
+        })
 # class FAQViewSet(ReadOnlyModelViewSet):
 #     queryset = FAQ.objects.all()     
 #     serializer_class  = faqSerializer
@@ -1675,3 +1755,127 @@ class FAQViewSet(ReadOnlyModelViewSet):
         
         serializer = self.get_serializer(faqs, many=True)
         return Response(serializer.data)
+
+
+
+
+# ------------------------------ HOD PERCENTAGE --------------------------
+
+
+class HodPercentageViewSet(ReadOnlyModelViewSet):
+    queryset = HodSharePercentage.objects.all()
+    serializer_class = HodSharPercentageSerliazer
+    
+   
+    
+@api_view(['POST'])
+def check_coupon_validity(request):
+    code = request.data.get('code')  # Assuming the coupon code is sent in the request data
+
+    try:
+        coupon = Coupon.objects.get(code=code)
+    except Coupon.DoesNotExist:
+        return Response({'message': 'Invalid coupon code'}, status=400)
+
+    current_datetime = timezone.now()
+    if current_datetime <= coupon.validity_period:
+        serializer = CouponSerializer(coupon)
+        return Response(serializer.data)
+    else:
+        return Response({'message': 'Coupon expired'}, status=400)
+
+
+class TokenExpirationCheckAPIView(APIView):
+    def get(self, request):
+        token = request.META.get('HTTP_AUTHORIZATION', '').split(' ')[1]  # Extract the token from the Authorization header
+
+        try:
+            refresh_token = RefreshToken(token)
+            expiration_date = refresh_token.current_time + timedelta(seconds=refresh_token.access_token.lifetime)
+
+            if expiration_date <= timezone.now():
+                return Response({'expired': True}, status=status.HTTP_200_OK)
+            else:
+                return Response({'expired': False}, status=status.HTTP_200_OK)
+
+        except TokenError:
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+# ---------------------- Testing ----------------------- 
+
+
+class TskListAPIView(generics.ListAPIView):
+    serializer_class = TskSerializer
+
+    def get_queryset(self):
+        technician_id = self.kwargs['technician_id']  # Assumes the technician ID is passed as a URL parameter
+        print("tidd",technician_id)
+        return Task.objects.filter(technician_id=technician_id)
+
+
+# ---------------------------- Payment -------------------------- 
+
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def customerpayments(request):
+    user = request.user
+    data = request.data
+    serializer = PaymentSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+
+        return Response({
+            'status':"success",
+            'data':serializer.data
+        })
+    
+    return Response({
+            'status':"Error",
+            'data':serializer.errors
+        })
+    
+
+
+class PaymentViewSet(ModelViewSet):
+    authentication_classes = [JWTAuthentication]
+    queryset = Payment.objects.all()     
+    serializer_class  = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated:
+            # Filter customers based on the authenticated user
+            queryset = Payment.objects.filter(booking_id__customer__admin=user)
+        else:
+            # If there is no authenticated user, return an empty queryset
+            queryset = Customer.objects.none()
+
+        return queryset
+  
+
+# class CustomerBookingViewSet(ModelViewSet):
+#     authentication_classes = [JWTAuthentication]
+#     queryset = Booking.objects.all()     
+#     serializer_class  = BokingSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         user = self.request.user
+
+#         if user.is_authenticated:
+#             # Filter customers based on the authenticated user
+#             queryset = Booking.objects.filter(customer__admin=user)
+#         else:
+#             # If there is no authenticated user, return an empty queryset
+#             queryset = Customer.objects.none()
+
+#         return queryset
+     

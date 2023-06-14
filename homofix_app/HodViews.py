@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice,Payment
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -1629,6 +1629,7 @@ def admin_booking(request):
         booking_date = timezone.make_aware(datetime.datetime.fromisoformat(booking_date_str))
         
         
+        
         booking = Booking.objects.create(
             customer=customer,
             booking_date=booking_date,   
@@ -2022,7 +2023,7 @@ def admin_share_percentage_update(request):
 def admin_share_list(request):
     share = Share.objects.all()
     testint = Share.objects.aggregate(Sum('hod_share'))
-    print("sssssssssss",testint)
+    
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()
     rebooking_count = Rebooking.objects.all().count()
@@ -3071,11 +3072,21 @@ def write_invoice_counter(counter):
 #     return HttpResponse("PDF generated successfully")
 
 
-def new_invoice(request, booking_id):
+def invoice_download(request, booking_id):
 
-    invoice = Invoice.objects.get(booking_id=booking_id)
-    # print("invoiceeeee",invoice)
-    print(invoice.invoice)
+    try:
+        invoice = Invoice.objects.get(booking_id=booking_id)
+        invoice_data = invoice.invoice if invoice else None
+
+        if invoice_data:
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+            response.write(invoice_data)
+            return response
+        else:
+            return HttpResponse("Invoice not found.")
+    except Invoice.DoesNotExist:
+        return HttpResponse("Invoice not found.")
     
     # # Retrieve the Booking object based on the booking_id
     # booking = get_object_or_404(Booking, id=booking_id)

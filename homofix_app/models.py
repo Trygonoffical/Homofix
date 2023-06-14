@@ -382,6 +382,9 @@ class Coupon(models.Model):
 #         return subtl
 
     
+
+
+
 class Booking(models.Model):
     STATUS_CHOICES = (
         ('New', 'New'),
@@ -404,6 +407,9 @@ class Booking(models.Model):
     cash_on_service = models.BooleanField(default=False, null=True, blank=True)
     online = models.BooleanField(default=True, null=True, blank=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_used_coupon')
+    New_payment = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    
+   
 
     def save(self, *args, **kwargs):
         if not self.order_id:
@@ -432,10 +438,24 @@ class Booking(models.Model):
             total -= self.coupon.discount_amount
         return total
 
+
     @property
     def tax_amount(self):
-        tax_rate = Decimal('0.18')  # replace with your actual tax rate
-        return round(self.total_amount * tax_rate, 2)
+        hod_share_percentage = HodSharePercentage.objects.latest('id')
+        
+        
+        # tax_rate = Decimal('0.18')  # replace with your actual tax rate
+        # return round(self.total_amount * tax_rate, 2)
+        # comp_val = float(self.total_amount * (hod_share_percentage/100))
+        comp_val = float(self.total_amount * (hod_share_percentage.percentage / 100))
+
+        comp_tax = float(comp_val * (0.18))
+        # exp_val = float(self.total_amount * ((1 - hod_share_percentage)/100))
+        exp_val = float(self.total_amount * ((1 - hod_share_percentage.percentage/100)))
+
+        exp_tax = float(exp_val * (0.05))
+        tax_rate = comp_tax + exp_tax 
+        return(round(tax_rate, 2))
 
     @property
     def total_addons(self):
@@ -451,6 +471,32 @@ class Booking(models.Model):
         subtotal = self.total_amount - self.total_addons
         return subtotal
 
+    @property
+    def final_amount(self):
+        final_amount = self.total_amount + self.tax_amount
+        return final_amount
+
+
+    # @property
+    # def pay_amt(self):
+    #     payments = Payment.objects.filter(booking_id=self)
+    #     total_payment_amount = sum(payment.amount for payment in payments)
+    #     return Decimal(self.final_amount) - Decimal(total_payment_amount)
+
+    @property
+    def pay_amt(self):
+        payments = Payment.objects.filter(booking_id=self)
+        total_payment_amount = sum(payment.amount for payment in payments)
+        remaining_amount = Decimal(self.final_amount) - Decimal(total_payment_amount)
+        
+        if remaining_amount > 0:
+            rounded_amount = round(remaining_amount, 2)  # Round to 2 decimal places
+        else:
+            rounded_amount = Decimal(self.final_amount)
+        
+        return rounded_amount
+
+    
 
 class BookingProduct(models.Model):
     
@@ -523,7 +569,8 @@ class Addon(models.Model):
 
 
 class HodSharePercentage(models.Model):
-    percentage = models.IntegerField()
+    percentage = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    # percentage = models.IntegerField()
     date = models.DateField(auto_now_add=True,null=True,blank=True)
 
     def __str__(self):
@@ -595,6 +642,7 @@ class Share(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     hod_share_percentage = models.ForeignKey(HodSharePercentage, on_delete=models.CASCADE)
     technician_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    cmp_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     # technician_share = models.IntegerField(default=0)
     # hod_share = models.IntegerField(default=0)
     hod_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
@@ -635,6 +683,7 @@ class Wallet(models.Model):
     #     return self.technician_id.admin.username
     
 
+
 class WalletHistory(models.Model):
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
     TYPE_CHOICES = (
@@ -650,7 +699,6 @@ class WalletHistory(models.Model):
     def __str__(self):
         return str(self.wallet.technician_id.admin.username)
     
-
 
 class Rebooking(models.Model):
     STATUS_CHOICES = (
@@ -720,23 +768,25 @@ class Payment(models.Model):
         ('Qr', 'Qr'),
     )
     booking_id = models.ForeignKey(Booking,on_delete=models.CASCADE)  
+    payment_id = models.CharField(max_length=100)
     payment_mode = models.CharField(max_length=20, choices=PAYMENT_CHOICES)
-    # total_price_with_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(auto_now_add=True,null=True,blank=True)
 
-    # def save(self, *args, **kwargs):
-    #     # Get the booking associated with this payment
-    #     booking = self.booking_id
-    #     # Calculate the total price with tax
-    #     total_price_with_tax = booking.bookingproduct_set.aggregate(
-    #         total=Coalesce(Sum('total_price'), 0) * Decimal('1.18')
-    #     )['total']
-    #     # Set the total price with tax for this payment
-    #     self.total_price_with_tax = total_price_with_tax
-    #     super(Payment, self).save(*args, **kwargs)
     
     def __str__(self):
         return str(self.booking_id)
+    
+
+    # def save(self, *args, **kwargs):
+    #     if self.booking_id:
+    #         self.amount = self.booking_id.final_amount
+    #     super().save(*args, **kwargs)
+
+   
+
+    
+
     
 class Kyc(models.Model):
     technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
@@ -934,3 +984,6 @@ def save_user_profile(sender,instance,**kwargs):
 #                         'longitude': longitude,
 #                     }
 #                 )
+
+
+

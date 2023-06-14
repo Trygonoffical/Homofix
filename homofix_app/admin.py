@@ -14,11 +14,11 @@ admin.site.register(FAQ)
 # admin.site.register(Booking)
 admin.site.register(Task)
 admin.site.register(Rebooking)
-admin.site.register(BookingProduct)
+# admin.site.register(BookingProduct)
 admin.site.register(SubCategory)
 admin.site.register(ContactUs)
 admin.site.register(HodSharePercentage)
-admin.site.register(Payment)
+# admin.site.register(Payment)
 # admin.site.register(Addon)
 # admin.site.register(Wallet)
 admin.site.register(TechnicianLocation)
@@ -36,7 +36,7 @@ admin.site.register(HomePageService)
 admin.site.register(Carrer)
 admin.site.register(ApplicantCarrer)
 admin.site.register(LegalPage)
-admin.site.register(Invoice)
+# admin.site.register(Invoice)
 
 
 
@@ -44,6 +44,18 @@ admin.site.register(Invoice)
 @admin.register(Technician)
 class TechnicianAdmin(admin.ModelAdmin):
     list_display=['id','admin']
+
+@admin.register(BookingProduct)
+class BookingProductAdmin(admin.ModelAdmin):
+    list_display=['id','booking','product','total_price']
+
+@admin.register(Invoice)
+class CustomerInvoice(admin.ModelAdmin):
+    list_display=['id','booking_id','invoice','invoice_no']
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display=['id','booking_id','payment_mode','amount','date']
 
 @admin.register(Wallet)
 class TechnicianAdmin(admin.ModelAdmin):
@@ -56,7 +68,7 @@ class TechnicianAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class TechnicianAdmin(admin.ModelAdmin):
-    list_display=['id','subtotal','total_amount','tax_amount','total_addons']
+    list_display=['id','subtotal','total_amount','tax_amount','total_addons','final_amount','pay_amt']
 
 
 @admin.register(Support)

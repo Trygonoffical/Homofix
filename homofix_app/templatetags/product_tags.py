@@ -26,8 +26,19 @@ def call_subtotal(total, tax):
     return totl
 
 
-register.simple_tag
+@register.simple_tag
 def call_gsthalf(price, quantity):
     amt = call_sellprice(price, quantity)
     half_tax = (amt * 9) / 100 / 2
     return half_tax
+
+
+@register.simple_tag
+def call_addon_amt_invoice(quantity,rate):
+    amt = quantity*rate
+    return amt
+
+@register.simple_tag
+def call_amt_invoice(quantity,rate):
+    amt = quantity*rate
+    return amt

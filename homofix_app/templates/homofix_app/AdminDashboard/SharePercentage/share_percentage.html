@@ -23,7 +23,9 @@
     <hr>
 
     {% include 'homofix_app/Base/messages.html' %}
+    {% if not share_percentage %}
     <div class="ms-auto mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal"><a href="javascript:;" class="btn btn-light radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square" ></i>Add New  Percentage</a></div>
+    {% endif %}
     <div class="card">
         
         <div class="card-body">
@@ -50,7 +52,7 @@
                             <td>
                                 <div class="d-flex order-actions">
                                     <a href="javascript:;" class="" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal{{i.id}}"><i class='bx bxs-edit'></i></a>
-                                    <a href="javascript:;" class="ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" ><i class='bx bxs-trash'></i></a>
+                                    {% comment %} <a href="javascript:;" class="ms-3" data-bs-toggle="modal" data-bs-target="#exampleDangerModal{{i.id}}" ><i class='bx bxs-trash'></i></a> {% endcomment %}
                                 </div>
                             </td> 
                            

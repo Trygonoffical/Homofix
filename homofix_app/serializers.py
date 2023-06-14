@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService,ApplicantCarrer,Carrer,Coupon,LegalPage,FAQ
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService,ApplicantCarrer,Carrer,Coupon,LegalPage,FAQ,HodSharePercentage,Payment
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -30,13 +30,19 @@ class ExpertSerliazer(serializers.ModelSerializer):
 
 # ------------------ Task ------------------------ 
 
+class ASerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Addon
+        fields = ('id', 'spare_parts_id', 'quantity', 'date', 'description')
+
 
 class BookingprdSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(source='product.id')
+    addon_set = ASerializer(many=True, read_only=True)
     
     class Meta:
         model = BookingProduct
-        fields = ('id', 'product_id')
+        fields = ('id', 'product_id','addon_set')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -82,14 +88,15 @@ class BookingSerializer(serializers.ModelSerializer):
     booking_product = BookingProductSerializer(many=True)
     customer = CustomerSerializer()
     products = ProductSerializer(many=True)
-    # total_amount = serializers.DecimalField(max_digits=8, decimal_places=2, read_only=True)
-    
+    tax_amount = serializers.ReadOnlyField()
+    total_amount = serializers.ReadOnlyField()
+    final_amount = serializers.ReadOnlyField()
+    pay_amt = serializers.ReadOnlyField()
     
 
     class Meta:
         model = Booking
         fields = "__all__"
-
 
 
 
@@ -357,14 +364,45 @@ class AddonsSerializer(serializers.ModelSerializer):
         fields = ['id', 'booking_prod_id', 'spare_parts_id', 'quantity', 'date', 'description']
 
 
+
+
+class BookingAddonSerializer(serializers.ModelSerializer):
+    # booking_product = BookingProductSerializer(many=True)
+    # customer = CustomerSerializer()
+    # products = ProductSerializer(many=True)
+    tax_amount = serializers.ReadOnlyField()
+    total_amount = serializers.ReadOnlyField()
+    final_amount = serializers.ReadOnlyField()
+    pay_amt = serializers.ReadOnlyField()
+    
+
+    class Meta:
+        model = Booking
+        fields = ['tax_amount','total_amount','final_amount','pay_amt']
+
+class AddongGetBookingProductSerializer(serializers.ModelSerializer):
+    # booking = serializers.IntegerField(source='booking.id')
+    booking= BookingAddonSerializer()
+    # technician_id = serializers.IntegerField(source='booking.technician.id')
+    
+    class Meta:
+        model = BookingProduct
+        fields = ['id','booking']
+
+
 class AddonsGetSerializer(serializers.ModelSerializer):
-    # booking_prod_id = BookingProductAddonSerializer()
+    booking_prod_id = AddongGetBookingProductSerializer()
     spare_parts_id = SparePartsSerializer()
     booking_id = serializers.ReadOnlyField(source='booking_prod_id.booking.id')
+    # total_amount = serializers.SerializerMethodField()
+
+   
+   
 
     class Meta:
         model = Addon
         fields = ['id','booking_id', 'booking_prod_id', 'spare_parts_id', 'quantity', 'date', 'description']
+        # depth = 1
 
 
 # ---------------------------------------- Technician Location ------------- 
@@ -717,3 +755,60 @@ class faqSerializer(serializers.ModelSerializer):
     class Meta:
         model = FAQ
         fields = "__all__"
+
+
+
+
+class HodSharPercentageSerliazer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = HodSharePercentage
+        fields = ['percentage']
+
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = ('id', 'code', 'discount_amount')
+
+
+
+
+
+# ----------------------- testing -------------------         
+
+
+class AdnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Addon
+        fields = '__all__'
+
+
+class kingProductSerializer(serializers.ModelSerializer):
+    addons = AdnSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = BookingProduct
+        fields = '__all__'
+
+class BingSerializer(serializers.ModelSerializer):
+    booking_product = kingProductSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Booking
+        fields = '__all__'
+
+class TskSerializer(serializers.ModelSerializer):
+    booking = BingSerializer()
+
+    class Meta:
+        model = Task
+        fields = '__all__'
+
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment   
+        fields = '__all__'     
