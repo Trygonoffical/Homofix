@@ -232,6 +232,62 @@
             </div>
         </div>
     </div>
+    <h6 class="mb-0 text-uppercase">Settlement</h6>
+    <hr>
+
+   
+    
+    <div class="card">
+        
+        <div class="card-body">
+            
+            <div class="table-responsive">
+                <table id="example" class="table table-striped">
+                    <thead>
+                        <tr>
+                            
+                            <th>Amount</th>
+                            <th>Settlement</th>
+                            <th>Date</th>
+                            
+                            
+                            
+                           
+                            
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in settlement %}
+                        <tr>
+                            <td>{{i.amount}}</td>
+                            
+                           
+                            
+                            
+                           
+                           
+                            <td>{{i.settlement}}</td>
+                            
+                           
+                            
+                            <td>{{i.date}}</td>
+                            
+                           
+                            
+                           
+                            
+                        </tr>
+
+                       
+                        {% endfor %}
+                       
+                    </tbody>
+                    
+                </table>
+            </div>
+        </div>
+    </div>
 
     <h6 class="mb-0 text-uppercase">Bank Details</h6>
     <hr>

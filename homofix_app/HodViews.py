@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 # from django.contrib.auth.decorators import login_required
-from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice,Payment
+from .models import CustomUser,Category,Technician,Product,SpareParts,Support,FAQ,Booking,Task,STATE_CHOICES,SubCategory,Rebooking,ContactUs,JobEnquiry,HodSharePercentage,Customer,Share,Payment,Addon,Wallet,WalletHistory,TechnicianLocation,AdminHOD,AllTechnicianLocation,BookingProduct,WithdrawRequest,RechargeHistory,Attendance,Coupon,Kyc,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice,Payment,Settlement
 from django.http import JsonResponse,HttpResponseRedirect
 from django.contrib import messages
 from django.urls import reverse
@@ -76,7 +76,7 @@ def admin_dashboard(request):
     booking_complete = Booking.objects.filter(status = "Completed").count()
     rebooking_count = Rebooking.objects.all().count()
     customer_count = Customer.objects.all().count()
-    total_hod_share = Share.objects.aggregate(Sum('hod_share'))['hod_share__sum'] or 0
+    total_hod_share = Share.objects.aggregate(Sum('company_share'))['company_share__sum'] or 0
     
     
     return render(request,'homofix_app/AdminDashboard/dashboard.html',{'booking_count':booking_count,'new_expert_count':new_expert_count,'rebooking_count':rebooking_count,'customer_count':customer_count,'booking_complete':booking_complete,'total_hod_share':total_hod_share,'booking':booking})
@@ -618,6 +618,7 @@ def technician_payment_history(request,id):
     
     
     wallet_history = WalletHistory.objects.filter(wallet__technician_id=technician)
+    settlement = Settlement.objects.filter(technician_id=technician)
    
     share = Share.objects.filter(task__technician=technician)
     new_expert_count = Technician.objects.filter(status="New").count()
@@ -671,7 +672,8 @@ def technician_payment_history(request,id):
         'share':share,
         'wallet_history':wallet_history,
         'wallet':wallet,
-        'kyc':kyc
+        'kyc':kyc,
+        'settlement':settlement
     }
    
     return render(request,'homofix_app/AdminDashboard/History/ExpertPaymentHistory/expert_payment_history.html',context)
@@ -2022,7 +2024,7 @@ def admin_share_percentage_update(request):
         
 def admin_share_list(request):
     share = Share.objects.all()
-    testint = Share.objects.aggregate(Sum('hod_share'))
+    testint = Share.objects.aggregate(Sum('company_share'))
     
     new_expert_count = Technician.objects.filter(status="New").count()
     booking_count = Booking.objects.filter(status = "New").count()

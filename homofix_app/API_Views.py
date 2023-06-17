@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer,HodSharPercentageSerliazer,CouponSerializer,TskSerializer,PaymentSerializer,cuSeralizerDemo
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer,HodSharPercentageSerliazer,CouponSerializer,TskSerializer,PaymentSerializer,cuSeralizerDemo,SettlementSeralizer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet,ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view,authentication_classes, permission_classes
-from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage,FAQ,Invoice,Coupon,Payment
+from .models import CustomUser,Technician,Task,Rebooking,JobEnquiry,Product,Booking,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,HodSharePercentage,Share,AllTechnicianLocation,Blog,MostViewed,Customer,Category,SubCategory,feedback,Offer,BookingProduct,HomePageService,ApplicantCarrer,Carrer,LegalPage,FAQ,Invoice,Coupon,Payment,Settlement
 from decimal import Decimal
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
@@ -147,16 +147,26 @@ class TaskViewSet(ModelViewSet):
                     # hod_share_with_tax = hod_share + tax_amt
                     hod_share_with_tax = float(str(hod_share)) + tax_amt
                     print("hod_share_with_tax",hod_share_with_tax)
+
+                    wallet_tecnician = Decimal(technician_share) - Decimal(tax_amt)
+                    print("wallet technician",wallet_tecnician)
                    
                     # technician_share = booking_amount - hod_share
                    
-                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,cmp_share=hod_share_percentage_value,hod_share=hod_share)
+                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=wallet_tecnician,company_share=hod_share_with_tax)
                     share.save()
                     technician = task.technician
                     wallet, created = Wallet.objects.get_or_create(technician_id=technician)
-                    wallet.total_share -= Decimal(str(hod_share_with_tax))
+                    wallet.total_share += Decimal(str(wallet_tecnician))
                    
                     wallet.save()
+
+
+
+                    # --------------------- Settlement --------------------------------
+
+                    settlement = Settlement.objects.create(technician_id=technician,amount=wallet_tecnician,settlement="Settlement Add")
+                    settlement.save()
 
                     # ----------------------------------- Invoice Part ----------------------- 
                     try:
@@ -208,44 +218,14 @@ class TaskViewSet(ModelViewSet):
                     except Exception as e:
                         print(e)
 
-                # return Response({'success': False, 'error': 'Missing booking ID or status'})
-
-
-
-
-
-                    # booking = Booking.objects.filter(id=booking_id).first()
-                    # print("bookinggg")
-                    
-                    # if booking:
-                    #     inv = Invoice.objects.filter(booking_id=booking)
-                    #     input_file = render_to_string('Invoice/invoice.html', {'invoice': inv})
-                    #     options = {
-                    #                     "enable-local-file-access": ""
-                    #                 }
-                    #     pdf_data = pdfkit.from_string(input_file, False, options=options)
-                    #     invoice = Invoice.objects.filter(booking_id=booking_id).first()
-                    #     if invoice:
-                    #         # Update existing invoice
-                    #         invoice.invoice = pdf_data
-                    #         invoice.save()
-                    #     else:
-                    #         # Create a new invoice
-                    #         invoice = Invoice.objects.create(
-                    #             booking_id=booking,
-                    #             invoice=pdf_data,  # Convert to bytes before assigning
-                    #             invoice_name='invoice.pdf'
-                    #         )
-                    #     return Response({'success': True})
-                    # else:
-                    #     return Response({'success': False, 'error': 'Invalid booking ID'})
-
 
                     
                 if booking.status == "Completed" and booking.cash_on_service == True:
                     
                     tax_rate = 0.18
                     booking_amount = booking.total_amount
+                    print("final amount",booking_amount)
+                    
                     
 
                     tax_amt =booking.tax_amount
@@ -253,25 +233,89 @@ class TaskViewSet(ModelViewSet):
                     hod_share_percentage = HodSharePercentage.objects.latest('id')
                     hod_share_percentage_value = hod_share_percentage.percentage
                     hod_share = booking_amount * (hod_share_percentage_value / 100) 
-                    print("new hod share0",hod_share)
+                    
+                    acbb = Decimal(hod_share) * Decimal(0.18)
+                    print(round(acbb,2))
+                    print("eeeeee",hod_share)
+                    wallet_tecnician = Decimal(hod_share) + Decimal(tax_amt)
+                    print("helloooo",wallet_tecnician)
+                    
                     technician_share = booking_amount-hod_share
+
+                    
                     print("technicia sare",technician_share)
-                    # print("testing",testing)
-                    # wallet_online = hod_share+tax_amt
-                    # print("Wallet online",wallet_online)
-                    # print("hod share",hod_share+tax_amt)
-                    hod_share_with_tax = hod_share + tax_amt
-                    print("hod_share_with_tax",hod_share_with_tax)
+                    
+                    
+                    print("eeeeeeeeeeeee",wallet_tecnician)
+                    final_amt = booking.final_amount - wallet_tecnician
+                    
+                    
+                    hod_share_with_tax = final_amt
                    
-                    # technician_share = booking_amount - hod_share
+                    
                    
-                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=technician_share,hod_share=hod_share_with_tax)
+                   
+                    share = Share.objects.create(task=task,hod_share_percentage=hod_share_percentage,technician_share=wallet_tecnician,company_share=hod_share_with_tax)
                     share.save()
                     technician = task.technician
                     wallet, created = Wallet.objects.get_or_create(technician_id=technician)
-                    wallet.total_share += hod_share_with_tax
+                    wallet.total_share -= Decimal(str(wallet_tecnician))
+                    
                    
                     wallet.save()
+
+                    settlement = Settlement.objects.create(technician_id=technician,amount=wallet_tecnician,settlement="Settlement Deduction")
+                    settlement.save()
+
+
+                    try:
+
+
+                        booking = Booking.objects.get(id=booking_id)
+                        # tax = booking.tax_amount
+                        subtotal = booking.subtotal
+                        tax = subtotal * 0.18
+                        total = tax+subtotal
+                        total_amt = float(booking.total_amount + booking.tax_amount)
+                        cgst_sgst = total_amt * 0.09
+                        grandtotal = total_amt + (cgst_sgst*2)
+                        
+                        
+                        bkng_id = Booking.objects.filter(id=booking_id)
+                        if booking:
+                            invoice = Invoice.objects.filter(booking_id=booking).first()
+                            if not invoice:
+
+                                invoice = Invoice.objects.create(booking_id=booking)
+                                bookingprod = BookingProduct.objects.filter(booking=booking).first()
+                                
+                                # addon = Addon.objects.filter(booking_prod_id=bookingprod)
+                                
+                                addon = Addon.objects.filter(booking_prod_id=bookingprod)
+                                                             
+                            
+                                input_file = render_to_string('Invoice/invoice.html', {'booking': invoice,'addon':addon,'total':total,"cgst_sgst":cgst_sgst,'grandtotal':grandtotal})
+                                options = {
+                                        "enable-local-file-access": ""
+                                    }
+                               
+
+                                pdf_data = pdfkit.from_string(input_file, False, options=options)
+
+                                
+                                if pdf_data:
+                                    invoice.invoice = pdf_data
+                                    invoice.save()
+                                    # invoice.save()
+                                    print("PDF data saved in invoice successfully.")
+                            
+                                # return Response({'success': True})
+                            else:
+                                pass
+                                # Booking does not exist
+                                # return Response({'Error': False, 'error': 'Invoice already created'})
+                    except Exception as e:
+                        print(e)
                    
                     
                 return Response({'success': True})
@@ -1915,3 +1959,15 @@ def customerupdateprofile(request):
 
 
 
+
+
+
+class SettlementViewSet(ReadOnlyModelViewSet):
+    serializer_class = SettlementSeralizer
+
+    def get_queryset(self):
+        technician_id = self.request.query_params.get('technician_id')
+        queryset = Settlement.objects.all()
+        if technician_id:
+            queryset = queryset.filter(technician_id=technician_id)
+        return queryset

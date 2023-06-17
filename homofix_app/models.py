@@ -404,8 +404,8 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
     description = models.TextField(null=True, blank=True) 
     order_id = models.CharField(max_length=9, unique=True, null=True, blank=True)
-    cash_on_service = models.BooleanField(default=False, null=True, blank=True)
-    online = models.BooleanField(default=True, null=True, blank=True)
+    cash_on_service = models.BooleanField(default=True, null=True, blank=True)
+    online = models.BooleanField(default=False, null=True, blank=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings_used_coupon')
     New_payment = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     
@@ -483,17 +483,30 @@ class Booking(models.Model):
     #     total_payment_amount = sum(payment.amount for payment in payments)
     #     return Decimal(self.final_amount) - Decimal(total_payment_amount)
 
+    # @property
+    # def pay_amt(self):
+    #     payments = Payment.objects.filter(booking_id=self)
+    #     total_payment_amount = sum(payment.amount for payment in payments)
+    #     remaining_amount = Decimal(self.final_amount) - Decimal(total_payment_amount)
+        
+    #     if remaining_amount > 0:
+    #         rounded_amount = round(remaining_amount, 2)  # Round to 2 decimal places
+    #     else:
+    #         rounded_amount = Decimal(self.final_amount)
+        
+    #     return rounded_amount
+
     @property
     def pay_amt(self):
         payments = Payment.objects.filter(booking_id=self)
         total_payment_amount = sum(payment.amount for payment in payments)
-        remaining_amount = Decimal(self.final_amount) - Decimal(total_payment_amount)
-        
-        if remaining_amount > 0:
-            rounded_amount = round(remaining_amount, 2)  # Round to 2 decimal places
+
+        if total_payment_amount > 0:
+            remaining_amount = Decimal(self.final_amount) - Decimal(total_payment_amount)
+            rounded_amount = round(remaining_amount, 2) if remaining_amount > 0 else Decimal('0.00')
         else:
             rounded_amount = Decimal(self.final_amount)
-        
+
         return rounded_amount
 
     
@@ -642,10 +655,10 @@ class Share(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     hod_share_percentage = models.ForeignKey(HodSharePercentage, on_delete=models.CASCADE)
     technician_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    cmp_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    # cmp_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     # technician_share = models.IntegerField(default=0)
     # hod_share = models.IntegerField(default=0)
-    hod_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    company_share = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     date = models.DateField(auto_now_add=True,null=True,blank=True)
 
 
@@ -901,6 +914,13 @@ class Invoice(models.Model):
 
         def save_invoice(self, pdf_data):
             self.invoice.save('invoice.pdf', ContentFile(pdf_data), save=True)
+
+
+class Settlement(models.Model):
+    technician_id = models.ForeignKey(Technician,on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    settlement = models.CharField(max_length=100)
+    date = models.DateField(auto_now_add=True)
 
 
 @receiver(post_save,sender=CustomUser)

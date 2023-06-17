@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService,ApplicantCarrer,Carrer,Coupon,LegalPage,FAQ,HodSharePercentage,Payment
+from .models import Technician,CustomUser,Task,Booking,Product,Customer,Rebooking,BookingProduct,JobEnquiry,Kyc,SpareParts,Addon,TechnicianLocation,showonline,RechargeHistory,Wallet,WalletHistory,WithdrawRequest,AllTechnicianLocation,Blog,MostViewed,Category,SubCategory,feedback,Offer,HomePageService,ApplicantCarrer,Carrer,Coupon,LegalPage,FAQ,HodSharePercentage,Payment,Settlement
 
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -825,3 +825,15 @@ class cuSeralizerDemo(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['address','mobile','city','state','area','zipcode','first_name']
+
+
+# ------------- Settlement -----------------         
+
+
+class SettlementSeralizer(serializers.ModelSerializer):
+    
+    
+    class Meta:
+        model = Settlement
+        fields = "__all__"
+

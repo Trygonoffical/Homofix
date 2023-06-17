@@ -47,7 +47,7 @@
                             <th>Username</th>
                             <th>Mobile</th>
                             <th>Subtotal</th>
-                            <th>GST</th>
+                            
                             <th>GST Amount</th>
                             <th>Addons Amount</th>
                             <th>total</th>
@@ -96,7 +96,7 @@
                                 {% endif %} 
                             </td> {% endcomment %}
                             <td>{{i.task.booking.subtotal}}</td>
-                            <td>18%</td>
+                            
                             <td>{{i.task.booking.tax_amount}}</td>
                             <td>{{i.task.booking.total_addons}}</td>
                             {% comment %} <td>
@@ -106,11 +106,11 @@
                                 N/A
                             {% endif %} 
                             </td> {% endcomment %}
-                            <td>{{ttl}}</td>
-                            <td>{{i.cmp_share}} %</td>
+                            <td>{{i.task.booking.final_amount}}</td>
+                            <td>{{i.hod_share_percentage}} %</td>
+                           
                             
-                            
-                            <td>Rs {{i.hod_share}}</td>
+                            <td>Rs {{i.company_share}}</td>
                             <td>Rs {{i.technician_share}}</td>
                             {% comment %} <td>Rs {{i.task.booking.}}</td> {% endcomment %}
                             {% comment %} <td>Rs {{ i.task.booking.bookingproduct_set.total_price }}</td> {% endcomment %}

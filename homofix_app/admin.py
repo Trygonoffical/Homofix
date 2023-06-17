@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice
+from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice,Settlement
 
 # Register your models here.
 
@@ -101,6 +101,12 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(JobEnquiry)
 class CategoryAdmin(admin.ModelAdmin):
     list_display=['id','name','mobile','email','resume','date']
+    
+    
+
+@admin.register(Settlement)
+class SettlementAdmin(admin.ModelAdmin):
+    list_display=['id','amount','settlement','date']
     
     
 

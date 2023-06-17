@@ -40,6 +40,7 @@ router.register('Legal-Page-Get', API_Views.LegalPageViewSet, basename='Legal-Pa
 router.register('Faq-Get', API_Views.FAQViewSet, basename='Faq')
 router.register('Company-percentage', API_Views.HodPercentageViewSet, basename='Company-percentage')
 router.register('Payment-Details', API_Views.PaymentViewSet, basename='Payment-Details')
+router.register('Settlement-Details', API_Views.SettlementViewSet, basename='Settlement-Details')
 
 
 
