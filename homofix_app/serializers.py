@@ -837,3 +837,75 @@ class SettlementSeralizer(serializers.ModelSerializer):
         model = Settlement
         fields = "__all__"
 
+# ---------------------- Customer payment --------------------- 
+
+
+class CustomerPaymentsSerliazer(serializers.ModelSerializer):
+   
+    class Meta:
+        model = Payment
+        fields = "__all__"
+
+
+
+
+
+
+
+
+# ---------------------- Customer Booking ------------------------
+
+
+# class CustomerBookingProductDetailsSerializer(serializers.ModelSerializer):
+   
+#     # warranty_desc = serializers.SerializerMethodField()
+    
+#     class Meta:
+#         model = Product
+#         fields = "__all__"
+
+
+# class customerBookingDetailsProduct(serializers.ModelSerializer):
+   
+#     class Meta:
+#         model : BookingProduct
+#         fields = '__all__'
+    
+class CustomerBookingProductDetailsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price','dis_amt','selling_price']  # Add the desired fields from the Product model
+    
+   
+
+class customerBookingDetailsProduct(serializers.ModelSerializer):
+    # addons = AdnSerializer(many=True, read_only=True)
+    product = CustomerBookingProductDetailsSerializer()
+    # addon_set = ASerializer(many=True, read_only=True)
+    addon_set = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BookingProduct
+        fields = ['id','product','quantity','addon_set']
+    
+    def get_addon_set(self, obj):
+        addons = obj.addon_set.all()
+        addon_data = ASerializer(addons, many=True).data
+        return addon_data
+
+
+class CustomerBookingDetailSerializer(serializers.ModelSerializer):
+    tax_amount = serializers.ReadOnlyField()
+    total_amount = serializers.ReadOnlyField()
+    final_amount = serializers.ReadOnlyField()
+    pay_amt = serializers.ReadOnlyField()
+    # booking_product = kingProductSerializer(many=True, read_only=True)
+    booking_product = customerBookingDetailsProduct(many=True, read_only=True)
+    
+    
+    # products = ProductSerializer(many=True)
+    class Meta:
+        model = Booking
+        fields = "__all__"
+        # depth = 1

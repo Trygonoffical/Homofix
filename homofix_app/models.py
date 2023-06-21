@@ -477,25 +477,7 @@ class Booking(models.Model):
         return round(final_amount,2)
 
 
-    # @property
-    # def pay_amt(self):
-    #     payments = Payment.objects.filter(booking_id=self)
-    #     total_payment_amount = sum(payment.amount for payment in payments)
-    #     return Decimal(self.final_amount) - Decimal(total_payment_amount)
-
-    # @property
-    # def pay_amt(self):
-    #     payments = Payment.objects.filter(booking_id=self)
-    #     total_payment_amount = sum(payment.amount for payment in payments)
-    #     remaining_amount = Decimal(self.final_amount) - Decimal(total_payment_amount)
-        
-    #     if remaining_amount > 0:
-    #         rounded_amount = round(remaining_amount, 2)  # Round to 2 decimal places
-    #     else:
-    #         rounded_amount = Decimal(self.final_amount)
-        
-    #     return rounded_amount
-
+   
     @property
     def pay_amt(self):
         payments = Payment.objects.filter(booking_id=self)
@@ -509,7 +491,23 @@ class Booking(models.Model):
 
         return rounded_amount
 
-    
+    @property
+    def coupon_code(self):
+        if self.coupon:
+            return self.coupon.code
+        return None
+
+    @property
+    def coupon_discount_amount(self):
+        if self.coupon:
+            return self.coupon.discount_amount
+        return None
+
+    @property
+    def coupon_validity_period(self):
+        if self.coupon:
+            return self.coupon.validity_period
+        return None
 
 class BookingProduct(models.Model):
     
@@ -782,7 +780,7 @@ class Payment(models.Model):
     )
     booking_id = models.ForeignKey(Booking,on_delete=models.CASCADE)  
     payment_id = models.CharField(max_length=100)
-    payment_mode = models.CharField(max_length=20, choices=PAYMENT_CHOICES)
+    payment_mode = models.CharField(max_length=20, choices=PAYMENT_CHOICES,default="Online")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(auto_now_add=True,null=True,blank=True)
 

@@ -94,7 +94,7 @@
             <div class="left-side p-2" style="border-top: 1px solid black;">
                 <p><b>Invoice To</b></p>
                 <div>
-                    <div class="cmp"><span> <b>Name :</b> </span> <span>{{booking.booking_id.customer.admin.username}}</span></div>
+                    <div class="cmp"><span> <b>Name :</b> </span> <span>{{booking.booking_id.customer.admin.first_name}}</span></div>
                     <div class="cmp"><span> <b>Address :</b> </span> <span>{{booking.booking_id.customer.address}}</span></div>
                     <div class="cmp"><span> <b>Pin code :</b> </span> <span>{{booking.booking_id.customer.zipcode}}</span></div>
                     <div class="cmp"><span> <b>State :</b> </span> <span>{{booking.booking_id.customer.state}}</span></div>
@@ -155,7 +155,7 @@
                     <td>{{adon.quantity}}</td>
                     <td>{{adon.spare_parts_id.price}}</td>
                     
-                    <td>{% call_addon_amt_invoice adon.quantity adon.spare_parts_id.price  %}</td>
+                    <td>{% call_addon_amt_invoice adon.quantity adon.spare_parts_id.price %}</td>
                 </tr>
                 {% endfor %}
                 
@@ -164,9 +164,13 @@
         <div id="total">
             <div id="demm">
                 <p>Subtotal </p>
+                <p>Coupon Discount</p>
+                <p>Net Amount</p>
                 <p>Tax</p>
             </div>
             <div id="nano">
+                <p>{% call_subtotal_invoice booking.booking_id.total_amount booking.booking_id.coupon_discount_amount %}</p>
+                <p>{{booking.booking_id.coupon_discount_amount}}</p>
                 <p>{{booking.booking_id.total_amount}}</p>
                 <p>{{booking.booking_id.tax_amount}}</p>
             </div>

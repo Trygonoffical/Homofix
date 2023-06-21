@@ -1,5 +1,11 @@
 from django.contrib import admin
-from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice,Settlement
+from django.http import HttpResponse
+import os
+from django.urls import reverse
+from django.conf import settings
+from django.http import FileResponse
+from django.utils.html import format_html
+from . models import CustomUser,AdminHOD,Technician,Product,Category,SpareParts,Customer,Support,FAQ,Booking,Task,Rebooking,BookingProduct,SubCategory,ContactUs,JobEnquiry,HodSharePercentage,Payment,Addon,Wallet,TechnicianLocation,Kyc,showonline,RechargeHistory,Share,AllTechnicianLocation,WithdrawRequest,Attendance,Blog,Offer,MostViewed,HomePageService,Carrer,ApplicantCarrer,LegalPage,Invoice,Settlement,Coupon
 
 # Register your models here.
 
@@ -55,8 +61,38 @@ class BookingProductAdmin(admin.ModelAdmin):
 
 @admin.register(Invoice)
 class CustomerInvoice(admin.ModelAdmin):
-    list_display=['id','booking_id','invoice','invoice_no']
+    
+    list_display = ['id', 'booking_id', 'invoice', 'invoice_no']
 
+    # def display_invoice(self, obj):
+    #     if obj.invoice:
+    #         return format_html('<a href="{}" target="_blank">View Invoice</a>', reverse('new_invoice', args=[obj.pk]))
+    #     return "No invoice"
+
+    # display_invoice.short_description = "Invoice"
+
+    # def get_urls(self):
+    #     from django.urls import path
+
+    #     urls = super().get_urls()
+    #     custom_urls = [
+    #         path('<int:invoice_id>/view-invoice/', self.admin_site.admin_view(self.view_invoice),
+    #              name='view-invoice'),
+    #     ]
+    #     return custom_urls + urls
+
+    # def view_invoice(self, request, invoice_id):
+    #     invoice = Invoice.objects.get(pk=invoice_id)
+    #     if invoice.invoice:
+    #         response = HttpResponse(content_type='application/pdf')
+    #         response.write(invoice.invoice)
+    #         return response
+    #     return HttpResponse("Invoice not found")
+
+   
+       
+
+       
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display=['id','booking_id','payment_mode','amount','date']
@@ -72,7 +108,7 @@ class TechnicianAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class TechnicianAdmin(admin.ModelAdmin):
-    list_display=['id','subtotal','total_amount','tax_amount','total_addons','final_amount','pay_amt']
+    list_display=['id','subtotal','total_amount','tax_amount','total_addons','final_amount','pay_amt','coupon_code','coupon_discount_amount','coupon_validity_period']
 
 
 @admin.register(Support)
@@ -107,6 +143,11 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Settlement)
 class SettlementAdmin(admin.ModelAdmin):
     list_display=['id','amount','settlement','date']
+    
+
+@admin.register(Coupon)
+class CouponAdmin(admin.ModelAdmin):
+    list_display=['id','code','discount_amount','validity_period']
     
     
 

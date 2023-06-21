@@ -40,6 +40,7 @@ router.register('Legal-Page-Get', API_Views.LegalPageViewSet, basename='Legal-Pa
 router.register('Faq-Get', API_Views.FAQViewSet, basename='Faq')
 router.register('Company-percentage', API_Views.HodPercentageViewSet, basename='Company-percentage')
 router.register('Payment-Details', API_Views.PaymentViewSet, basename='Payment-Details')
+router.register('Customer-Booking-Details', API_Views.CustomerBookingDetailsViewSet, basename='Customer-Booking-Details')
 router.register('Settlement-Details', API_Views.SettlementViewSet, basename='Settlement-Details')
 
 
@@ -79,10 +80,14 @@ urlpatterns = [
     path('api/Invoice/',API_Views.generate_invoice_pdf,name="invoice"),
     path('api/Invoicenw/<int:booking_id>',API_Views.invoice_pdf,name="invoice_pdf"),
     path('api/invoice/download/<int:booking_id>/', API_Views.invoice_download, name='invoice_download'),
+
+    path('api/Expert/Invoice/<int:booking_id>',API_Views.expert_invoice_pdf,name="expert_invoice_pdf"),
+    path('api/Expert/invoice/download/<int:booking_id>/', API_Views.expert_invoice_download, name='expert_invoice_download'),
+
     path('api/Rebooking/Status/Update',API_Views.RebookingStatusUpdated,name="RebookingStatusUpdated"),
     path('check-coupon-validity/', API_Views.check_coupon_validity, name='check_coupon_validity'),
     path('check-token-expiration/', API_Views.TokenExpirationCheckAPIView.as_view(), name='check-token-expiration'),
-    path('api/paymentss/',API_Views.customerpayments,name="payment"),
+    path('api/customer/payments/',API_Views.customerpayments,name="payment"),
     path('api/customer/profile/update/',API_Views.customerupdateprofile,name="customerupdateprofile"),
     
     
@@ -93,6 +98,7 @@ urlpatterns = [
 
     path('<str:title>/', API_Views.BlogByTitleViewSet.as_view({'get': 'retrieve'}), name='blog-detail'),
     path('tasks/<int:technician_id>/', API_Views.TskListAPIView.as_view(), name='task-list'),
+    
     
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

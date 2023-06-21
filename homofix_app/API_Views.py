@@ -1,6 +1,6 @@
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from rest_framework.authentication import BasicAuthentication
-from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer,HodSharPercentageSerliazer,CouponSerializer,TskSerializer,PaymentSerializer,cuSeralizerDemo,SettlementSeralizer
+from homofix_app.serializers import LoginSerliazer,CustomerLoginSerliazer,ExpertSerliazer,CustomUserSerializer,TaskSerializer,RebookingSerializer,JobEnquirySerliazer,ProductSerializer,BokingSerializer,KycSerializer,SparePartsSerializer,AddonsSerializer,TechnicianLocationSerializer,AddonsGetSerializer,TechnicianOnlineSerializer,TechnicianRechargeHistorySerializer,TechnicianWalletSerializer,TechnicianWalletHistorySerializer,TechnicianWithdrawRequestSerializer,AllTechnicianLocationSerializer,BlogSerializer,MostViewed,MostViewedSerializer,VerifyOtpSerializer,CategorySerializer,SubcategorySerializer,CustSerailizer,LoginCustomrSerializers,FeedbackSerailizer,OfferSerializer,testingBooking,HomePageSerailizer,BookingProductSerializer,CustomerLoginn,AddonsDeleteSerailizers,ApplicantCarrerSerliazer,CarrerSerliazer,BkingProductSerializer,BkingSerializer,LegalPageSerializer,faqSerializer,HodSharPercentageSerliazer,CouponSerializer,TskSerializer,PaymentSerializer,cuSeralizerDemo,SettlementSeralizer,CustomerBookingDetailSerializer
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework import status
@@ -148,7 +148,8 @@ class TaskViewSet(ModelViewSet):
                     hod_share_with_tax = float(str(hod_share)) + tax_amt
                     print("hod_share_with_tax",hod_share_with_tax)
 
-                    wallet_tecnician = Decimal(technician_share) - Decimal(tax_amt)
+                    wallet_tecnician = technician_share
+                    # wallet_tecnician = Decimal(technician_share) - Decimal(tax_amt)
                     print("wallet technician",wallet_tecnician)
                    
                     # technician_share = booking_amount - hod_share
@@ -169,16 +170,17 @@ class TaskViewSet(ModelViewSet):
                     settlement.save()
 
                     # ----------------------------------- Invoice Part ----------------------- 
+                    
+
                     try:
-
-
+                        
                         booking = Booking.objects.get(id=booking_id)
                         # tax = booking.tax_amount
                         subtotal = booking.subtotal
-                        tax = subtotal * 0.18
+                        tax = Decimal(subtotal) * Decimal(0.18)
                         total = tax+subtotal
-                        total_amt = float(booking.total_amount + booking.tax_amount)
-                        cgst_sgst = total_amt * 0.09
+                        total_amt = Decimal(booking.total_amount) + Decimal(booking.tax_amount)
+                        cgst_sgst = Decimal(total_amt) * Decimal(0.09)
                         grandtotal = total_amt + (cgst_sgst*2)
                         
                         
@@ -193,13 +195,13 @@ class TaskViewSet(ModelViewSet):
                                 # addon = Addon.objects.filter(booking_prod_id=bookingprod)
                                 
                                 addon = Addon.objects.filter(booking_prod_id=bookingprod)
-                                                             
+                                                                
                             
                                 input_file = render_to_string('Invoice/invoice.html', {'booking': invoice,'addon':addon,'total':total,"cgst_sgst":cgst_sgst,'grandtotal':grandtotal})
                                 options = {
                                         "enable-local-file-access": ""
                                     }
-                               
+                                
 
                                 pdf_data = pdfkit.from_string(input_file, False, options=options)
 
@@ -214,7 +216,7 @@ class TaskViewSet(ModelViewSet):
                             else:
                                 pass
                                 # Booking does not exist
-                                # return Response({'Error': False, 'error': 'Invoice already created'})
+                                    # return Response({'Error': False, 'error': 'Invoice already created'})
                     except Exception as e:
                         print(e)
 
@@ -274,10 +276,10 @@ class TaskViewSet(ModelViewSet):
                         booking = Booking.objects.get(id=booking_id)
                         # tax = booking.tax_amount
                         subtotal = booking.subtotal
-                        tax = subtotal * 0.18
+                        tax = Decimal(subtotal) * Decimal(0.18)
                         total = tax+subtotal
-                        total_amt = float(booking.total_amount + booking.tax_amount)
-                        cgst_sgst = total_amt * 0.09
+                        total_amt = Decimal(booking.total_amount) + Decimal(booking.tax_amount)
+                        cgst_sgst = Decimal(total_amt) * Decimal(0.09)
                         grandtotal = total_amt + (cgst_sgst*2)
                         
                         
@@ -292,13 +294,13 @@ class TaskViewSet(ModelViewSet):
                                 # addon = Addon.objects.filter(booking_prod_id=bookingprod)
                                 
                                 addon = Addon.objects.filter(booking_prod_id=bookingprod)
-                                                             
+                                                                
                             
                                 input_file = render_to_string('Invoice/invoice.html', {'booking': invoice,'addon':addon,'total':total,"cgst_sgst":cgst_sgst,'grandtotal':grandtotal})
                                 options = {
                                         "enable-local-file-access": ""
                                     }
-                               
+                                
 
                                 pdf_data = pdfkit.from_string(input_file, False, options=options)
 
@@ -323,6 +325,8 @@ class TaskViewSet(ModelViewSet):
                 return Response({'success': False, 'message': 'Booking not found.'})
         else:
             return Response({'success': False, 'message': 'Booking id and status are required.'})
+
+
 
 
 
@@ -1132,17 +1136,17 @@ class CustomerLoginViewSet(CreateAPIView):
         ottt = request.session.get('otp', 'Default value if key does not exist')
         
         
-        username = "TRYGON"
-        apikey = "E705A-DFEDC"
-        apirequest = "Text"
-        sender = "TRYGON"
-        mobile = phone_number
-        message = f"Dear User {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
-        template_id = "1707162192151162124"
+        # username = "TRYGON"
+        # apikey = "E705A-DFEDC"
+        # apirequest = "Text"
+        # sender = "TRYGON"
+        # mobile = phone_number
+        # message = f"Dear User {otp_unique} is the OTP for your login at Trygon. In case you have not requested this, please contact us at info@trygon.in"
+        # template_id = "1707162192151162124"
         
-        url = f"https://sms.webtextsolution.com/sms-panel/api/http/index.php?username=TRYGON&apikey=E705A-DFEDC&apirequest=Text&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
+        # url = f"https://sms.webtextsolution.com/sms-panel/api/http/index.php?username=TRYGON&apikey=E705A-DFEDC&apirequest=Text&sender={sender}&mobile={mobile}&message={urllib.parse.quote(message)}&route=TRANS&TemplateID=1707162192151162124&format=JSON"
         
-        response = requests.get(url) 
+        # response = requests.get(url) 
         
         
         return Response({'message': 'OTP is sent to your mobile number','otp_session':ottt}, status=status.HTTP_200_OK)
@@ -1778,6 +1782,54 @@ def invoice_download(request, booking_id):
             'status': 404,
             'message': 'Invoice not found.'
         })
+
+
+
+
+
+@api_view(['GET'])
+def expert_invoice_pdf(request, booking_id):
+    try:
+        invoice = Invoice.objects.get(booking_id=booking_id)
+        invoice_data = invoice.invoice if invoice else None
+
+        if invoice_data:
+            download_url = reverse('expert_invoice_download', args=[booking_id])
+            # view_url = reverse('invoice_view', args=[booking_id])
+            response_data = {
+                'status': 200,
+                'message': 'Invoice found.',
+                'download_url': request.build_absolute_uri(download_url),
+                # 'view_url': request.build_absolute_uri(view_url),
+            }
+            return Response(response_data)
+        else:
+            return Response({
+                'status': 404,
+                'message': 'Invoice not found.'
+            })
+    except Invoice.DoesNotExist:
+        return Response({
+            'status': 404,
+            'message': 'Invoice not found.'
+        })  
+
+
+
+
+def expert_invoice_download(request, booking_id):
+    try:
+        invoice = Invoice.objects.get(booking_id=booking_id)
+        invoice_data = invoice.invoice if invoice else None
+
+        if invoice_data:
+            response = HttpResponse(invoice_data, content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+            return response
+        else:
+            return HttpResponse("Invoice not found.", status=404)
+    except Invoice.DoesNotExist:
+        return HttpResponse("Invoice not found.", status=404)              
 # class FAQViewSet(ReadOnlyModelViewSet):
 #     queryset = FAQ.objects.all()     
 #     serializer_class  = faqSerializer
@@ -1971,3 +2023,27 @@ class SettlementViewSet(ReadOnlyModelViewSet):
         if technician_id:
             queryset = queryset.filter(technician_id=technician_id)
         return queryset
+
+
+
+
+
+class CustomerBookingDetailsViewSet(ModelViewSet):
+    authentication_classes = [JWTAuthentication]
+    queryset = Booking.objects.all()     
+    serializer_class  = CustomerBookingDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated:
+            # Filter bookings based on the authenticated customer
+            queryset = Booking.objects.filter(customer__admin=user)
+            print("query set",queryset)
+        else:
+            # If there is no authenticated user, return an empty queryset
+            queryset = Booking.objects.none()
+
+        return queryset
+  

@@ -42,3 +42,8 @@ def call_addon_amt_invoice(quantity,rate):
 def call_amt_invoice(quantity,rate):
     amt = quantity*rate
     return amt
+
+@register.simple_tag
+def call_subtotal_invoice(total_amt,coupon_disc):
+    amt = total_amt + coupon_disc
+    return amt
